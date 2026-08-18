@@ -383,7 +383,7 @@
       </div>
     </div>
 
-    <!-- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN -->
+    <!-- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN (ĐÃ CẬP NHẬT CHUẨN WEBSITE 4T) -->
     <div class="card" id="sectionFooterStats">
       <div class="card-header">
         <span class="card-title">📈 Thống Kê Tổng Hợp Theo Thời Gian</span>
@@ -399,9 +399,9 @@
           <button class="btn btn-primary" onclick="resetFooterStatsDate()">Tất cả thời gian</button>
         </div>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem;">
         <div class="stat-card" style="border-left-color: var(--info);">
-          <h4>👁️ Lượt Truy Cập Website</h4>
+          <h4>👁️ Lượt Truy Cập</h4>
           <div class="val" id="footerValVisits">0</div>
         </div>
         <div class="stat-card" style="border-left-color: var(--purple);">
@@ -415,6 +415,10 @@
         <div class="stat-card" style="border-left-color: var(--success);">
           <h4>💵 Tiền Thu Thực Tế</h4>
           <div class="val" id="footerValRevenue" style="color: var(--success);">0 VNĐ</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--danger);">
+          <h4>❌ Đơn Hàng Đã Hủy</h4>
+          <div class="val" id="footerValCancelled" style="color: var(--danger);">0</div>
         </div>
       </div>
     </div>
@@ -510,12 +514,54 @@
   </div>
 
   <script>
+    
+    function calculateShipping(weight, address) {
+        let basePrice = weight * 15000; // Giá ví dụ 15k/kg
+        let extraFee = address.toLowerCase().includes("xa") ? 20000 : 0;
+        return basePrice + extraFee;
+    }
+
+    function updateTotalUI() {
+        let w = parseFloat(document.getElementById('editWeight').value) || 0;
+        let addr = document.getElementById('editAddress').value;
+        let total = calculateShipping(w, addr);
+        document.getElementById('newTotalDisplay').innerText = total.toLocaleString() + " VNĐ";
+    }
+
+    function saveOrderChanges(index) {
+        let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+        let newService = document.getElementById('editService').value;
+        let newWeight = parseFloat(document.getElementById('editWeight').value);
+        let newAddress = document.getElementById('editAddress').value;
+        let newTotal = calculateShipping(newWeight, newAddress);
+
+        let oldStatus = orders[index].status;
+        orders[index].service = newService;
+        orders[index].weight = newWeight;
+        orders[index].address = newAddress;
+        orders[index].total = newTotal;
+
+        if (!orders[index].history) orders[index].history = [];
+        let now = new Date();
+        let timeString = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+        orders[index].history.push({
+            action: `Admin sửa đơn: ${newWeight}kg, ĐC: ${newAddress}, Giá mới: ${newTotal}`,
+            performer: localStorage.getItem('loggedAdmin'),
+            time: timeString
+        });
+
+        localStorage.setItem('orders_v2', JSON.stringify(orders));
+        alert("Đã cập nhật đơn hàng thành công!");
+        closeModal('orderDetailModal');
+        renderOrdersTable();
+    }
+
+
     // Khởi tạo dữ liệu mẫu
     function initDefaultData() {
       let sampleAdmins = [
-        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "view_order_detail", "view_order_history", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false },
-        // { username: "staff_cskh", password: "123", fullname: "Trần Thị Cẩm Ly", title: "Nhân viên CSKH", permissions: ["customer_chat", "customer_new_password"], isLocked: false },
-        // { username: "staff_order", password: "123", fullname: "Lê Văn Giao", title: "Nhân viên Điều phối", permissions: ["orders", "view_order_detail"], isLocked: false }
+        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "view_order_detail", "view_order_history", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false }
       ];
       if (!localStorage.getItem('adminAccounts')) {
         localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
@@ -530,14 +576,7 @@
       }
 
       if (!localStorage.getItem('websiteVisitsLog')) {
-        let sampleVisits = [
-          { time: "2026-08-15 10:00:00" },
-          { time: "2026-08-16 11:20:00" },
-          { time: "2026-08-17 14:10:00" },
-          { time: "2026-08-18 09:00:00" },
-          { time: "2026-08-18 15:30:00" }
-        ];
-        localStorage.setItem('websiteVisitsLog', JSON.stringify(sampleVisits));
+        localStorage.setItem('websiteVisitsLog', JSON.stringify([]));
       }
     }
 
@@ -545,7 +584,7 @@
 
     window.onload = function() {
       initDefaultData();
-      recordVisit();
+      recordVisit();      // Ghi nhận lượt truy cập mới vào localStorage
       checkAuthStatus();
     };
 
@@ -923,18 +962,25 @@
 
       let body = document.getElementById('orderDetailBody');
       body.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 1rem;">
-          <p><strong>Mã Đơn Hàng:</strong> ${o.id}</p>
-          <p><strong>Trạng Thái:</strong> <span class="badge badge-processing">${o.status}</span></p>
-          <p><strong>Khách Hàng:</strong> ${o.customerName}</p>
-          <p><strong>Số Điện Thoại:</strong> ${o.phone}</p>
-          <p style="grid-column: span 2;"><strong>Địa Chỉ:</strong> <span style="color: var(--secondary); font-weight: bold;">📍 ${addressInfo}</span></p>
-          <p><strong>Dịch Vụ:</strong> ${o.service}</p>
-          <p><strong>Giao Nhận:</strong> ${o.deliveryService}</p>
-          <p><strong>Thanh Toán:</strong> ${o.paymentMethod}</p>
-          <p><strong>Tổng Tiền:</strong> <span style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
-          <p style="grid-column: span 2;"><strong>Thời Gian Đặt:</strong> ${o.time}</p>
-          <p style="grid-column: span 2;"><strong>Ghi Chú Đơn:</strong> ${o.notes || 'Không có ghi chú'}</p>
+        <div class="form-group">
+          <label>Loại dịch vụ/vải:</label>
+          <input type="text" id="editService" value="${o.service}">
+        </div>
+        <div class="form-group">
+          <label>Số Kg:</label>
+          <input type="number" id="editWeight" value="${o.weight || 1}" oninput="updateTotalUI()">
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ giao-nhận:</label>
+          <input type="text" id="editAddress" value="${addressInfo}" oninput="updateTotalUI()">
+        </div>
+        <p><strong>Tổng Tiền Thực Tế:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+        <button class="btn btn-primary" onclick="saveOrderChanges(${index})" style="width:100%; margin-top:10px;">Lưu Thay Đổi Đơn Hàng</button>
+        
+        <hr style="margin: 15px 0;">
+        <div style="font-size: 0.8rem; color: #64748b;">
+          <p>Mã Đơn: ${o.id}</p>
+          <p>Khách: ${o.customerName} (${o.phone})</p>
         </div>
 
         <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
@@ -1154,7 +1200,7 @@
     }
 
     function openAddAdminModal() {
-      document.getElementById('adminModalTitle').innerText = "Thêm Tài Khoản Admin Mới & Chức Danh";
+      document.getElementById('adminModalTitle').innerText = "Tài khoản nhân viên và phân quyền";
       document.getElementById('adminForm').reset();
       document.getElementById('editAdminUsername').value = "";
       document.getElementById('inputUsername').disabled = false;
@@ -1166,7 +1212,7 @@
     function openEditAdminModal(index) {
       let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
       let a = admins[index];
-      document.getElementById('adminModalTitle').innerText = "Chỉnh Sửa Quyền & Chức Danh Admin";
+      document.getElementById('adminModalTitle').innerText = "Chỉnh Sửa tài khoản Admin";
       document.getElementById('editAdminUsername').value = a.username;
       document.getElementById('inputUsername').value = a.username;
       document.getElementById('inputUsername').disabled = true;
@@ -1234,7 +1280,7 @@
       }
     }
 
-    // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN ---
+    // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN (CẬP NHẬT CHUẨN WEBSITE 4T) ---
     function calculateFooterStats() {
       let fromDateStr = document.getElementById('statFromDate').value;
       let toDateStr = document.getElementById('statToDate').value;
@@ -1266,6 +1312,7 @@
 
       let totalOrdersCount = filteredOrders.length;
       let totalAccountsCount = filteredUsers.length;
+      let totalCancelledCount = filteredOrders.filter(o => o.status === "Đã hủy").length;
       
       let realCollectedRevenue = 0;
       filteredOrders.forEach(o => {
@@ -1282,6 +1329,9 @@
       document.getElementById('footerValAccounts').innerText = totalAccountsCount.toLocaleString();
       document.getElementById('footerValOrders').innerText = totalOrdersCount.toLocaleString();
       document.getElementById('footerValRevenue').innerText = realCollectedRevenue.toLocaleString() + " VNĐ";
+      if(document.getElementById('footerValCancelled')) {
+        document.getElementById('footerValCancelled').innerText = totalCancelledCount.toLocaleString();
+      }
     }
 
     function resetFooterStatsDate() {

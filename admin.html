@@ -18,28 +18,41 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-    body { background: #f1f5f9; color: var(--dark); padding-bottom: 3rem; }
+    body { background: #f1f5f9; color: var(--dark); padding-bottom: 3rem; overflow-x: hidden; }
 
     /* Login Screen */
     #loginScreen { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: url('4T.jpg') no-repeat center center / cover; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    z-index: 9999; 
-  }
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: url('4T.jpg') no-repeat center center / cover; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 9999; 
+    }
     .login-card { background: white; padding: 2.5rem; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .login-card h2 { color: var(--primary); margin-bottom: 1.5rem; text-align: center; }
 
     /* Admin Navigation */
-    .admin-nav { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px; }
+    .admin-nav { 
+      background: var(--primary); 
+      color: white; 
+      padding: 1rem 2rem; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      flex-wrap: wrap; 
+      gap: 10px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 1000; 
+    }
     .admin-nav h1 { font-size: 1.4rem; }
-    .admin-nav .user-info { display: flex; align-items: center; gap: 15px; }
+    .admin-nav .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
 
     /* Layout Main */
     .container { max-width: 1400px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 2rem; }
@@ -47,44 +60,55 @@
     /* Stats Overview */
     .stats-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.2rem; }
     .stat-card { background: white; padding: 1.2rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); display: flex; flex-direction: column; justify-content: center; }
-    .stat-card h4 { color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-    .stat-card .val { font-size: 1.6rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
-    .stat-card .sub-val { font-size: 0.9rem; color: #64748b; margin-top: 5px;}
+    .stat-card h4 { color: #64748b; font-size: 0.85rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat-card .val { font-size: 1.6rem; font-weight: bold; color: var(--primary); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat-card .sub-val { font-size: 0.9rem; color: #64748b; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .statuses-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.2rem; }
+    .statuses-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       .stats-grid { grid-template-columns: 1fr; }
-      .statuses-container { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+      .statuses-container { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .statuses-container { grid-template-columns: repeat(2, 1fr); }
+      .admin-nav { padding: 1rem; flex-direction: column; align-items: flex-start; }
+      .admin-nav .user-info { width: 100%; justify-content: space-between; }
+      .card-header { flex-direction: column; align-items: stretch !important; }
+      .search-input { width: 100% !important; }
+      .chat-layout { grid-template-columns: 1fr !important; height: auto !important; }
+      .chat-users-list { max-height: 150px; border-right: none; border-bottom: 1px solid #cbd5e1; }
     }
 
     /* Cards & Tables Section */
-    .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; overflow-x: auto; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.8rem; flex-wrap: wrap; gap: 10px; }
     .card-title { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
 
     /* Table Styling */
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-    th { background: #f8fafc; padding: 0.8rem; color: #475569; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 600px; }
+    th { background: #f8fafc; padding: 0.8rem; color: #475569; font-weight: 600; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
     td { padding: 0.8rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
     tr:hover { background: #f8fafc; }
 
     /* Badges & Status */
-    .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; white-space: nowrap; }
     .badge-pending { background: #fef3c7; color: #92400e; }
     .badge-processing { background: #e0f2fe; color: #075985; }
     .badge-processed { background: #f3e8ff; color: #6b21a8; }
     .badge-shipping { background: #ffedd5; color: #c2410c; }
     .badge-completed { background: #d1fae5; color: #065f46; }
-    .badge-new { background: #dbeafe; color: #1e40af; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; }
     .badge-active { background: #d1fae5; color: #065f46; }
     .badge-inactive { background: #fef3c7; color: #92400e; }
     .badge-locked { background: #fee2e2; color: #991b1b; }
 
     /* Form Controls & Buttons */
     .select-status { padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; outline: none; }
+    .select-status:disabled { background-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
     .search-input { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; width: 220px; }
-    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; }
+    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
     .btn-lock { background: var(--danger); color: white; }
     .btn-unlock { background: var(--success); color: white; }
     .btn-chat-user { background: var(--secondary); color: white; margin-right: 5px; }
@@ -97,15 +121,46 @@
     .clickable-link:hover { color: var(--primary); }
 
     /* Modal Styling */
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-    .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 500px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 1rem; }
+    .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 650px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
     .close-modal { cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #64748b; }
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
     .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
-    .permissions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-    .permissions-grid label { font-weight: normal; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    
+    /* Phân quyền chức năng */
+    .permissions-grid { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+      margin-top: 5px; 
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f8fafc;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .permissions-grid label { 
+      font-weight: normal; 
+      font-size: 0.85rem; 
+      display: grid; 
+      grid-template-columns: 30px 1fr; 
+      align-items: center; 
+      cursor: pointer; 
+      text-align: left; 
+      padding: 4px 8px;
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #f1f5f9;
+    }
+    .permissions-grid label input[type="checkbox"] {
+      justify-self: start;
+      margin: 0;
+      width: 16px;
+      height: 16px;
+    }
 
     /* Live Chat Section */
     .chat-layout { display: grid; grid-template-columns: 280px 1fr; border: 1px solid #cbd5e1; border-radius: 8px; height: 380px; overflow: hidden; }
@@ -148,7 +203,7 @@
 
   <!-- Admin Header -->
   <div class="admin-nav">
-    <h1>⚙️ Trang Quản Lý Cửa Hàng - Giặt Sấy 4T</h1>
+    <h1>⚙️ Quản Lý Cửa Hàng - 4T</h1>
     <div class="user-info">
       <span id="currentWelcomeText">Xin chào: <strong>...</strong></span>
       <button class="btn btn-warning" onclick="openChangePasswordModal()">Đổi mật khẩu</button>
@@ -159,7 +214,7 @@
   <div class="container">
 
     <!-- Stats Overview & Revenue -->
-    <div class="stats-grid">
+    <div class="stats-grid" id="statsGridSection">
       <div class="stat-card" style="border-left-color: var(--success); min-height: 130px;">
         <h4>💰 Tổng Doanh Thu Thực</h4>
         <div class="val" id="totalRealRevenue" style="color: var(--success); font-size: 2rem;">0 VNĐ</div>
@@ -187,6 +242,10 @@
           <h4>✅ Hoàn Tất Đơn</h4>
           <div class="val" id="countCompleted">0</div>
         </div>
+        <div class="stat-card" style="border-left-color: var(--danger);">
+          <h4>❌ Đã Hủy Đơn</h4>
+          <div class="val" id="countCancelled">0</div>
+        </div>
       </div>
     </div>
 
@@ -205,12 +264,13 @@
               <option value="Đã xử lý">Đã xử lý</option>
               <option value="Đang giao hàng">Đang giao hàng</option>
               <option value="Hoàn tất đơn hàng">Hoàn tất đơn hàng</option>
+              <option value="Đã hủy">Đã hủy</option>
             </select>
           </div>
         </div>
       </div>
 
-      <div style="overflow-x: auto;">
+      <div>
         <table>
           <thead>
             <tr>
@@ -230,18 +290,39 @@
       </div>
     </div>
 
-    <!-- Admin Account Management Section -->
+    <!-- ORDER ACTION HISTORY LOG SECTION -->
+    <div class="card" id="sectionOrderLogs">
+      <div class="card-header">
+        <span class="card-title">📜 Nhật Ký Thao Tác Hệ Thống (Tổng Hợp)</span>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Hành Động / Thay Đổi</th>
+              <th>Nhân Viên / Tài Khoản Thực Hiện</th>
+              <th>Thời Gian Thay Đổi</th>
+            </tr>
+          </thead>
+          <tbody id="orderLogsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Account Management & Permissions Section -->
     <div class="card" id="sectionAdmins">
       <div class="card-header">
         <span class="card-title">🛡️ Quản Lý Tài Khoản & Phân Quyền Admin</span>
         <button class="btn btn-primary" onclick="openAddAdminModal()" id="btnAddAdmin">+ Thêm Tài Khoản Admin</button>
       </div>
-      <div style="overflow-x: auto;">
+      <div>
         <table>
           <thead>
             <tr>
               <th>Tên Đăng Nhập</th>
               <th>Họ Tên Quản Trị Viên</th>
+              <th>Chức Danh</th>
               <th>Quyền Hạn Được Cấp</th>
               <th>Trạng Thái</th>
               <th>Hành Động</th>
@@ -255,8 +336,8 @@
     <!-- Live Chat Section -->
     <div class="card" id="sectionChat">
       <div class="card-header">
-        <span class="card-title">💬 Trung Tâm Chat Trực Tiếp Với Khách Hàng</span>
-        <span style="font-size:0.85rem; color:#64748b;">Trực tuyến 24/7</span>
+        <span class="card-title">💬 Trung Tâm Chat Với Khách Hàng</span>
+        <span style="font-size:0.85rem; color:#64748b;" id="chatStaffIndicator">Đang hiển thị tài khoản trao đổi chat</span>
       </div>
       
       <div class="chat-layout">
@@ -277,14 +358,14 @@
     <!-- Customer Account Management Table -->
     <div class="card" id="sectionUsers">
       <div class="card-header">
-        <span class="card-title">👥 Quản Lý Tài Khoản Đăng Ký & Chăm Sóc Khách Hàng</span>
+        <span class="card-title">👥 Quản Lý Tài Khoản Khách Hàng</span>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <button class="btn btn-success" onclick="exportUsersData()" id="btnExportUsers">📥 Xuất Excel Khách Hàng</button>
           <input type="text" id="searchUser" class="search-input" placeholder="Tìm theo tên/SĐT..." onkeyup="renderUsersTable()">
         </div>
       </div>
 
-      <div style="overflow-x: auto;">
+      <div>
         <table>
           <thead>
             <tr>
@@ -302,13 +383,49 @@
       </div>
     </div>
 
+    <!-- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN -->
+    <div class="card" id="sectionFooterStats">
+      <div class="card-header">
+        <span class="card-title">📈 Thống Kê Tổng Hợp Theo Thời Gian</span>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 600;">Từ ngày:</label>
+            <input type="date" id="statFromDate" class="search-input" style="width: auto;" onchange="calculateFooterStats()">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 600;">Đến ngày:</label>
+            <input type="date" id="statToDate" class="search-input" style="width: auto;" onchange="calculateFooterStats()">
+          </div>
+          <button class="btn btn-primary" onclick="resetFooterStatsDate()">Tất cả thời gian</button>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem;">
+        <div class="stat-card" style="border-left-color: var(--info);">
+          <h4>👁️ Lượt Truy Cập Website</h4>
+          <div class="val" id="footerValVisits">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--purple);">
+          <h4>👤 Tài Khoản Đã Tạo</h4>
+          <div class="val" id="footerValAccounts" style="color: var(--purple);">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--warning);">
+          <h4>📦 Tổng Số Đơn Hàng</h4>
+          <div class="val" id="footerValOrders">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--success);">
+          <h4>💵 Tiền Thu Thực Tế</h4>
+          <div class="val" id="footerValRevenue" style="color: var(--success);">0 VNĐ</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- MODAL: Chi tiết Đơn Hàng -->
+  <!-- MODAL: Chi tiết Đơn Hàng & Lịch sử thay đổi toàn bộ -->
   <div class="modal" id="orderDetailModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>📄 Chi Tiết Đơn Hàng</h3>
+        <h3>📄 Chi Tiết & Lịch Sử Thay Đổi Đơn Hàng</h3>
         <span class="close-modal" onclick="closeModal('orderDetailModal')">&times;</span>
       </div>
       <div id="orderDetailBody"></div>
@@ -326,9 +443,9 @@
     </div>
   </div>
 
-  <!-- MODAL: Thêm/Sửa Admin -->
+  <!-- MODAL: Thêm/Sửa Admin & Phân Quyền -->
   <div class="modal" id="adminModal">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 500px;">
       <div class="modal-header">
         <h3 id="adminModalTitle">Thêm Tài Khoản Admin Mới</h3>
         <span class="close-modal" onclick="closeModal('adminModal')">&times;</span>
@@ -348,13 +465,22 @@
           <input type="text" id="inputFullname" required placeholder="vd: Nguyễn Văn Quản Lý">
         </div>
         <div class="form-group">
-          <label>Phân Quyền Chức Năng:</label>
+          <label>Chức Danh:</label>
+          <input type="text" id="inputTitle" required placeholder="vd: Trưởng ca / Nhân viên CSKH">
+        </div>
+        <div class="form-group">
+          <label>Phân Quyền Chức Năng Chi Tiết:</label>
           <div class="permissions-grid">
             <label><input type="checkbox" class="perm-checkbox" value="orders"> Quản lý đơn hàng</label>
-            <label><input type="checkbox" class="perm-checkbox" value="chat"> Chat trực tiếp</label>
-            <label><input type="checkbox" class="perm-checkbox" value="users"> Quản lý khách hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="view_order_detail"> Xem Chi Tiết đơn hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="view_order_history"> Xem Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="customer_new_password"> Mật khẩu mới cho khách hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="customer_chat"> Chat</label>
+            <label><input type="checkbox" class="perm-checkbox" value="customer_lock"> Khóa khách hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="customer_delete"> Xóa khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="export"> Xuất dữ liệu Excel</label>
             <label><input type="checkbox" class="perm-checkbox" value="manage_admins"> Quản lý tài khoản Admin</label>
+            <label><input type="checkbox" class="perm-checkbox" value="footer_stats"> Xem Thống Kê Cuối Trang</label>
           </div>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 0.95rem;">Lưu Tài Khoản</button>
@@ -387,37 +513,59 @@
     // Khởi tạo dữ liệu mẫu
     function initDefaultData() {
       let sampleAdmins = [
-        { username: "admin4T", password: "123", fullname: "Admin 4T", permissions: ["orders", "chat", "users", "export", "manage_admins"], isLocked: false },
-        { username: "staff", password: "123", fullname: "Lê Văn Ca", permissions: ["orders", "chat"], isLocked: false }
+        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "view_order_detail", "view_order_history", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false },
+        // { username: "staff_cskh", password: "123", fullname: "Trần Thị Cẩm Ly", title: "Nhân viên CSKH", permissions: ["customer_chat", "customer_new_password"], isLocked: false },
+        // { username: "staff_order", password: "123", fullname: "Lê Văn Giao", title: "Nhân viên Điều phối", permissions: ["orders", "view_order_detail"], isLocked: false }
       ];
-      localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
-
-      if (!localStorage.getItem('orders_v2')) {
-        let sampleOrders = [
-          { id: "HD001", customerName: "Nguyễn Văn An", phone: "0909123456", service: "Giặt sấy lấy ngay (5kg)", deliveryService: "Giao nhận tận nơi", paymentMethod: "Tiền mặt", total: 75000, time: "2026-08-18 08:30", status: "Chờ tiếp nhận", notes: "Khách yêu cầu giặt nước xả Comfort." },
-          { id: "HD002", customerName: "Trần Thị Bình", phone: "0912345678", service: "Giặt hấp áo vest (2 cái)", deliveryService: "Khách mang đến", paymentMethod: "Ví điện tử", total: 120000, time: "2026-08-18 09:15", status: "Đang xử lý", notes: "Đồ vest cao cấp, chú ý nút áo." },
-          { id: "HD003", customerName: "Lê Hoàng Nam", phone: "0988777666", service: "Giặt chăn mền gấu bông", deliveryService: "Giao nhận tận nơi", paymentMethod: "App ngân hàng", total: 90000, time: "2026-08-18 10:00", status: "Đã xử lý", notes: "" }
-        ];
-        localStorage.setItem('orders_v2', JSON.stringify(sampleOrders));
+      if (!localStorage.getItem('adminAccounts')) {
+        localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
+      } else {
+        let admins = JSON.parse(localStorage.getItem('adminAccounts'));
+        admins.forEach(a => { if(!a.title) a.title = a.username === 'admin4T' ? 'Quản Trị Hệ Thống' : 'Nhân viên'; });
+        localStorage.setItem('adminAccounts', JSON.stringify(admins));
       }
 
-      if (!localStorage.getItem('users')) {
-        let sampleUsers = [
-          { name: "Nguyễn Văn An", phone: "0909123456", password: "123", address: "123 Thuận An, Bình Dương", gps: "10.850, 106.771", points: 150, lastAccess: "2026-08-18 10:30", status: "Active", isLocked: false, reviews: [{rating: 5, comment: "Dịch vụ giặt rất nhanh và thơm!", date: "2026-08-10"}] },
-          { name: "Trần Thị Bình", phone: "0912345678", password: "123", address: "456 Dĩ An, Bình Dương", gps: "10.862, 106.782", points: 80, lastAccess: "2026-07-20 14:15", status: "Inactive", isLocked: false, reviews: [{rating: 4, comment: "Đồ sạch sẽ, nhân viên thân thiện.", date: "2026-07-15"}] },
-          { name: "Lê Hoàng Nam", phone: "0988777666", password: "123", address: "789 Thủ Dầu Một, Bình Dương", gps: "10.980, 106.650", points: 20, lastAccess: "2026-08-18 16:45", status: "New", isLocked: false, reviews: [] }
-        ];
-        localStorage.setItem('users', JSON.stringify(sampleUsers));
+      // if (!localStorage.getItem('orders_v2')) {
+      //   let sampleOrders = [
+      //     { id: "HD001", customerName: "Nguyễn Văn An", phone: "0909123456", service: "Giặt sấy lấy ngay (5kg)", deliveryService: "Giao nhận tận nơi", address: "123 Thuận An, Bình Dương", paymentMethod: "Tiền mặt", total: 75000, time: "2026-08-18 08:30", status: "Chờ tiếp nhận", notes: "Khách yêu cầu giặt nước xả Comfort.", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống / Khách hàng", time: "2026-08-18 08:30"}] },
+      //     { id: "HD002", customerName: "Trần Thị Bình", phone: "0912345678", service: "Giặt hấp áo vest (2 cái)", deliveryService: "Khách mang đến", address: "456 Dĩ An, Bình Dương", paymentMethod: "Ví điện tử", total: 120000, time: "2026-08-18 09:15", status: "Đang xử lý", notes: "Đồ vest cao cấp, chú ý nút áo.", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống", time: "2026-08-18 09:15"}, {action: "Thay đổi trạng thái: 'Chờ tiếp nhận' ➔ 'Đang xử lý'", performer: "Admin 4T (admin4T)", time: "2026-08-18 09:20"}] },
+      //     { id: "HD003", customerName: "Lê Hoàng Nam", phone: "0988777666", service: "Giặt chăn mền gấu bông", deliveryService: "Giao nhận tận nơi", address: "789 Thủ Dầu Một, Bình Dương", paymentMethod: "App ngân hàng", total: 90000, time: "2026-08-18 10:00", status: "Hoàn tất đơn hàng", notes: "", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống", time: "2026-08-18 10:00"}, {action: "Thay đổi trạng thái: 'Chờ tiếp nhận' ➔ 'Hoàn tất đơn hàng'", performer: "Admin 4T (admin4T)", time: "2026-08-18 11:00"}] }
+      //   ];
+      //   localStorage.setItem('orders_v2', JSON.stringify(sampleOrders));
+      // }
+
+      // if (!localStorage.getItem('users')) {
+      //   let sampleUsers = [
+      //     { name: "Nguyễn Văn An", phone: "0909123456", password: "123", address: "123 Thuận An, Bình Dương", gps: "10.850, 106.771", points: 150, createdAt: "2026-08-15 08:00:00", lastAccess: "2026-08-18 10:30", status: "Active", isLocked: false, reviews: [{rating: 5, comment: "Dịch vụ giặt rất nhanh và thơm!", date: "2026-08-10"}] },
+      //     { name: "Trần Thị Bình", phone: "0912345678", password: "123", address: "456 Dĩ An, Bình Dương", gps: "10.862, 106.782", points: 80, createdAt: "2026-07-10 09:00:00", lastAccess: "2026-07-20 14:15", status: "Inactive", isLocked: false, reviews: [{rating: 4, comment: "Đồ sạch sẽ, nhân viên thân thiện.", date: "2026-07-15"}] },
+      //     { name: "Lê Hoàng Nam", phone: "0988777666", password: "123", address: "789 Thủ Dầu Một, Bình Dương", gps: "10.980, 106.650", points: 20, createdAt: "2026-08-18 15:00:00", lastAccess: "2026-08-18 16:45", status: "New", isLocked: false, reviews: [] }
+      //   ];
+      //   localStorage.setItem('users', JSON.stringify(sampleUsers));
+      // }
+
+      // if (!localStorage.getItem('adminChats')) {
+      //   let sampleChats = {
+      //     "0909123456": [
+      //       { sender: "customer", text: "Shop ơi giặt 5kg quần áo mỏng hết bao lâu ạ?", handledBy: "staff_cskh" },
+      //       { sender: "admin", text: "Chào bạn! Khoảng 2-3 tiếng là hoàn tất giặt sấy khô thơm bạn nhé!", handledBy: "staff_cskh" }
+      //     ]
+      //   };
+      //   localStorage.setItem('adminChats', JSON.stringify(sampleChats));
+      // }
+
+      if (!localStorage.getItem('orderActionLogs')) {
+        localStorage.setItem('orderActionLogs', JSON.stringify([]));
       }
 
-      if (!localStorage.getItem('adminChats')) {
-        let sampleChats = {
-          "0909123456": [
-            { sender: "customer", text: "Shop ơi giặt 5kg quần áo mỏng hết bao lâu ạ?" },
-            { sender: "admin", text: "Chào bạn! Khoảng 2-3 tiếng là hoàn tất giặt sấy khô thơm bạn nhé!" }
-          ]
-        };
-        localStorage.setItem('adminChats', JSON.stringify(sampleChats));
+      if (!localStorage.getItem('websiteVisitsLog')) {
+        let sampleVisits = [
+          { time: "2026-08-15 10:00:00" },
+          { time: "2026-08-16 11:20:00" },
+          { time: "2026-08-17 14:10:00" },
+          { time: "2026-08-18 09:00:00" },
+          { time: "2026-08-18 15:30:00" }
+        ];
+        localStorage.setItem('websiteVisitsLog', JSON.stringify(sampleVisits));
       }
     }
 
@@ -425,8 +573,22 @@
 
     window.onload = function() {
       initDefaultData();
+      recordVisit();
       checkAuthStatus();
     };
+
+    function recordVisit() {
+      let visits = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                       String(now.getSeconds()).padStart(2, '0');
+      visits.push({ time: timeString });
+      localStorage.setItem('websiteVisitsLog', JSON.stringify(visits));
+    }
 
     // --- ĐĂNG NHẬP & XÁC THỰC ---
     function checkAuthStatus() {
@@ -508,23 +670,53 @@
 
       let isRoot = (admin.username === 'admin4T');
       
-      document.getElementById('currentWelcomeText').innerHTML = `Xin chào: <strong>${admin.fullname}</strong> ${isRoot ? '👑' : ''}`;
+      document.getElementById('currentWelcomeText').innerHTML = `<strong>${admin.fullname}</strong> ${isRoot ? '👑' : ''}`;
+
+      let statsGridSection = document.getElementById('statsGridSection');
+      if (isRoot) {
+        statsGridSection.style.display = 'grid';
+      } else {
+        statsGridSection.style.display = 'none';
+      }
 
       let perms = admin.permissions || [];
 
       document.getElementById('sectionOrders').style.display = (isRoot || perms.includes('orders')) ? 'block' : 'none';
-      document.getElementById('sectionChat').style.display = (isRoot || perms.includes('chat')) ? 'block' : 'none';
-      document.getElementById('sectionUsers').style.display = (isRoot || perms.includes('users')) ? 'block' : 'none';
+      
+      let canViewAnyHistory = isRoot || perms.includes('view_order_history');
+      document.getElementById('sectionOrderLogs').style.display = canViewAnyHistory ? 'block' : 'none';
+
+      let canChat = isRoot || perms.includes('customer_chat');
+      document.getElementById('sectionChat').style.display = canChat ? 'block' : 'none';
+
+      let hasAnyUserPerm = isRoot || perms.includes('customer_new_password') || perms.includes('customer_chat') || perms.includes('customer_lock') || perms.includes('customer_delete');
+      document.getElementById('sectionUsers').style.display = hasAnyUserPerm ? 'block' : 'none';
+
       document.getElementById('sectionAdmins').style.display = (isRoot || perms.includes('manage_admins')) ? 'block' : 'none';
+
+      let canViewFooterStats = isRoot || perms.includes('footer_stats');
+      document.getElementById('sectionFooterStats').style.display = canViewFooterStats ? 'block' : 'none';
       
       document.getElementById('btnExportOrders').style.display = (isRoot || perms.includes('export')) ? 'inline-block' : 'none';
       document.getElementById('btnExportUsers').style.display = (isRoot || perms.includes('export')) ? 'inline-block' : 'none';
       document.getElementById('btnAddAdmin').style.display = (isRoot || perms.includes('manage_admins')) ? 'inline-block' : 'none';
 
-      if (isRoot || perms.includes('orders')) renderOrdersTable();
-      if (isRoot || perms.includes('chat')) renderChatList();
-      if (isRoot || perms.includes('users')) renderUsersTable();
+      if (isRoot) {
+        document.getElementById('chatStaffIndicator').innerText = "Tài khoản tối cao: Xem được toàn bộ hội thoại & tài khoản phụ trách";
+      } else {
+        document.getElementById('chatStaffIndicator').innerText = `Đang trao đổi với tư cách: ${admin.fullname}`;
+      }
+
+      if (isRoot || perms.includes('orders')) {
+        renderOrdersTable();
+      }
+      if (canViewAnyHistory) {
+        renderOrderLogsTable();
+      }
+      if (canChat) renderChatList();
+      if (hasAnyUserPerm) renderUsersTable();
       if (isRoot || perms.includes('manage_admins')) renderAdminTable();
+      if (canViewFooterStats) calculateFooterStats();
     }
 
     // --- QUẢN LÝ ĐƠN HÀNG ---
@@ -535,18 +727,28 @@
       let tbody = document.getElementById('ordersTableBody');
       tbody.innerHTML = '';
 
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      let canViewDetail = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_detail'));
+
       let realRevenue = 0, estimatedRevenue = 0;
-      let countPending = 0, countProcessing = 0, countProcessed = 0, countShipping = 0, countCompleted = 0;
+      let countPending = 0, countProcessing = 0, countProcessed = 0, countShipping = 0, countCompleted = 0, countCancelled = 0;
 
       orders.forEach((o, index) => {
-        estimatedRevenue += o.total;
+        if (o.status !== "Đã hủy") {
+          estimatedRevenue += o.total;
+        }
+
         if (o.status === "Chờ tiếp nhận") countPending++;
         else if (o.status === "Đang xử lý") countProcessing++;
         else if (o.status === "Đã xử lý") countProcessed++;
         else if (o.status === "Đang giao hàng") countShipping++;
         else if (o.status === "Hoàn tất đơn hàng") countCompleted++;
+        else if (o.status === "Đã hủy") countCancelled++;
 
-        if (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử" || (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng")) {
+        if (o.status !== "Đã hủy" && (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử" || (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng"))) {
           realRevenue += o.total;
         }
 
@@ -558,10 +760,20 @@
         else if (o.status === "Đã xử lý") badgeClass = "badge-processed";
         else if (o.status === "Đang giao hàng") badgeClass = "badge-shipping";
         else if (o.status === "Hoàn tất đơn hàng") badgeClass = "badge-completed";
+        else if (o.status === "Đã hủy") badgeClass = "badge-cancelled";
+
+        let isFinalState = (o.status === "Hoàn tất đơn hàng" || o.status === "Đã hủy");
+        let disabledAttr = isFinalState ? "disabled title=\"Đơn hàng đã hoàn tất hoặc đã hủy, không thể thay đổi trạng thái!\"" : "";
+
+        let cancelOptionHtml = isRoot ? `<option value="Đã hủy" ${o.status==='Đã hủy'?'selected':''}>Đã hủy</option>` : '';
+
+        let orderIdColumn = canViewDetail 
+          ? `<span class="clickable-link" onclick="openOrderDetail(${index})">${o.id}</span>`
+          : `<span>${o.id}</span>`;
 
         tbody.innerHTML += `
           <tr>
-            <td><span class="clickable-link" onclick="openOrderDetail(${index})">${o.id}</span></td>
+            <td>${orderIdColumn}</td>
             <td>${o.customerName}<br><small style="color:#64748b;">${o.phone}</small></td>
             <td>${o.service}</td>
             <td><small style="color:#0284c7; font-weight:600;">${o.deliveryService}</small></td>
@@ -570,12 +782,13 @@
             <td><small>${o.time}</small></td>
             <td><span class="badge ${badgeClass}">${o.status}</span></td>
             <td>
-              <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)">
+              <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)" ${disabledAttr}>
                 <option value="Chờ tiếp nhận" ${o.status==='Chờ tiếp nhận'?'selected':''}>Chờ tiếp nhận</option>
                 <option value="Đang xử lý" ${o.status==='Đang xử lý'?'selected':''}>Đang xử lý</option>
                 <option value="Đã xử lý" ${o.status==='Đã xử lý'?'selected':''}>Đã xử lý</option>
                 <option value="Đang giao hàng" ${o.status==='Đang giao hàng'?'selected':''}>Đang giao hàng</option>
                 <option value="Hoàn tất đơn hàng" ${o.status==='Hoàn tất đơn hàng'?'selected':''}>Hoàn tất đơn hàng</option>
+                ${cancelOptionHtml}
               </select>
             </td>
           </tr>
@@ -589,12 +802,27 @@
       document.getElementById('countProcessed').innerText = countProcessed;
       document.getElementById('countShipping').innerText = countShipping;
       document.getElementById('countCompleted').innerText = countCompleted;
+      document.getElementById('countCancelled').innerText = countCancelled;
     }
 
     function confirmAndUpdateOrderStatus(index, selectElement) {
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
-      let oldStatus = orders[index].status;
+      let oldStatus = orders[index].id ? orders[index].status : "";
+
+      if (oldStatus === "Hoàn tất đơn hàng" || oldStatus === "Đã hủy") {
+        alert("Đơn hàng này đã ở trạng thái 'Hoàn tất đơn hàng' hoặc 'Đã hủy', không thể đổi lại trạng thái!");
+        selectElement.value = oldStatus;
+        return;
+      }
+
       let newStatus = selectElement.value;
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      
+      if (newStatus === "Đã hủy" && currentAdminUsername !== "admin4T") {
+        alert("Tài khoản nhân viên không được phép chuyển đơn hàng sang tình trạng Hủy!");
+        selectElement.value = oldStatus;
+        return;
+      }
 
       if (oldStatus === newStatus) return;
 
@@ -602,42 +830,196 @@
 
       if (confirmChange) {
         orders[index].status = newStatus;
+
+        if (!orders[index].history) orders[index].history = [];
+        let now = new Date();
+        let timeString = now.getFullYear() + '-' + 
+                         String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(now.getDate()).padStart(2, '0') + ' ' + 
+                         String(now.getHours()).padStart(2, '0') + ':' + 
+                         String(now.getMinutes()).padStart(2, '0') + ':' + 
+                         String(now.getSeconds()).padStart(2, '0');
+
+        let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        let adminObj = admins.find(a => a.username === currentAdminUsername);
+        let adminFullName = adminObj ? adminObj.fullname : currentAdminUsername;
+
+        orders[index].history.push({
+          action: `Thay đổi trạng thái: "${oldStatus}" ➔ "${newStatus}"`,
+          performer: `${adminFullName} (${currentAdminUsername})`,
+          time: timeString
+        });
+
         localStorage.setItem('orders_v2', JSON.stringify(orders));
+        logOrderAction(orders[index].id, oldStatus, newStatus, currentAdminUsername);
+
         renderOrdersTable();
+        renderOrderLogsTable();
+        calculateFooterStats();
       } else {
         selectElement.value = oldStatus;
       }
     }
 
+    function logOrderAction(orderId, oldStatus, newStatus, username) {
+      let logs = JSON.parse(localStorage.getItem('orderActionLogs') || '[]');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === username);
+      let adminFullName = adminObj ? adminObj.fullname : username;
+
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                       String(now.getSeconds()).padStart(2, '0');
+
+      logs.unshift({
+        orderId: orderId,
+        action: `Thay đổi trạng thái: "${oldStatus}" ➔ "${newStatus}"`,
+        performer: `${adminFullName} (${username})`,
+        time: timeString
+      });
+
+      if (logs.length > 100) logs.pop();
+      localStorage.setItem('orderActionLogs', JSON.stringify(logs));
+    }
+
+    function renderOrderLogsTable() {
+      let logs = JSON.parse(localStorage.getItem('orderActionLogs') || '[]');
+      let tbody = document.getElementById('orderLogsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Chưa có lịch sử thay đổi trạng thái nào được ghi nhận.</td></tr>`;
+        return;
+      }
+
+      logs.forEach(l => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong style="color:var(--primary);">${l.orderId}</strong></td>
+            <td>${l.action}</td>
+            <td><span style="font-weight:600; color:var(--secondary);">${l.performer}</span></td>
+            <td><small>${l.time}</small></td>
+          </tr>
+        `;
+      });
+    }
+
     function openOrderDetail(index) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      let canViewDetail = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_detail'));
+
+      if (!canViewDetail) {
+        alert("Bạn không có quyền xem Chi Tiết đơn hàng!");
+        return;
+      }
+
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
       let o = orders[index];
+      
+      let customerObj = users.find(u => u.phone === o.phone || u.name === o.customerName);
+      let addressInfo = o.address || (customerObj ? customerObj.address : 'Chưa cập nhật địa chỉ');
+
+      let canViewHistory = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_history'));
+
+      let historyRows = "";
+      if (canViewHistory) {
+        if (o.history && o.history.length > 0) {
+          o.history.forEach(h => {
+            historyRows += `
+              <tr>
+                <td>${h.action}</td>
+                <td><span style="font-weight: 600; color: var(--secondary);">${h.performer}</span></td>
+                <td><small>${h.time}</small></td>
+              </tr>
+            `;
+          });
+        } else {
+          historyRows = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">Chưa có lịch sử thay đổi trạng thái nào.</td></tr>`;
+        }
+      } else {
+        historyRows = `<tr><td colspan="3" style="text-align: center; color: var(--danger);">🔒 Tài khoản của bạn không được phân quyền xem Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng này.</td></tr>`;
+      }
+
       let body = document.getElementById('orderDetailBody');
       body.innerHTML = `
-        <p><strong>Mã Đơn Hàng:</strong> ${o.id}</p>
-        <p><strong>Khách Hàng:</strong> ${o.customerName} (${o.phone})</p>
-        <p><strong>Dịch Vụ:</strong> ${o.service}</p>
-        <p><strong>Giao Nhận:</strong> ${o.deliveryService}</p>
-        <p><strong>Thanh Toán:</strong> ${o.paymentMethod}</p>
-        <p><strong>Tổng Tiền:</strong> <span style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
-        <p><strong>Thời Gian Đặt:</strong> ${o.time}</p>
-        <p><strong>Trạng Thái:</strong> ${o.status}</p>
-        <p><strong>Ghi Chú Đơn:</strong> ${o.notes || 'Không có ghi chú'}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 1rem;">
+          <p><strong>Mã Đơn Hàng:</strong> ${o.id}</p>
+          <p><strong>Trạng Thái:</strong> <span class="badge badge-processing">${o.status}</span></p>
+          <p><strong>Khách Hàng:</strong> ${o.customerName}</p>
+          <p><strong>Số Điện Thoại:</strong> ${o.phone}</p>
+          <p style="grid-column: span 2;"><strong>Địa Chỉ:</strong> <span style="color: var(--secondary); font-weight: bold;">📍 ${addressInfo}</span></p>
+          <p><strong>Dịch Vụ:</strong> ${o.service}</p>
+          <p><strong>Giao Nhận:</strong> ${o.deliveryService}</p>
+          <p><strong>Thanh Toán:</strong> ${o.paymentMethod}</p>
+          <p><strong>Tổng Tiền:</strong> <span style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+          <p style="grid-column: span 2;"><strong>Thời Gian Đặt:</strong> ${o.time}</p>
+          <p style="grid-column: span 2;"><strong>Ghi Chú Đơn:</strong> ${o.notes || 'Không có ghi chú'}</p>
+        </div>
+
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+        <h4 style="color: var(--primary); margin-bottom: 10px; font-size: 1rem;">📜 Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng:</h4>
+        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Hành Động / Thay Đổi</th>
+                <th>Người Thực Hiện</th>
+                <th>Thời Gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${historyRows}
+            </tbody>
+          </table>
+        </div>
       `;
       document.getElementById('orderDetailModal').style.display = 'flex';
     }
 
-    // --- QUẢN LÝ KHÁCH HÀNG & THỐNG KÊ ĐƠN HÀNG + ĐỔI MẬT KHẨU ---
+    // --- QUẢN LÝ KHÁCH HÀNG & PHÂN QUYỀN ---
     function renderUsersTable() {
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       let searchQuery = document.getElementById('searchUser').value.toLowerCase();
       let tbody = document.getElementById('userTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
+
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+
+      let canChat = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('customer_chat'));
+      let canLock = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('customer_lock'));
+      let canDelete = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('customer_delete'));
 
       users.forEach((u, index) => {
         if (searchQuery && !u.name.toLowerCase().includes(searchQuery) && !u.phone.includes(searchQuery)) return;
 
         let badgeHTML = u.isLocked ? `<span class="badge badge-locked">Đã Khóa</span>` : `<span class="badge badge-active">Hoạt Động</span>`;
+
+        let actionButtonsHtml = "";
+        if (canChat) {
+          actionButtonsHtml += `<button class="btn btn-chat-user" onclick="openChatWithUser('${u.phone}', '${u.name}')">💬 Chat</button>`;
+        }
+        if (canLock) {
+          actionButtonsHtml += u.isLocked 
+            ? `<button class="btn btn-unlock" onclick="toggleLockUser(${index})">🔓 Mở</button>` 
+            : `<button class="btn btn-lock" onclick="toggleLockUser(${index})">🔒 Khóa</button>`;
+        }
+        if (canDelete) {
+          actionButtonsHtml += `<button class="btn btn-lock" onclick="deleteUser(${index})" style="background:#64748b;">🗑️ Xóa</button>`;
+        }
 
         tbody.innerHTML += `
           <tr>
@@ -647,17 +1029,22 @@
             <td><strong>${u.points || 0}đ</strong></td>
             <td>${u.lastAccess || 'Vừa xong'}</td>
             <td>${badgeHTML}</td>
-            <td>
-              <button class="btn btn-chat-user" onclick="openChatWithUser('${u.phone}', '${u.name}')">💬 Chat</button>
-              ${u.isLocked ? `<button class="btn btn-unlock" onclick="toggleLockUser(${index})">🔓 Mở</button>` : `<button class="btn btn-lock" onclick="toggleLockUser(${index})">🔒 Khóa</button>`}
-              <button class="btn btn-lock" onclick="deleteUser(${index})" style="background:#64748b;">🗑️ Xóa</button>
-            </td>
+            <td>${actionButtonsHtml || '<small style="color:#94a3b8">Không có quyền thao tác</small>'}</td>
           </tr>
         `;
       });
     }
 
     function toggleLockUser(index) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('customer_lock'))) {
+        alert("Bạn không có quyền khóa/mở tài khoản khách hàng!");
+        return;
+      }
+
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       users[index].isLocked = !users[index].isLocked;
       localStorage.setItem('users', JSON.stringify(users));
@@ -665,6 +1052,15 @@
     }
 
     function deleteUser(index) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('customer_delete'))) {
+        alert("Bạn không có quyền xóa tài khoản khách hàng!");
+        return;
+      }
+
       if(confirm("Bạn có chắc chắn muốn xóa tài khoản khách hàng này?")) {
         let users = JSON.parse(localStorage.getItem('users') || '[]');
         users.splice(index, 1);
@@ -678,12 +1074,35 @@
       let u = users[index];
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
 
-      // Lọc các đơn hàng của khách hàng này dựa vào số điện thoại hoặc tên
       let customerOrders = orders.filter(o => o.phone === u.phone || o.customerName === u.name);
       let totalOrdersCount = customerOrders.length;
-      let totalMoneySpent = customerOrders.reduce((sum, o) => sum + o.total, 0);
+      let totalMoneySpent = customerOrders.filter(o => o.status !== "Đã hủy").reduce((sum, o) => sum + o.total, 0);
 
       let reviewsHtml = (u.reviews && u.reviews.length > 0) ? u.reviews.map(r => `<li>⭐ ${r.rating}/5 - "${r.comment}" <small>(${r.date})</small></li>`).join('') : '<li>Chưa có đánh giá nào.</li>';
+
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      let canNewPassword = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('customer_new_password'));
+
+      let passwordChangeSectionHtml = "";
+      if (canNewPassword) {
+        passwordChangeSectionHtml = `
+          <hr style="margin: 12px 0;">
+          <h4 style="color: var(--danger); margin-bottom: 6px;">🔑 Cập Nhật Mật Khẩu Khách Hàng:</h4>
+          <div class="form-group" style="margin-top: 8px;">
+            <label>Mật khẩu mới cho khách hàng:</label>
+            <input type="password" id="newCustomerPasswordInput" placeholder="Nhập mật khẩu mới...">
+          </div>
+          <button class="btn btn-primary" onclick="updateCustomerPassword(${index})" style="width: 100%; padding: 8px;">Lưu Mật Khẩu Mới</button>
+        `;
+      } else {
+        passwordChangeSectionHtml = `
+          <hr style="margin: 12px 0;">
+          <p style="color: #64748b; font-size: 0.85rem; font-style: italic;">🔒 Tài khoản của bạn không được phân quyền tạo Mật khẩu mới cho khách hàng.</p>
+        `;
+      }
 
       let body = document.getElementById('customerDetailBody');
       body.innerHTML = `
@@ -701,18 +1120,21 @@
         <p><strong>Lịch Sử Đánh Giá & Phản Hồi:</strong></p>
         <ul style="padding-left: 20px; font-size: 0.9rem; color: #475569; margin-top: 5px;">${reviewsHtml}</ul>
 
-        <hr style="margin: 12px 0;">
-        <h4 style="color: var(--danger); margin-bottom: 6px;">🔑 Cập Nhật Mật Khẩu Khách Hàng:</h4>
-        <div class="form-group" style="margin-top: 8px;">
-          <label>Mật khẩu mới cho khách hàng:</label>
-          <input type="password" id="newCustomerPasswordInput" placeholder="Nhập mật khẩu mới...">
-        </div>
-        <button class="btn btn-primary" onclick="updateCustomerPassword(${index})" style="width: 100%; padding: 8px;">Lưu Mật Khẩu Mới</button>
+        ${passwordChangeSectionHtml}
       `;
       document.getElementById('customerDetailModal').style.display = 'flex';
     }
 
     function updateCustomerPassword(userIndex) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('customer_new_password'))) {
+        alert("Bạn không có quyền đổi mật khẩu cho khách hàng!");
+        return;
+      }
+
       let newPass = document.getElementById('newCustomerPasswordInput').value.trim();
       if (!newPass) {
         alert("Vui lòng nhập mật khẩu mới!");
@@ -723,15 +1145,16 @@
       if (users[userIndex]) {
         users[userIndex].password = newPass;
         localStorage.setItem('users', JSON.stringify(users));
-        alert(`Đã cập nhật mật khẩu thành công cho khách hàng: ${users[userIndex].name}`);
+        alert(`Đã cập nhật mật khẩu mới thành công cho khách hàng: ${users[userIndex].name}`);
         document.getElementById('newCustomerPasswordInput').value = '';
       }
     }
 
-    // --- QUẢN LÝ ADMIN ---
+    // --- QUẢN LÝ ADMIN & CHỨC DANH ---
     function renderAdminTable() {
       let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
       let tbody = document.getElementById('adminTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       admins.forEach((a, index) => {
@@ -743,11 +1166,12 @@
           <tr>
             <td><strong>${a.username}</strong> ${isRoot ? '👑' : ''}</td>
             <td>${a.fullname}</td>
+            <td><span style="color:var(--info); font-weight:600;">${a.title || 'Nhân viên'}</span></td>
             <td><small style="color:var(--primary); font-weight:600;">${permsText}</small></td>
             <td>${badge}</td>
             <td>
               ${!isRoot ? `
-                <button class="btn btn-primary" onclick="openEditAdminModal(${index})">✏️ Sửa</button>
+                <button class="btn btn-primary" onclick="openEditAdminModal(${index})">✏️ Sửa Quyền</button>
                 ${a.isLocked ? `<button class="btn btn-unlock" onclick="toggleLockAdmin(${index})">🔓 Mở</button>` : `<button class="btn btn-lock" onclick="toggleLockAdmin(${index})">🔒 Khóa</button>`}
                 <button class="btn btn-lock" onclick="deleteAdmin(${index})" style="background:#64748b;">🗑️ Xóa</button>
               ` : '<small style="color:#64748b;">Tài khoản gốc</small>'}
@@ -758,7 +1182,7 @@
     }
 
     function openAddAdminModal() {
-      document.getElementById('adminModalTitle').innerText = "Thêm Tài Khoản Admin Mới";
+      document.getElementById('adminModalTitle').innerText = "Thêm Tài Khoản Admin Mới & Chức Danh";
       document.getElementById('adminForm').reset();
       document.getElementById('editAdminUsername').value = "";
       document.getElementById('inputUsername').disabled = false;
@@ -770,11 +1194,12 @@
     function openEditAdminModal(index) {
       let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
       let a = admins[index];
-      document.getElementById('adminModalTitle').innerText = "Chỉnh Sửa Quyền Admin";
+      document.getElementById('adminModalTitle').innerText = "Chỉnh Sửa Quyền & Chức Danh Admin";
       document.getElementById('editAdminUsername').value = a.username;
       document.getElementById('inputUsername').value = a.username;
       document.getElementById('inputUsername').disabled = true;
       document.getElementById('inputFullname').value = a.fullname;
+      document.getElementById('inputTitle').value = a.title || '';
       document.getElementById('passwordGroupField').style.display = 'none';
       document.getElementById('inputPassword').required = false;
 
@@ -791,6 +1216,7 @@
       let username = document.getElementById('inputUsername').value.trim();
       let password = document.getElementById('inputPassword').value.trim();
       let fullname = document.getElementById('inputFullname').value.trim();
+      let title = document.getElementById('inputTitle').value.trim();
       let editUsername = document.getElementById('editAdminUsername').value;
 
       let selectedPerms = [];
@@ -804,6 +1230,7 @@
         let admin = admins.find(a => a.username === editUsername);
         if (admin) {
           admin.fullname = fullname;
+          admin.title = title;
           admin.permissions = selectedPerms;
         }
       } else {
@@ -811,7 +1238,7 @@
           alert("Tên đăng nhập đã tồn tại!");
           return;
         }
-        admins.push({ username, password, fullname, permissions: selectedPerms, isLocked: false });
+        admins.push({ username, password, fullname, title, permissions: selectedPerms, isLocked: false });
       }
 
       localStorage.setItem('adminAccounts', JSON.stringify(admins));
@@ -833,6 +1260,62 @@
         localStorage.setItem('adminAccounts', JSON.stringify(admins));
         renderAdminTable();
       }
+    }
+
+    // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN ---
+    function calculateFooterStats() {
+      let fromDateStr = document.getElementById('statFromDate').value;
+      let toDateStr = document.getElementById('statToDate').value;
+
+      let visitsLog = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+
+      let filteredVisits = visitsLog.filter(v => {
+        let visitDate = v.time.split(' ')[0];
+        if (fromDateStr && visitDate < fromDateStr) return false;
+        if (toDateStr && visitDate > toDateStr) return false;
+        return true;
+      });
+
+      let filteredUsers = users.filter(u => {
+        let userDate = (u.createdAt || "2026-01-01 00:00:00").split(' ')[0];
+        if (fromDateStr && userDate < fromDateStr) return false;
+        if (toDateStr && userDate > toDateStr) return false;
+        return true;
+      });
+
+      let filteredOrders = orders.filter(o => {
+        let orderDate = o.time.split(' ')[0];
+        if (fromDateStr && orderDate < fromDateStr) return false;
+        if (toDateStr && orderDate > toDateStr) return false;
+        return true;
+      });
+
+      let totalOrdersCount = filteredOrders.length;
+      let totalAccountsCount = filteredUsers.length;
+      
+      let realCollectedRevenue = 0;
+      filteredOrders.forEach(o => {
+        let isDone = (o.status === "Hoàn tất đơn hàng" || o.status === "Đã xử lý");
+        let isPaidOnline = (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử");
+        let isPaidCashCompleted = (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng");
+
+        if (o.status !== "Đã hủy" && (isPaidOnline || isPaidCashCompleted || isDone)) {
+          realCollectedRevenue += o.total;
+        }
+      });
+
+      document.getElementById('footerValVisits').innerText = filteredVisits.length.toLocaleString();
+      document.getElementById('footerValAccounts').innerText = totalAccountsCount.toLocaleString();
+      document.getElementById('footerValOrders').innerText = totalOrdersCount.toLocaleString();
+      document.getElementById('footerValRevenue').innerText = realCollectedRevenue.toLocaleString() + " VNĐ";
+    }
+
+    function resetFooterStatsDate() {
+      document.getElementById('statFromDate').value = '';
+      document.getElementById('statToDate').value = '';
+      calculateFooterStats();
     }
 
     // --- XUẤT EXCEL (CSV) ---
@@ -873,6 +1356,7 @@
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       let listContainer = document.getElementById('chatUsersList');
+      if (!listContainer) return;
       listContainer.innerHTML = '';
 
       let phones = Object.keys(chats);
@@ -885,12 +1369,17 @@
         let userObj = users.find(u => u.phone === phone) || { name: "Khách Vãng Lai" };
         let msgList = chats[phone];
         let lastMsg = msgList[msgList.length - 1]?.text || '';
+        
+        let lastAdminSender = msgList.slice().reverse().find(m => m.sender === 'admin');
+        let handledByText = lastAdminSender ? `Phụ trách: ${lastAdminSender.handledBy || 'Admin'}` : 'Chưa có phản hồi';
+
         let activeClass = (phone === activeChatPhone) ? 'active' : '';
 
         listContainer.innerHTML += `
           <div class="chat-user-item ${activeClass}" onclick="selectChat('${phone}', '${userObj.name}')">
             <div class="chat-user-name">${userObj.name}</div>
-            <div class="chat-user-sub">${phone}</div>
+            <div class="chat-user-sub">SĐT: ${phone}</div>
+            <div class="chat-user-sub" style="color:var(--secondary); font-weight:600;">👤 ${handledByText}</div>
             <div class="chat-user-sub" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-style:italic;">"${lastMsg}"</div>
           </div>
         `;
@@ -906,15 +1395,18 @@
 
     function openChatWithUser(phone, name) {
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
-      if (!chats[phone]) chats[phone] = [{ sender: "admin", text: "Xin chào! Cửa hàng 4T có thể hỗ trợ gì cho bạn ạ?" }];
-      localStorage.setItem('adminChats', JSON.stringify(chats));
+      let currentAdmin = localStorage.getItem('loggedAdmin');
+      if (!chats[phone]) {
+        chats[phone] = [{ sender: "admin", text: "Xin chào! Cửa hàng 4T có thể hỗ trợ gì cho bạn ạ?", handledBy: currentAdmin }];
+        localStorage.setItem('adminChats', JSON.stringify(chats));
+      }
       selectChat(phone, name);
       window.scrollTo({ top: 750, behavior: 'smooth' });
     }
 
     function renderChatMessages() {
       let box = document.getElementById('chatMessagesBox');
-      if (!activeChatPhone) return;
+      if (!box || !activeChatPhone) return;
 
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
       let msgList = chats[activeChatPhone] || [];
@@ -922,7 +1414,7 @@
       box.innerHTML = '';
       msgList.forEach(m => {
         let alignClass = (m.sender === 'admin') ? 'msg-admin' : 'msg-customer';
-        let senderName = (m.sender === 'admin') ? 'Admin 4T' : 'Khách hàng';
+        let senderName = (m.sender === 'admin') ? `Admin (${m.handledBy || 'Hệ thống'})` : 'Khách hàng';
         box.innerHTML += `
           <div class="msg-bubble ${alignClass}">
             <div style="font-size:0.7rem; opacity:0.8; margin-bottom:2px;">${senderName}</div>
@@ -939,10 +1431,11 @@
 
       if (!activeChatPhone || !text) return;
 
+      let currentAdmin = localStorage.getItem('loggedAdmin');
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
       if (!chats[activeChatPhone]) chats[activeChatPhone] = [];
 
-      chats[activeChatPhone].push({ sender: "admin", text: text });
+      chats[activeChatPhone].push({ sender: "admin", text: text, handledBy: currentAdmin });
       localStorage.setItem('adminChats', JSON.stringify(chats));
 
       input.value = '';

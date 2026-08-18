@@ -525,34 +525,6 @@
         localStorage.setItem('adminAccounts', JSON.stringify(admins));
       }
 
-      // if (!localStorage.getItem('orders_v2')) {
-      //   let sampleOrders = [
-      //     { id: "HD001", customerName: "Nguyễn Văn An", phone: "0909123456", service: "Giặt sấy lấy ngay (5kg)", deliveryService: "Giao nhận tận nơi", address: "123 Thuận An, Bình Dương", paymentMethod: "Tiền mặt", total: 75000, time: "2026-08-18 08:30", status: "Chờ tiếp nhận", notes: "Khách yêu cầu giặt nước xả Comfort.", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống / Khách hàng", time: "2026-08-18 08:30"}] },
-      //     { id: "HD002", customerName: "Trần Thị Bình", phone: "0912345678", service: "Giặt hấp áo vest (2 cái)", deliveryService: "Khách mang đến", address: "456 Dĩ An, Bình Dương", paymentMethod: "Ví điện tử", total: 120000, time: "2026-08-18 09:15", status: "Đang xử lý", notes: "Đồ vest cao cấp, chú ý nút áo.", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống", time: "2026-08-18 09:15"}, {action: "Thay đổi trạng thái: 'Chờ tiếp nhận' ➔ 'Đang xử lý'", performer: "Admin 4T (admin4T)", time: "2026-08-18 09:20"}] },
-      //     { id: "HD003", customerName: "Lê Hoàng Nam", phone: "0988777666", service: "Giặt chăn mền gấu bông", deliveryService: "Giao nhận tận nơi", address: "789 Thủ Dầu Một, Bình Dương", paymentMethod: "App ngân hàng", total: 90000, time: "2026-08-18 10:00", status: "Hoàn tất đơn hàng", notes: "", history: [{action: "Khởi tạo đơn hàng: Chờ tiếp nhận", performer: "Hệ thống", time: "2026-08-18 10:00"}, {action: "Thay đổi trạng thái: 'Chờ tiếp nhận' ➔ 'Hoàn tất đơn hàng'", performer: "Admin 4T (admin4T)", time: "2026-08-18 11:00"}] }
-      //   ];
-      //   localStorage.setItem('orders_v2', JSON.stringify(sampleOrders));
-      // }
-
-      // if (!localStorage.getItem('users')) {
-      //   let sampleUsers = [
-      //     { name: "Nguyễn Văn An", phone: "0909123456", password: "123", address: "123 Thuận An, Bình Dương", gps: "10.850, 106.771", points: 150, createdAt: "2026-08-15 08:00:00", lastAccess: "2026-08-18 10:30", status: "Active", isLocked: false, reviews: [{rating: 5, comment: "Dịch vụ giặt rất nhanh và thơm!", date: "2026-08-10"}] },
-      //     { name: "Trần Thị Bình", phone: "0912345678", password: "123", address: "456 Dĩ An, Bình Dương", gps: "10.862, 106.782", points: 80, createdAt: "2026-07-10 09:00:00", lastAccess: "2026-07-20 14:15", status: "Inactive", isLocked: false, reviews: [{rating: 4, comment: "Đồ sạch sẽ, nhân viên thân thiện.", date: "2026-07-15"}] },
-      //     { name: "Lê Hoàng Nam", phone: "0988777666", password: "123", address: "789 Thủ Dầu Một, Bình Dương", gps: "10.980, 106.650", points: 20, createdAt: "2026-08-18 15:00:00", lastAccess: "2026-08-18 16:45", status: "New", isLocked: false, reviews: [] }
-      //   ];
-      //   localStorage.setItem('users', JSON.stringify(sampleUsers));
-      // }
-
-      // if (!localStorage.getItem('adminChats')) {
-      //   let sampleChats = {
-      //     "0909123456": [
-      //       { sender: "customer", text: "Shop ơi giặt 5kg quần áo mỏng hết bao lâu ạ?", handledBy: "staff_cskh" },
-      //       { sender: "admin", text: "Chào bạn! Khoảng 2-3 tiếng là hoàn tất giặt sấy khô thơm bạn nhé!", handledBy: "staff_cskh" }
-      //     ]
-      //   };
-      //   localStorage.setItem('adminChats', JSON.stringify(sampleChats));
-      // }
-
       if (!localStorage.getItem('orderActionLogs')) {
         localStorage.setItem('orderActionLogs', JSON.stringify([]));
       }

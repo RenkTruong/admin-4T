@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang Quản Lý - Giặt Sấy 4T</title>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --secondary: #1b75bc;
+      --light: #f4f8fb;
+      --dark: #1e293b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #0284c7;
+      --purple: #8b5cf6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: #f1f5f9; color: var(--dark); padding-bottom: 3rem; }
+
+    /* Login Screen */
+    #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f4c81; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .login-card { background: white; padding: 2.5rem; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .login-card h2 { color: var(--primary); margin-bottom: 1.5rem; text-align: center; }
+
+    /* Admin Navigation */
+    .admin-nav { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px; }
+    .admin-nav h1 { font-size: 1.4rem; }
+    .admin-nav .user-info { display: flex; align-items: center; gap: 15px; }
+
+    /* Layout Main */
+    .container { max-width: 1400px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 2rem; }
+
+    /* Stats Overview */
+    .stats-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.2rem; }
+    .stat-card { background: white; padding: 1.2rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); display: flex; flex-direction: column; justify-content: center; }
+    .stat-card h4 { color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
+    .stat-card .val { font-size: 1.6rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
+    .stat-card .sub-val { font-size: 0.9rem; color: #64748b; margin-top: 5px;}
+
+    .statuses-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.2rem; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .statuses-container { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    }
+
+    /* Cards & Tables Section */
+    .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.8rem; flex-wrap: wrap; gap: 10px; }
+    .card-title { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
+
+    /* Table Styling */
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th { background: #f8fafc; padding: 0.8rem; color: #475569; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 0.8rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    tr:hover { background: #f8fafc; }
+
+    /* Badges & Status */
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-processing { background: #e0f2fe; color: #075985; }
+    .badge-processed { background: #f3e8ff; color: #6b21a8; }
+    .badge-shipping { background: #ffedd5; color: #c2410c; }
+    .badge-completed { background: #d1fae5; color: #065f46; }
+    .badge-new { background: #dbeafe; color: #1e40af; }
+    .badge-active { background: #d1fae5; color: #065f46; }
+    .badge-inactive { background: #fef3c7; color: #92400e; }
+    .badge-locked { background: #fee2e2; color: #991b1b; }
+
+    /* Form Controls & Buttons */
+    .select-status { padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; outline: none; }
+    .search-input { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; width: 220px; }
+    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; }
+    .btn-lock { background: var(--danger); color: white; }
+    .btn-unlock { background: var(--success); color: white; }
+    .btn-chat-user { background: var(--secondary); color: white; margin-right: 5px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+
+    .clickable-link { color: var(--secondary); font-weight: bold; cursor: pointer; text-decoration: underline; }
+    .clickable-link:hover { color: var(--primary); }
+
+    /* Modal Styling */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 500px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+    .close-modal { cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #64748b; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+    .permissions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+    .permissions-grid label { font-weight: normal; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* Live Chat Section */
+    .chat-layout { display: grid; grid-template-columns: 280px 1fr; border: 1px solid #cbd5e1; border-radius: 8px; height: 380px; overflow: hidden; }
+    .chat-users-list { background: #f8fafc; border-right: 1px solid #cbd5e1; overflow-y: auto; }
+    .chat-user-item { padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+    .chat-user-item:hover, .chat-user-item.active { background: #e0f2fe; }
+    .chat-user-name { font-weight: bold; font-size: 0.9rem; }
+    .chat-user-sub { font-size: 0.75rem; color: #64748b; }
+
+    .chat-main { display: flex; flex-direction: column; background: white; }
+    .chat-header { padding: 10px 15px; background: var(--light); border-bottom: 1px solid #e2e8f0; font-weight: bold; color: var(--primary); }
+    .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #fafafa; font-size: 0.9rem; display: flex; flex-direction: column; }
+    .msg-bubble { margin-bottom: 10px; max-width: 70%; padding: 8px 12px; border-radius: 12px; line-height: 1.4; }
+    .msg-customer { background: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .msg-admin { background: var(--secondary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-input-area { display: flex; border-top: 1px solid #cbd5e1; }
+    .chat-input-area input { flex: 1; border: none; padding: 10px; outline: none; }
+    .chat-input-area button { background: var(--primary); color: white; border: none; padding: 0 20px; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <!-- MÀN HÌNH ĐĂNG NHẬP -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <h2>🔐 Đăng Nhập Quản Trị</h2>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Tên đăng nhập:</label>
+          <input type="text" id="loginUsername" required placeholder="Nhập username...">
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu:</label>
+          <input type="password" id="loginPassword" required placeholder="Nhập mật khẩu...">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem; margin-top: 5px;">Đăng Nhập</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Header -->
+  <div class="admin-nav">
+    <h1>⚙️ Trang Quản Lý Cửa Hàng - Giặt Sấy 4T</h1>
+    <div class="user-info">
+      <span id="currentWelcomeText">Xin chào: <strong>...</strong></span>
+      <button class="btn btn-warning" onclick="openChangePasswordModal()">Đổi mật khẩu</button>
+      <button class="btn btn-danger" onclick="handleLogout()">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats Overview & Revenue -->
+    <div class="stats-grid">
+      <div class="stat-card" style="border-left-color: var(--success); min-height: 130px;">
+        <h4>💰 Tổng Doanh Thu Thực</h4>
+        <div class="val" id="totalRealRevenue" style="color: var(--success); font-size: 2rem;">0 VNĐ</div>
+        <div class="sub-val">Doanh thu ước tính: <span id="totalEstimatedRevenue" style="font-weight: bold;">0 VNĐ</span></div>
+      </div>
+
+      <div class="statuses-container">
+        <div class="stat-card" style="border-left-color: var(--warning);">
+          <h4>⏳ Chờ Tiếp Nhận</h4>
+          <div class="val" id="countPending">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--info);">
+          <h4>🧺 Đang Xử Lý</h4>
+          <div class="val" id="countProcessing">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--purple);">
+          <h4>✨ Đã Xử Lý</h4>
+          <div class="val" id="countProcessed">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #c2410c;">
+          <h4>🚚 Đang Giao Hàng</h4>
+          <div class="val" id="countShipping">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--success);">
+          <h4>✅ Hoàn Tất Đơn</h4>
+          <div class="val" id="countCompleted">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Management Section -->
+    <div class="card" id="sectionOrders">
+      <div class="card-header">
+        <span class="card-title">📦 Quản Lý Theo Dõi Đơn Hàng</span>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-success" onclick="exportOrdersData()" id="btnExportOrders">📥 Xuất Excel Đơn Hàng</button>
+          <input type="text" id="searchOrderInput" class="search-input" placeholder="🔍 Tìm tên hoặc SĐT..." onkeyup="renderOrdersTable()">
+          <div>
+            <select id="filterOrderStatus" onchange="renderOrdersTable()" class="select-status" style="padding: 6px 12px;">
+              <option value="ALL">Tất cả đơn hàng</option>
+              <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
+              <option value="Đang xử lý">Đang xử lý</option>
+              <option value="Đã xử lý">Đã xử lý</option>
+              <option value="Đang giao hàng">Đang giao hàng</option>
+              <option value="Hoàn tất đơn hàng">Hoàn tất đơn hàng</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Khách Hàng</th>
+              <th>Dịch Vụ & Khối Lượng</th>
+              <th>Dịch Vụ Giao Nhận</th>
+              <th>Thanh Toán</th>
+              <th>Tổng Tiền</th>
+              <th>Thời Gian</th>
+              <th>Trạng Thái</th>
+              <th>Cập Nhật</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Account Management Section -->
+    <div class="card" id="sectionAdmins">
+      <div class="card-header">
+        <span class="card-title">🛡️ Quản Lý Tài Khoản & Phân Quyền Admin</span>
+        <button class="btn btn-primary" onclick="openAddAdminModal()" id="btnAddAdmin">+ Thêm Tài Khoản Admin</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Đăng Nhập</th>
+              <th>Họ Tên Quản Trị Viên</th>
+              <th>Quyền Hạn Được Cấp</th>
+              <th>Trạng Thái</th>
+              <th>Hành Động</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Live Chat Section -->
+    <div class="card" id="sectionChat">
+      <div class="card-header">
+        <span class="card-title">💬 Trung Tâm Chat Trực Tiếp Với Khách Hàng</span>
+        <span style="font-size:0.85rem; color:#64748b;">Trực tuyến 24/7</span>
+      </div>
+      
+      <div class="chat-layout">
+        <div class="chat-users-list" id="chatUsersList"></div>
+        <div class="chat-main">
+          <div class="chat-header" id="currentChatHeader">Đang chọn cuộc trò chuyện...</div>
+          <div class="chat-messages" id="chatMessagesBox">
+            <p style="text-align: center; color: #94a3b8; margin-top: 20px;">Vui lòng chọn một khách hàng từ danh sách bên trái để bắt đầu chat.</p>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" id="adminMsgInput" placeholder="Nhập tin nhắn phản hồi khách hàng..." onkeypress="if(event.key==='Enter') sendAdminMessage()">
+            <button onclick="sendAdminMessage()">Gửi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Account Management Table -->
+    <div class="card" id="sectionUsers">
+      <div class="card-header">
+        <span class="card-title">👥 Quản Lý Tài Khoản Đăng Ký & Chăm Sóc Khách Hàng</span>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-success" onclick="exportUsersData()" id="btnExportUsers">📥 Xuất Excel Khách Hàng</button>
+          <input type="text" id="searchUser" class="search-input" placeholder="Tìm theo tên/SĐT..." onkeyup="renderUsersTable()">
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Khách Hàng</th>
+              <th>Số Điện Thoại</th>
+              <th>Địa Chỉ & GPS</th>
+              <th>Điểm</th>
+              <th>Truy Cập Cuối</th>
+              <th>Trạng Thái</th>
+              <th>Hành Động Chăm Sóc</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: Chi tiết Đơn Hàng -->
+  <div class="modal" id="orderDetailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📄 Chi Tiết Đơn Hàng</h3>
+        <span class="close-modal" onclick="closeModal('orderDetailModal')">&times;</span>
+      </div>
+      <div id="orderDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Chi tiết Khách Hàng & Thống Kê & Đổi Mật Khẩu -->
+  <div class="modal" id="customerDetailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>👤 Thông Tin, Thống Kê & Đổi Mật Khẩu Khách Hàng</h3>
+        <span class="close-modal" onclick="closeModal('customerDetailModal')">&times;</span>
+      </div>
+      <div id="customerDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Thêm/Sửa Admin -->
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="adminModalTitle">Thêm Tài Khoản Admin Mới</h3>
+        <span class="close-modal" onclick="closeModal('adminModal')">&times;</span>
+      </div>
+      <form id="adminForm" onsubmit="saveAdminAccount(event)">
+        <input type="hidden" id="editAdminUsername">
+        <div class="form-group">
+          <label>Tên Đăng Nhập (Username):</label>
+          <input type="text" id="inputUsername" required placeholder="vd: staff01">
+        </div>
+        <div class="form-group" id="passwordGroupField">
+          <label>Mật Khẩu Ban Đầu:</label>
+          <input type="password" id="inputPassword" placeholder="vd: 123456">
+        </div>
+        <div class="form-group">
+          <label>Họ và Tên Quản Trị Viên:</label>
+          <input type="text" id="inputFullname" required placeholder="vd: Nguyễn Văn Quản Lý">
+        </div>
+        <div class="form-group">
+          <label>Phân Quyền Chức Năng:</label>
+          <div class="permissions-grid">
+            <label><input type="checkbox" class="perm-checkbox" value="orders"> Quản lý đơn hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="chat"> Chat trực tiếp</label>
+            <label><input type="checkbox" class="perm-checkbox" value="users"> Quản lý khách hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="export"> Xuất dữ liệu Excel</label>
+            <label><input type="checkbox" class="perm-checkbox" value="manage_admins"> Quản lý tài khoản Admin</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 0.95rem;">Lưu Tài Khoản</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Đổi mật khẩu Admin cá nhân -->
+  <div class="modal" id="changePasswordModal">
+    <div class="modal-content" style="width: 400px;">
+      <div class="modal-header">
+        <h3>🔑 Đổi Mật Khẩu Cá Nhân</h3>
+        <span class="close-modal" onclick="closeModal('changePasswordModal')">&times;</span>
+      </div>
+      <form onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label>Mật khẩu cũ:</label>
+          <input type="password" id="oldPassword" required placeholder="Nhập mật khẩu cũ...">
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu mới:</label>
+          <input type="password" id="newPassword" required placeholder="Nhập mật khẩu mới...">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">Xác Nhận Đổi Mật Khẩu</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Khởi tạo dữ liệu mẫu
+    function initDefaultData() {
+      let sampleAdmins = [
+        { username: "admin4T", password: "123", fullname: "Admin 4T", permissions: ["orders", "chat", "users", "export", "manage_admins"], isLocked: false },
+        { username: "staff", password: "123", fullname: "Lê Văn Ca", permissions: ["orders", "chat"], isLocked: false }
+      ];
+      localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
+
+      if (!localStorage.getItem('orders_v2')) {
+        let sampleOrders = [
+          { id: "HD001", customerName: "Nguyễn Văn An", phone: "0909123456", service: "Giặt sấy lấy ngay (5kg)", deliveryService: "Giao nhận tận nơi", paymentMethod: "Tiền mặt", total: 75000, time: "2026-08-18 08:30", status: "Chờ tiếp nhận", notes: "Khách yêu cầu giặt nước xả Comfort." },
+          { id: "HD002", customerName: "Trần Thị Bình", phone: "0912345678", service: "Giặt hấp áo vest (2 cái)", deliveryService: "Khách mang đến", paymentMethod: "Ví điện tử", total: 120000, time: "2026-08-18 09:15", status: "Đang xử lý", notes: "Đồ vest cao cấp, chú ý nút áo." },
+          { id: "HD003", customerName: "Lê Hoàng Nam", phone: "0988777666", service: "Giặt chăn mền gấu bông", deliveryService: "Giao nhận tận nơi", paymentMethod: "App ngân hàng", total: 90000, time: "2026-08-18 10:00", status: "Đã xử lý", notes: "" }
+        ];
+        localStorage.setItem('orders_v2', JSON.stringify(sampleOrders));
+      }
+
+      if (!localStorage.getItem('users')) {
+        let sampleUsers = [
+          { name: "Nguyễn Văn An", phone: "0909123456", password: "123", address: "123 Thuận An, Bình Dương", gps: "10.850, 106.771", points: 150, lastAccess: "2026-08-18 10:30", status: "Active", isLocked: false, reviews: [{rating: 5, comment: "Dịch vụ giặt rất nhanh và thơm!", date: "2026-08-10"}] },
+          { name: "Trần Thị Bình", phone: "0912345678", password: "123", address: "456 Dĩ An, Bình Dương", gps: "10.862, 106.782", points: 80, lastAccess: "2026-07-20 14:15", status: "Inactive", isLocked: false, reviews: [{rating: 4, comment: "Đồ sạch sẽ, nhân viên thân thiện.", date: "2026-07-15"}] },
+          { name: "Lê Hoàng Nam", phone: "0988777666", password: "123", address: "789 Thủ Dầu Một, Bình Dương", gps: "10.980, 106.650", points: 20, lastAccess: "2026-08-18 16:45", status: "New", isLocked: false, reviews: [] }
+        ];
+        localStorage.setItem('users', JSON.stringify(sampleUsers));
+      }
+
+      if (!localStorage.getItem('adminChats')) {
+        let sampleChats = {
+          "0909123456": [
+            { sender: "customer", text: "Shop ơi giặt 5kg quần áo mỏng hết bao lâu ạ?" },
+            { sender: "admin", text: "Chào bạn! Khoảng 2-3 tiếng là hoàn tất giặt sấy khô thơm bạn nhé!" }
+          ]
+        };
+        localStorage.setItem('adminChats', JSON.stringify(sampleChats));
+      }
+    }
+
+    let activeChatPhone = null;
+
+    window.onload = function() {
+      initDefaultData();
+      checkAuthStatus();
+    };
+
+    // --- ĐĂNG NHẬP & XÁC THỰC ---
+    function checkAuthStatus() {
+      let loggedUser = localStorage.getItem('loggedAdmin');
+      if (loggedUser) {
+        document.getElementById('loginScreen').style.display = 'none';
+        applyPermissionsAndRender();
+      } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+      }
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      let u = document.getElementById('loginUsername').value.trim();
+      let p = document.getElementById('loginPassword').value.trim();
+
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let admin = admins.find(a => a.username === u && a.password === p);
+
+      if (!admin) {
+        alert("Sai tên đăng nhập hoặc mật khẩu!");
+        return;
+      }
+
+      if (admin.isLocked) {
+        alert("Tài khoản của bạn đã bị khóa!");
+        return;
+      }
+
+      localStorage.setItem('loggedAdmin', u);
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginScreen').style.display = 'none';
+      applyPermissionsAndRender();
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('loggedAdmin');
+      location.reload();
+    }
+
+    function openChangePasswordModal() {
+      document.getElementById('oldPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('changePasswordModal').style.display = 'flex';
+    }
+
+    function handleChangePassword(event) {
+      event.preventDefault();
+      let oldP = document.getElementById('oldPassword').value;
+      let newP = document.getElementById('newPassword').value;
+      let currentUsername = localStorage.getItem('loggedAdmin');
+
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let admin = admins.find(a => a.username === currentUsername);
+
+      if (!admin || admin.password !== oldP) {
+        alert("Mật khẩu cũ không chính xác!");
+        return;
+      }
+
+      admin.password = newP;
+      localStorage.setItem('adminAccounts', JSON.stringify(admins));
+      alert("Đổi mật khẩu thành công!");
+      closeModal('changePasswordModal');
+    }
+
+    // --- PHÂN QUYỀN & GIAO DIỆN ---
+    function applyPermissionsAndRender() {
+      let currentUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let admin = admins.find(a => a.username === currentUsername);
+
+      if (!admin) {
+        handleLogout();
+        return;
+      }
+
+      let isRoot = (admin.username === 'admin4T');
+      
+      document.getElementById('currentWelcomeText').innerHTML = `Xin chào: <strong>${admin.fullname}</strong> ${isRoot ? '👑' : ''}`;
+
+      let perms = admin.permissions || [];
+
+      document.getElementById('sectionOrders').style.display = (isRoot || perms.includes('orders')) ? 'block' : 'none';
+      document.getElementById('sectionChat').style.display = (isRoot || perms.includes('chat')) ? 'block' : 'none';
+      document.getElementById('sectionUsers').style.display = (isRoot || perms.includes('users')) ? 'block' : 'none';
+      document.getElementById('sectionAdmins').style.display = (isRoot || perms.includes('manage_admins')) ? 'block' : 'none';
+      
+      document.getElementById('btnExportOrders').style.display = (isRoot || perms.includes('export')) ? 'inline-block' : 'none';
+      document.getElementById('btnExportUsers').style.display = (isRoot || perms.includes('export')) ? 'inline-block' : 'none';
+      document.getElementById('btnAddAdmin').style.display = (isRoot || perms.includes('manage_admins')) ? 'inline-block' : 'none';
+
+      if (isRoot || perms.includes('orders')) renderOrdersTable();
+      if (isRoot || perms.includes('chat')) renderChatList();
+      if (isRoot || perms.includes('users')) renderUsersTable();
+      if (isRoot || perms.includes('manage_admins')) renderAdminTable();
+    }
+
+    // --- QUẢN LÝ ĐƠN HÀNG ---
+    function renderOrdersTable() {
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let filterStatus = document.getElementById('filterOrderStatus').value;
+      let searchQuery = document.getElementById('searchOrderInput').value.toLowerCase().trim();
+      let tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '';
+
+      let realRevenue = 0, estimatedRevenue = 0;
+      let countPending = 0, countProcessing = 0, countProcessed = 0, countShipping = 0, countCompleted = 0;
+
+      orders.forEach((o, index) => {
+        estimatedRevenue += o.total;
+        if (o.status === "Chờ tiếp nhận") countPending++;
+        else if (o.status === "Đang xử lý") countProcessing++;
+        else if (o.status === "Đã xử lý") countProcessed++;
+        else if (o.status === "Đang giao hàng") countShipping++;
+        else if (o.status === "Hoàn tất đơn hàng") countCompleted++;
+
+        if (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử" || (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng")) {
+          realRevenue += o.total;
+        }
+
+        if (filterStatus !== "ALL" && o.status !== filterStatus) return;
+        if (searchQuery && !o.customerName.toLowerCase().includes(searchQuery) && !o.phone.includes(searchQuery)) return;
+
+        let badgeClass = "badge-pending";
+        if (o.status === "Đang xử lý") badgeClass = "badge-processing";
+        else if (o.status === "Đã xử lý") badgeClass = "badge-processed";
+        else if (o.status === "Đang giao hàng") badgeClass = "badge-shipping";
+        else if (o.status === "Hoàn tất đơn hàng") badgeClass = "badge-completed";
+
+        tbody.innerHTML += `
+          <tr>
+            <td><span class="clickable-link" onclick="openOrderDetail(${index})">${o.id}</span></td>
+            <td>${o.customerName}<br><small style="color:#64748b;">${o.phone}</small></td>
+            <td>${o.service}</td>
+            <td><small style="color:#0284c7; font-weight:600;">${o.deliveryService}</small></td>
+            <td><span style="font-weight: 600; font-size: 0.85rem;">${o.paymentMethod}</span></td>
+            <td><strong style="color:var(--primary);">${o.total.toLocaleString()} VNĐ</strong></td>
+            <td><small>${o.time}</small></td>
+            <td><span class="badge ${badgeClass}">${o.status}</span></td>
+            <td>
+              <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)">
+                <option value="Chờ tiếp nhận" ${o.status==='Chờ tiếp nhận'?'selected':''}>Chờ tiếp nhận</option>
+                <option value="Đang xử lý" ${o.status==='Đang xử lý'?'selected':''}>Đang xử lý</option>
+                <option value="Đã xử lý" ${o.status==='Đã xử lý'?'selected':''}>Đã xử lý</option>
+                <option value="Đang giao hàng" ${o.status==='Đang giao hàng'?'selected':''}>Đang giao hàng</option>
+                <option value="Hoàn tất đơn hàng" ${o.status==='Hoàn tất đơn hàng'?'selected':''}>Hoàn tất đơn hàng</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('totalRealRevenue').innerText = realRevenue.toLocaleString() + " VNĐ";
+      document.getElementById('totalEstimatedRevenue').innerText = estimatedRevenue.toLocaleString() + " VNĐ";
+      document.getElementById('countPending').innerText = countPending;
+      document.getElementById('countProcessing').innerText = countProcessing;
+      document.getElementById('countProcessed').innerText = countProcessed;
+      document.getElementById('countShipping').innerText = countShipping;
+      document.getElementById('countCompleted').innerText = countCompleted;
+    }
+
+    function confirmAndUpdateOrderStatus(index, selectElement) {
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let oldStatus = orders[index].status;
+      let newStatus = selectElement.value;
+
+      if (oldStatus === newStatus) return;
+
+      let confirmChange = confirm(`Bạn có chắc chắn muốn chuyển trạng thái đơn hàng [${orders[index].id}] từ "${oldStatus}" sang "${newStatus}" không?`);
+
+      if (confirmChange) {
+        orders[index].status = newStatus;
+        localStorage.setItem('orders_v2', JSON.stringify(orders));
+        renderOrdersTable();
+      } else {
+        selectElement.value = oldStatus;
+      }
+    }
+
+    function openOrderDetail(index) {
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let o = orders[index];
+      let body = document.getElementById('orderDetailBody');
+      body.innerHTML = `
+        <p><strong>Mã Đơn Hàng:</strong> ${o.id}</p>
+        <p><strong>Khách Hàng:</strong> ${o.customerName} (${o.phone})</p>
+        <p><strong>Dịch Vụ:</strong> ${o.service}</p>
+        <p><strong>Giao Nhận:</strong> ${o.deliveryService}</p>
+        <p><strong>Thanh Toán:</strong> ${o.paymentMethod}</p>
+        <p><strong>Tổng Tiền:</strong> <span style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+        <p><strong>Thời Gian Đặt:</strong> ${o.time}</p>
+        <p><strong>Trạng Thái:</strong> ${o.status}</p>
+        <p><strong>Ghi Chú Đơn:</strong> ${o.notes || 'Không có ghi chú'}</p>
+      `;
+      document.getElementById('orderDetailModal').style.display = 'flex';
+    }
+
+    // --- QUẢN LÝ KHÁCH HÀNG & THỐNG KÊ ĐƠN HÀNG + ĐỔI MẬT KHẨU ---
+    function renderUsersTable() {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let searchQuery = document.getElementById('searchUser').value.toLowerCase();
+      let tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = '';
+
+      users.forEach((u, index) => {
+        if (searchQuery && !u.name.toLowerCase().includes(searchQuery) && !u.phone.includes(searchQuery)) return;
+
+        let badgeHTML = u.isLocked ? `<span class="badge badge-locked">Đã Khóa</span>` : `<span class="badge badge-active">Hoạt Động</span>`;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong class="clickable-link" onclick="openCustomerDetail(${index})">${u.name}</strong></td>
+            <td>${u.phone}</td>
+            <td><small>${u.address}<br><span style="color:#0284c7;">📍 GPS: ${u.gps || 'Chưa có'}</span></small></td>
+            <td><strong>${u.points || 0}đ</strong></td>
+            <td>${u.lastAccess || 'Vừa xong'}</td>
+            <td>${badgeHTML}</td>
+            <td>
+              <button class="btn btn-chat-user" onclick="openChatWithUser('${u.phone}', '${u.name}')">💬 Chat</button>
+              ${u.isLocked ? `<button class="btn btn-unlock" onclick="toggleLockUser(${index})">🔓 Mở</button>` : `<button class="btn btn-lock" onclick="toggleLockUser(${index})">🔒 Khóa</button>`}
+              <button class="btn btn-lock" onclick="deleteUser(${index})" style="background:#64748b;">🗑️ Xóa</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function toggleLockUser(index) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users[index].isLocked = !users[index].isLocked;
+      localStorage.setItem('users', JSON.stringify(users));
+      renderUsersTable();
+    }
+
+    function deleteUser(index) {
+      if(confirm("Bạn có chắc chắn muốn xóa tài khoản khách hàng này?")) {
+        let users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.splice(index, 1);
+        localStorage.setItem('users', JSON.stringify(users));
+        renderUsersTable();
+      }
+    }
+
+    function openCustomerDetail(index) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let u = users[index];
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+
+      // Lọc các đơn hàng của khách hàng này dựa vào số điện thoại hoặc tên
+      let customerOrders = orders.filter(o => o.phone === u.phone || o.customerName === u.name);
+      let totalOrdersCount = customerOrders.length;
+      let totalMoneySpent = customerOrders.reduce((sum, o) => sum + o.total, 0);
+
+      let reviewsHtml = (u.reviews && u.reviews.length > 0) ? u.reviews.map(r => `<li>⭐ ${r.rating}/5 - "${r.comment}" <small>(${r.date})</small></li>`).join('') : '<li>Chưa có đánh giá nào.</li>';
+
+      let body = document.getElementById('customerDetailBody');
+      body.innerHTML = `
+        <p><strong>Họ Tên Khách Hàng:</strong> ${u.name}</p>
+        <p><strong>Số Điện Thoại:</strong> ${u.phone}</p>
+        <p><strong>Địa Chỉ:</strong> ${u.address}</p>
+        <p><strong>Điểm Tích Lũy:</strong> <span style="color:var(--success); font-weight:bold;">${u.points || 0} điểm</span></p>
+        
+        <hr style="margin: 12px 0;">
+        <h4 style="color: var(--primary); margin-bottom: 6px;">📊 Thống Kê Sử Dụng Dịch Vụ:</h4>
+        <p><strong>Tổng số đơn hàng đã đặt:</strong> <span style="color: var(--secondary); font-weight: bold;">${totalOrdersCount} đơn</span></p>
+        <p><strong>Tổng số tiền đã chi tiêu:</strong> <span style="color: var(--success); font-weight: bold;">${totalMoneySpent.toLocaleString()} VNĐ</span></p>
+
+        <hr style="margin: 12px 0;">
+        <p><strong>Lịch Sử Đánh Giá & Phản Hồi:</strong></p>
+        <ul style="padding-left: 20px; font-size: 0.9rem; color: #475569; margin-top: 5px;">${reviewsHtml}</ul>
+
+        <hr style="margin: 12px 0;">
+        <h4 style="color: var(--danger); margin-bottom: 6px;">🔑 Cập Nhật Mật Khẩu Khách Hàng:</h4>
+        <div class="form-group" style="margin-top: 8px;">
+          <label>Mật khẩu mới cho khách hàng:</label>
+          <input type="password" id="newCustomerPasswordInput" placeholder="Nhập mật khẩu mới...">
+        </div>
+        <button class="btn btn-primary" onclick="updateCustomerPassword(${index})" style="width: 100%; padding: 8px;">Lưu Mật Khẩu Mới</button>
+      `;
+      document.getElementById('customerDetailModal').style.display = 'flex';
+    }
+
+    function updateCustomerPassword(userIndex) {
+      let newPass = document.getElementById('newCustomerPasswordInput').value.trim();
+      if (!newPass) {
+        alert("Vui lòng nhập mật khẩu mới!");
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users[userIndex]) {
+        users[userIndex].password = newPass;
+        localStorage.setItem('users', JSON.stringify(users));
+        alert(`Đã cập nhật mật khẩu thành công cho khách hàng: ${users[userIndex].name}`);
+        document.getElementById('newCustomerPasswordInput').value = '';
+      }
+    }
+
+    // --- QUẢN LÝ ADMIN ---
+    function renderAdminTable() {
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let tbody = document.getElementById('adminTableBody');
+      tbody.innerHTML = '';
+
+      admins.forEach((a, index) => {
+        let isRoot = (a.username === 'admin4T');
+        let badge = a.isLocked ? `<span class="badge badge-locked">Đã Khóa</span>` : `<span class="badge badge-active">Hoạt Động</span>`;
+        let permsText = isRoot ? "Toàn quyền hệ thống" : (a.permissions ? a.permissions.join(', ') : 'Không có');
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${a.username}</strong> ${isRoot ? '👑' : ''}</td>
+            <td>${a.fullname}</td>
+            <td><small style="color:var(--primary); font-weight:600;">${permsText}</small></td>
+            <td>${badge}</td>
+            <td>
+              ${!isRoot ? `
+                <button class="btn btn-primary" onclick="openEditAdminModal(${index})">✏️ Sửa</button>
+                ${a.isLocked ? `<button class="btn btn-unlock" onclick="toggleLockAdmin(${index})">🔓 Mở</button>` : `<button class="btn btn-lock" onclick="toggleLockAdmin(${index})">🔒 Khóa</button>`}
+                <button class="btn btn-lock" onclick="deleteAdmin(${index})" style="background:#64748b;">🗑️ Xóa</button>
+              ` : '<small style="color:#64748b;">Tài khoản gốc</small>'}
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openAddAdminModal() {
+      document.getElementById('adminModalTitle').innerText = "Thêm Tài Khoản Admin Mới";
+      document.getElementById('adminForm').reset();
+      document.getElementById('editAdminUsername').value = "";
+      document.getElementById('inputUsername').disabled = false;
+      document.getElementById('passwordGroupField').style.display = 'block';
+      document.getElementById('inputPassword').required = true;
+      document.getElementById('adminModal').style.display = 'flex';
+    }
+
+    function openEditAdminModal(index) {
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let a = admins[index];
+      document.getElementById('adminModalTitle').innerText = "Chỉnh Sửa Quyền Admin";
+      document.getElementById('editAdminUsername').value = a.username;
+      document.getElementById('inputUsername').value = a.username;
+      document.getElementById('inputUsername').disabled = true;
+      document.getElementById('inputFullname').value = a.fullname;
+      document.getElementById('passwordGroupField').style.display = 'none';
+      document.getElementById('inputPassword').required = false;
+
+      let checkboxes = document.querySelectorAll('.perm-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = a.permissions && a.permissions.includes(cb.value);
+      });
+
+      document.getElementById('adminModal').style.display = 'flex';
+    }
+
+    function saveAdminAccount(event) {
+      event.preventDefault();
+      let username = document.getElementById('inputUsername').value.trim();
+      let password = document.getElementById('inputPassword').value.trim();
+      let fullname = document.getElementById('inputFullname').value.trim();
+      let editUsername = document.getElementById('editAdminUsername').value;
+
+      let selectedPerms = [];
+      document.querySelectorAll('.perm-checkbox:checked').forEach(cb => {
+        selectedPerms.push(cb.value);
+      });
+
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+
+      if (editUsername) {
+        let admin = admins.find(a => a.username === editUsername);
+        if (admin) {
+          admin.fullname = fullname;
+          admin.permissions = selectedPerms;
+        }
+      } else {
+        if (admins.some(a => a.username === username)) {
+          alert("Tên đăng nhập đã tồn tại!");
+          return;
+        }
+        admins.push({ username, password, fullname, permissions: selectedPerms, isLocked: false });
+      }
+
+      localStorage.setItem('adminAccounts', JSON.stringify(admins));
+      closeModal('adminModal');
+      renderAdminTable();
+    }
+
+    function toggleLockAdmin(index) {
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      admins[index].isLocked = !admins[index].isLocked;
+      localStorage.setItem('adminAccounts', JSON.stringify(admins));
+      renderAdminTable();
+    }
+
+    function deleteAdmin(index) {
+      if(confirm("Bạn có chắc chắn muốn xóa tài khoản này?")) {
+        let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        admins.splice(index, 1);
+        localStorage.setItem('adminAccounts', JSON.stringify(admins));
+        renderAdminTable();
+      }
+    }
+
+    // --- XUẤT EXCEL (CSV) ---
+    function exportOrdersData() {
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + ["MaDon,KhachHang,DienThoai,DichVu,ThanhToan,TongTien,ThoiGian,TrangThai"].join(",") + "\n" +
+        orders.map(o => `"${o.id}","${o.customerName}","${o.phone}","${o.service}","${o.paymentMethod}",${o.total},"${o.time}","${o.status}"`).join("\n");
+      
+      let encodedUri = encodeURI(csvContent);
+      let link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "Danh_Sach_Don_Hang_4T.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportUsersData() {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + ["HoTen,SoDienThoai,DiaChi,DiemTichLuy,TruyCapCuoi,TrangThai"].join(",") + "\n" +
+        users.map(u => `"${u.name}","${u.phone}","${u.address}",${u.points || 0},"${u.lastAccess}","${u.isLocked ? 'Da khoa' : 'Hoat dong'}"`).join("\n");
+      
+      let encodedUri = encodeURI(csvContent);
+      let link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "Danh_Sach_Khach_Hang_4T.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // --- LIVE CHAT ---
+    function renderChatList() {
+      let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let listContainer = document.getElementById('chatUsersList');
+      listContainer.innerHTML = '';
+
+      let phones = Object.keys(chats);
+      if (phones.length === 0) {
+        listContainer.innerHTML = `<p style="padding:15px; font-size:0.85rem; color:#64748b;">Chưa có tin nhắn.</p>`;
+        return;
+      }
+
+      phones.forEach(phone => {
+        let userObj = users.find(u => u.phone === phone) || { name: "Khách Vãng Lai" };
+        let msgList = chats[phone];
+        let lastMsg = msgList[msgList.length - 1]?.text || '';
+        let activeClass = (phone === activeChatPhone) ? 'active' : '';
+
+        listContainer.innerHTML += `
+          <div class="chat-user-item ${activeClass}" onclick="selectChat('${phone}', '${userObj.name}')">
+            <div class="chat-user-name">${userObj.name}</div>
+            <div class="chat-user-sub">${phone}</div>
+            <div class="chat-user-sub" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-style:italic;">"${lastMsg}"</div>
+          </div>
+        `;
+      });
+    }
+
+    function selectChat(phone, name) {
+      activeChatPhone = phone;
+      document.getElementById('currentChatHeader').innerText = `💬 Đang chat với: ${name} (${phone})`;
+      renderChatList();
+      renderChatMessages();
+    }
+
+    function openChatWithUser(phone, name) {
+      let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      if (!chats[phone]) chats[phone] = [{ sender: "admin", text: "Xin chào! Cửa hàng 4T có thể hỗ trợ gì cho bạn ạ?" }];
+      localStorage.setItem('adminChats', JSON.stringify(chats));
+      selectChat(phone, name);
+      window.scrollTo({ top: 750, behavior: 'smooth' });
+    }
+
+    function renderChatMessages() {
+      let box = document.getElementById('chatMessagesBox');
+      if (!activeChatPhone) return;
+
+      let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      let msgList = chats[activeChatPhone] || [];
+
+      box.innerHTML = '';
+      msgList.forEach(m => {
+        let alignClass = (m.sender === 'admin') ? 'msg-admin' : 'msg-customer';
+        let senderName = (m.sender === 'admin') ? 'Admin 4T' : 'Khách hàng';
+        box.innerHTML += `
+          <div class="msg-bubble ${alignClass}">
+            <div style="font-size:0.7rem; opacity:0.8; margin-bottom:2px;">${senderName}</div>
+            ${m.text}
+          </div>
+        `;
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendAdminMessage() {
+      let input = document.getElementById('adminMsgInput');
+      let text = input.value.trim();
+
+      if (!activeChatPhone || !text) return;
+
+      let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      if (!chats[activeChatPhone]) chats[activeChatPhone] = [];
+
+      chats[activeChatPhone].push({ sender: "admin", text: text });
+      localStorage.setItem('adminChats', JSON.stringify(chats));
+
+      input.value = '';
+      renderChatMessages();
+      renderChatList();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4T - Giặt Sấy Công Nghệ Nhật Bản</title>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --secondary: #1b75bc;
+      --accent: #29b6f6;
+      --light: #f4f8fb;
+      --dark: #1e293b;
+      --white: #ffffff;
+      --success: #16a34a;
+      --zalo: #0068ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f8fafc; color: var(--dark); line-height: 1.6; }
+
+    /* Header & Navigation */
+    header { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; }
+    .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); text-decoration: none; }
+    .logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 20px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; transition: 0.2s; }
+    .nav-links a:hover { color: var(--secondary); }
+
+    .auth-buttons { display: flex; gap: 10px; align-items: center; }
+    .btn-auth { background: var(--primary); color: var(--white); padding: 0.5rem 1.2rem; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-auth-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 0.5rem 1.2rem; border-radius: 20px; cursor: pointer; font-weight: 600; }
+
+    .user-pill { display: flex; align-items: center; gap: 10px; background: var(--light); padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1; }
+    .user-avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+    /* Live Stats Bar */
+    .stats-bar { background: var(--primary); color: var(--white); padding: 0.6rem; font-size: 0.9rem; }
+    .stats-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; font-weight: 600; }
+    .stat-item span { color: var(--accent); font-size: 1.1rem; font-weight: bold; }
+
+    /* Hero Section */
+    .hero { background: linear-gradient(135deg, #0f4c81 0%, #1b75bc 100%); color: var(--white); padding: 3.5rem 1rem; text-align: center; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+    .hero p.slogan { font-style: italic; font-size: 1.3rem; opacity: 0.95; margin-bottom: 2rem; }
+    
+    /* Japanese Tech Highlights Grid */
+    .tech-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .tech-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+    .tech-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; display: block; }
+    .tech-card h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .tech-card p { font-size: 0.85rem; opacity: 0.9; }
+
+    /* General Layout Sections */
+    .section-title { text-align: center; font-size: 1.8rem; color: var(--primary); margin: 2.5rem 0 1.5rem; position: relative; }
+    .section-title::after { content: ''; width: 60px; height: 3px; background: var(--accent); display: block; margin: 8px auto 0; border-radius: 2px; }
+
+    /* About Section */
+    .about-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+    .about-text h3 { color: var(--secondary); font-size: 1.4rem; margin-bottom: 1rem; }
+    .about-text p { margin-bottom: 1rem; color: #475569; text-align: justify; }
+    .japan-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem; }
+    .japan-badge { background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+
+    /* Contact Bar / Quick Info */
+    .contact-section { background: var(--white); border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 2rem 1rem; margin-top: 3rem; }
+    .contact-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .contact-card { background: var(--light); padding: 1.2rem; border-radius: 10px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 15px; }
+    .contact-card .icon { font-size: 2rem; }
+    .btn-zalo-link { display: inline-block; background: var(--zalo); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.85rem; margin-top: 5px; }
+
+    /* Main Grid Order Section */
+    .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .card { background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
+    .btn-submit { width: 100%; background: var(--success); color: var(--white); padding: 0.83rem; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-submit:hover { opacity: 0.9; }
+
+    /* User Dashboard Card */
+    .user-card { background: linear-gradient(135deg, #1e293b 0%, #0f4c81 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .user-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .rank-badge { background: #f59e0b; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+    .points-display { font-size: 2rem; font-weight: bold; color: var(--accent); }
+
+    /* Orders History & Filter */
+    .filter-tabs { display: flex; gap: 5px; margin: 1rem 0; overflow-x: auto; padding-bottom: 5px; }
+    .filter-btn { padding: 5px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 15px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .order-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem; background: #fff; }
+    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
+
+    /* Status Badges */
+    .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+    .st-wait { background: #fef08a; color: #854d0e; }
+    .st-process { background: #bae6fd; color: #0369a1; }
+    .st-done { background: #bbf7d0; color: #15803d; }
+    .st-shipping { background: #fde68a; color: #b45309; }
+    .st-paid { background: #e2e8f0; color: #334155; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-card { background: var(--white); padding: 2rem; border-radius: 12px; width: 90%; max-width: 450px; position: relative; text-align: center; }
+    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; border: none; background: none; cursor: pointer; }
+    .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn { flex: 1; padding: 0.8rem; border: none; background: none; font-weight: 700; color: #64748b; cursor: pointer; }
+    .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+    .auth-form { display: none; text-align: left; }
+    .auth-form.active { display: block; }
+
+    /* QR Code Payment Box */
+    .qr-container { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary); margin: 1rem 0; }
+    .qr-img { width: 200px; height: 200px; object-fit: contain; border: 2px solid #e2e8f0; border-radius: 8px; margin: 0.5rem 0; }
+
+    /* Floating Contact Buttons */
+    .floating-buttons { position: fixed; bottom: 20px; right: 20px; z-index: 900; display: flex; flex-direction: column; gap: 10px; }
+    .btn-float { border: none; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); text-decoration: none; }
+    .btn-zalo { background: var(--zalo); font-weight: bold; font-size: 0.9rem; }
+    .btn-chat { background: var(--primary); }
+
+    /* Chat Widget */
+    .chat-box { display: none; position: fixed; bottom: 85px; right: 20px; width: 320px; height: 380px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); flex-direction: column; z-index: 950; }
+    .chat-header { background: var(--primary); color: white; padding: 1rem; font-weight: bold; }
+    .chat-body { flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; font-size: 0.9rem; }
+    .chat-input { display: flex; border-top: 1px solid #e2e8f0; }
+    .chat-input input { flex: 1; border: none; padding: 0.8rem; outline: none; }
+    .chat-input button { border: none; background: var(--secondary); color: white; padding: 0 1rem; cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .main-content, .about-container { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="logo">4T <span>GIẶT SẤY</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">Giới Thiệu</a></li>
+        <li><a href="#tech">Công Nghệ Nhật</a></li>
+        <li><a href="#order">Đặt Hàng</a></li>
+        <li><a href="#contact">Liên Hệ</a></li>
+      </ul>
+      <div class="auth-buttons" id="authNav">
+        <button class="btn-auth-outline" onclick="openAuthModal('login')">Đăng Nhập</button>
+        <button class="btn-auth" onclick="openAuthModal('register')">Đăng Ký</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Stats Bar -->
+  <div class="stats-bar">
+    <div class="stats-container">
+      <div class="stat-item">👁️ Lượt truy cập: <span id="statVisits">1,245</span></div>
+      <div class="stat-item">📦 Đơn hàng phục vụ: <span id="statOrders">328</span></div>
+      <div class="stat-item">👤 Khách hàng đăng ký: <span id="statUsers">152</span></div>
+    </div>
+  </div>
+
+  <!-- Hero Banner: Giới thiệu Máy Giặt Nhật -->
+  <section class="hero" id="tech">
+    <h1>Giặt Sấy 4T - Công Nghệ Chuẩn Nhật Bản</h1>
+    <p class="slogan">Thơm sạch mỗi ngày – Tiện lợi mỗi lần</p>
+    
+    <div class="tech-grid">
+      <div class="tech-card">
+        <span class="icon">🌀</span>
+        <h3>Giặt Sạch Sâu</h3>
+        <p>Đánh bay vết bẩn cứng đầu nhờ sóng siêu âm hiện đại</p>
+      </div>
+      <div class="tech-card">
+        <span class="icon">♨️</span>
+        <h3>Sấy Khô Nhanh</h3>
+        <p>Công nghệ sấy bơm nhiệt Heatpump tiết kiệm, chống nhăn sợi vải</p>
+      </div>
+      <div class="tech-card">
+        <span class="icon">🌸</span>
+        <h3>Thơm Lâu Tự Nhiên</h3>
+        <p>Lưu hương sâu, giữ sợi vải mềm mại nguyên bản</p>
+      </div>
+      <div class="tech-card">
+        <span class="icon">🛡️</span>
+        <h3>Diệt Khuẩn UV</h3>
+        <p>Loại bỏ 99.9% vi khuẩn và bụi mịn gây dị ứng</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Giới Thiệu Cửa Hàng -->
+  <section class="about-container" id="about" style="margin-top: 3rem;">
+    <div>
+      <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?auto=format&fit=crop&w=600&q=80" alt="Cửa hàng giặt ủi 4T" style="width:100%; border-radius:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    </div>
+    <div class="about-text">
+      <h3>Chào mừng bạn đến với Tiệm Giặt Sấy 4T</h3>
+      <p>Cửa hàng Giặt Sấy 4T tự hào mang đến giải pháp chăm sóc trang phục hàng đầu với hệ thống máy giặt sấy nhập khẩu nguyên chiếc từ Nhật Bản. Chúng tôi thấu hiểu từng chất liệu vải và áp dụng quy trình phân loại nghiêm ngặt trước khi làm sạch.</p>
+      <p>Không chỉ giặt sạch thông thường, 4T bảo vệ tối đa độ bền màu và phom dáng quần áo của gia đình bạn. Đội ngũ giao nhận tận nơi nhanh chóng, thân thiện luôn sẵn sàng phục vụ.</p>
+      <div class="japan-badges">
+        <span class="japan-badge">✓ Tiêu chuẩn vệ sinh Nhật Bản</span>
+        <span class="japan-badge">✓ Giặt riêng từng máy</span>
+        <span class="japan-badge">✓ Giao nhận tận nhà</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Thông Tin Liên Hệ Direct & Zalo Link -->
+  <section class="contact-section" id="contact">
+    <h2 class="section-title" style="margin-top: 0;">Thông Tin Liên Hệ</h2>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <span class="icon">📍</span>
+        <div>
+          <strong>ĐỊA CHỈ CỬA HÀNG</strong>
+          <p style="font-size:0.9rem; color:#475569;">123 Nguyễn Văn A, P. Bình Hòa, TP. Thuận An, Bình Dương</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <span class="icon">📞</span>
+        <div>
+          <strong>HOTLINE CHĂM SÓC KHÁCH HÀNG</strong>
+          <p style="font-size:0.9rem; color:#475569;">0909 123 456 (8:00 - 21:00 hàng ngày)</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <span class="icon">💬</span>
+        <div>
+          <strong>ZALO CỬA HÀNG</strong><br>
+          <a href="https://zalo.me/0909123456" target="_blank" class="btn-zalo-link">👉 Trực tiếp Chat Zalo: 0909 123 456</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Order & Tracking Area -->
+  <div class="main-content" id="order">
+    
+    <!-- Cột Trái: Form Tạo Đơn Hàng -->
+    <div>
+      <div class="card">
+        <h2 style="color:var(--primary); margin-bottom:0.3rem;">Tạo Đơn Hàng Dịch Vụ</h2>
+        <p id="formAutoFillNotice" style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">(Bạn có thể tạo đơn ngay không cần đăng nhập)</p>
+        
+        <form id="orderForm" oninput="calculateTotal()">
+          <div class="form-group">
+            <label>Họ và tên khách hàng (*):</label>
+            <input type="text" id="custName" placeholder="Nhập tên người nhận" required>
+          </div>
+          <div class="form-group">
+            <label>Số điện thoại (* - Đủ 10 số):</label>
+            <input type="tel" id="custPhone" placeholder="VD: 0909123456" maxlength="10" required>
+          </div>
+          <div class="form-group">
+            <label>Địa chỉ nhận & giao hàng (* - Tối thiểu 10 ký tự):</label>
+            <input type="text" id="custAddress" placeholder="Nhập địa chỉ nhà chi tiết" required>
+          </div>
+
+          <hr style="margin: 1rem 0; border: none; border-top: 1px solid #e2e8f0;">
+
+          <div class="form-group">
+            <label>Giặt & Sấy khô (15,000đ/kg):</label>
+            <input type="number" id="weight" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label>Ủi / Là hơi nước (10,000đ/cái):</label>
+            <input type="number" id="iron" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label>Dịch vụ giao nhận tận nơi:</label>
+            <select id="delivery">
+              <option value="0">Tự mang đến cửa hàng</option>
+              <option value="15000">Nhận và giao hàng tận nhà (+15,000đ)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Hình thức thanh toán:</label>
+            <select id="payment">
+              <option value="Tiền mặt">Tiền mặt khi nhận hàng</option>
+              <option value="Ví điện tử / Ngân hàng">Liên kết Ví Điện Tử / Chuyển khoản QR Ngân hàng</option>
+            </select>
+          </div>
+
+          <h3 style="color: #e11d48; margin: 1rem 0;">Tổng tiền thanh toán: <span id="totalAmount">0</span> VNĐ</h3>
+          <button type="button" class="btn-submit" onclick="submitOrder()">Xác Nhận Đặt Đơn Hàng</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cột Phải: Dashboard Tài khoản & Lịch Sử Đơn -->
+    <div>
+      <div id="accountDashboard"></div>
+
+      <div class="card">
+        <h3 style="color:var(--primary);">Theo Dõi Lịch Sử Đơn Hàng</h3>
+        
+        <div class="filter-tabs">
+          <button class="filter-btn active" onclick="filterOrders('Tất cả', this)">Tất cả</button>
+          <button class="filter-btn" onclick="filterOrders('Chờ tiếp nhận', this)">Chờ tiếp nhận</button>
+          <button class="filter-btn" onclick="filterOrders('Đang xử lý', this)">Đang xử lý</button>
+          <button class="filter-btn" onclick="filterOrders('Đang giao hàng', this)">Đang giao hàng</button>
+          <button class="filter-btn" onclick="filterOrders('Đã thanh toán', this)">Đã thanh toán</button>
+        </div>
+
+        <div id="orderHistoryList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Thanh Toán QR Ngân Hàng / Ví Điện Tử -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-card">
+      <button class="close-modal" onclick="closePaymentModal()">&times;</button>
+      <h3 style="color:var(--primary);">Quét Mã QR Thanh Toán</h3>
+      <p style="font-size:0.9rem; color:#64748b; margin-top:5px;">Hỗ trợ tất cả ứng dụng Ngân hàng, Momo, ZaloPay, VNPay</p>
+      
+      <div class="qr-container">
+        <img id="qrImage" class="qr-img" src="" alt="Mã QR Thanh Toán VietQR">
+        <p style="font-size:0.85rem; font-weight:bold; color:var(--primary);" id="qrNotice">Đang khởi tạo mã QR...</p>
+      </div>
+
+      <p style="font-size:0.85rem; text-align:left; background:#f1f5f9; padding:8px; border-radius:6px; margin-bottom:1rem;">
+        <b>Chủ tài khoản:</b> TIEM GIAT SAY 4T<br>
+        <b>Số tài khoản:</b> 0909123456<br>
+        <b>Ngân hàng:</b> MBBank (Ngân Hàng Quân Đội)
+      </p>
+
+      <button class="btn-submit" onclick="finishQRPayment()">Tôi Đã Hoàn Tất Thanh Toán</button>
+    </div>
+  </div>
+
+  <!-- Modal Đăng Nhập / Đăng Ký -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card">
+      <button class="close-modal" onclick="closeAuthModal()">&times;</button>
+      <div class="auth-tabs">
+        <button class="tab-btn active" id="loginTabBtn" onclick="switchTab('login')">Đăng Nhập</button>
+        <button class="tab-btn" id="registerTabBtn" onclick="switchTab('register')">Đăng Ký</button>
+      </div>
+
+      <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Số điện thoại:</label>
+          <input type="tel" id="loginPhone" placeholder="SĐT 10 chữ số" required>
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu:</label>
+          <input type="password" placeholder="Mật khẩu" required>
+        </div>
+        <button type="submit" class="btn-submit">Đăng Nhập</button>
+      </form>
+
+      <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Họ và tên (*):</label>
+          <input type="text" id="regName" placeholder="Tên của bạn" required>
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại (* - Đủ 10 số):</label>
+          <input type="tel" id="regPhone" placeholder="VD: 0909123456" maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ (* - Tối thiểu 10 ký tự):</label>
+          <input type="text" id="regAddress" placeholder="Địa chỉ chi tiết" required>
+        </div>
+        <div class="form-group">
+          <label>Tọa độ định vị vị trí (*):</label>
+          <button type="button" onclick="getLocation()" style="background: var(--accent); border:none; color:white; padding:0.5rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold; width:100%;">📍 Bắt buộc: Gắn vị trí GPS của tôi</button>
+          <input type="text" id="regGPS" placeholder="Tọa độ GPS" readonly required style="margin-top:0.3rem; background:#f1f5f9;">
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu (*):</label>
+          <input type="password" placeholder="Mật khẩu" required>
+        </div>
+        <button type="submit" class="btn-submit">Tạo Tài Khoản Mới</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Contact Buttons -->
+  <div class="floating-buttons">
+    <a href="https://zalo.me/0909123456" target="_blank" class="btn-float btn-zalo" title="Chat Zalo Cửa Hàng">Zalo</a>
+    <button class="btn-float btn-chat" onclick="toggleChat()" title="Chat Trực Tuyến">💬</button>
+  </div>
+
+  <!-- Chat Box -->
+  <div class="chat-box" id="chatBox">
+    <div class="chat-header">Hỗ Trợ Khách Hàng - 4T Laundry</div>
+    <div class="chat-body" id="chatBody">
+      <p><strong>Cửa hàng:</strong> Xin chào! Chúng tôi có thể giúp gì cho bạn về dịch vụ giặt sấy Nhật Bản hôm nay?</p>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+      <button onclick="sendMessage()">Gửi</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentFilter = 'Tất cả';
+    let pendingOrder = null;
+
+    window.onload = function() {
+      let visits = parseInt(localStorage.getItem('visits') || '1245') + 1;
+      localStorage.setItem('visits', visits);
+      document.getElementById('statVisits').innerText = visits.toLocaleString();
+      
+      updateStats();
+      renderUserDashboard();
+      renderHistory();
+    };
+
+    function updateStats() {
+      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      document.getElementById('statOrders').innerText = (328 + orders.length).toLocaleString();
+      document.getElementById('statUsers').innerText = (152 + users.length).toLocaleString();
+    }
+
+    function renderUserDashboard() {
+      let container = document.getElementById('accountDashboard');
+      let nav = document.getElementById('authNav');
+
+      if (currentUser) {
+        nav.innerHTML = `
+          <div class="user-pill">
+            <div class="user-avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
+            <span style="font-weight:600; font-size:0.9rem;">${currentUser.name}</span>
+          </div>
+          <button class="btn-auth-outline" onclick="logout()" style="padding:0.3rem 0.8rem; font-size:0.85rem;">Đăng xuất</button>
+        `;
+
+        container.innerHTML = `
+          <div class="user-card">
+            <div class="user-card-header">
+              <div>
+                <h3 style="margin:0;">${currentUser.name}</h3>
+                <p style="font-size:0.85rem; opacity:0.8;">📞 ${currentUser.phone}</p>
+              </div>
+              <span class="rank-badge">Khách Hàng Thân Thiết</span>
+            </div>
+            <p style="font-size:0.85rem; margin-bottom: 5px;">Điểm tích lũy dịch vụ:</p>
+            <div class="points-display">${currentUser.points || 100} <span style="font-size:1rem; font-weight:normal;">Điểm</span></div>
+          </div>
+        `;
+
+        document.getElementById('custName').value = currentUser.name;
+        document.getElementById('custPhone').value = currentUser.phone;
+        document.getElementById('custAddress').value = currentUser.address;
+        document.getElementById('formAutoFillNotice').innerText = "✅ Tự động điền dữ liệu từ tài khoản đã đăng nhập.";
+        document.getElementById('formAutoFillNotice').style.color = "green";
+
+      } else {
+        nav.innerHTML = `
+          <button class="btn-auth-outline" onclick="openAuthModal('login')">Đăng Nhập</button>
+          <button class="btn-auth" onclick="openAuthModal('register')">Đăng Ký</button>
+        `;
+
+        container.innerHTML = `
+          <div class="card" style="background:#f8fafc; border:1px dashed #cbd5e1;">
+            <p><strong>Dành cho Khách Hàng:</strong> Đăng nhập tài khoản để xem điểm tích lũy và theo dõi lịch sử dịch vụ đầy đủ!</p>
+            <button class="btn-auth-outline" onclick="openAuthModal('login')" style="margin-top:10px; width:100%;">Đăng Nhập / Đăng Ký</button>
+          </div>
+        `;
+      }
+    }
+
+    function openAuthModal(type) { document.getElementById('authModal').style.display = 'flex'; switchTab(type); }
+    function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+    function switchTab(type) {
+      if(type === 'login') {
+        document.getElementById('loginTabBtn').classList.add('active'); document.getElementById('registerTabBtn').classList.remove('active');
+        document.getElementById('loginForm').classList.add('active'); document.getElementById('registerForm').classList.remove('active');
+      } else {
+        document.getElementById('registerTabBtn').classList.add('active'); document.getElementById('loginTabBtn').classList.remove('active');
+        document.getElementById('registerForm').classList.add('active'); document.getElementById('loginForm').classList.remove('active');
+      }
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          document.getElementById('regGPS').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+        }, () => alert("Vui lòng bật Geolocation/GPS trên thiết bị!"));
+      } else { alert("Trình duyệt không hỗ trợ vị trí GPS."); }
+    }
+
+    function validatePhone(phone) { return /^0\d{9}$/.test(phone); }
+    function validateAddress(address) { return address.trim().length >= 10; }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      let name = document.getElementById('regName').value;
+      let phone = document.getElementById('regPhone').value;
+      let address = document.getElementById('regAddress').value;
+      let gps = document.getElementById('regGPS').value;
+
+      if (!validatePhone(phone)) { alert("Số điện thoại phải đủ 10 số (VD: 0909123456)!"); return; }
+      if (!validateAddress(address)) { alert("Địa chỉ phải nhập chi tiết tối thiểu 10 ký tự!"); return; }
+      if (!gps) { alert("Vui lòng bấm nút lấy tọa độ vị trí GPS!"); return; }
+
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let newUser = { name, phone, address, gps, points: 50 };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      alert('Đăng ký tài khoản thành công! Tặng ngay 50 điểm tích lũy.');
+      updateStats();
+      currentUser = newUser;
+      renderUserDashboard();
+      closeAuthModal();
+      renderHistory();
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      let phone = document.getElementById('loginPhone').value;
+      if (!validatePhone(phone)) { alert("Số điện thoại không đủ 10 số!"); return; }
+
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let user = users.find(u => u.phone === phone);
+      
+      if(user) { currentUser = user; } 
+      else { currentUser = { name: "Khách Hàng", phone: phone, address: "123 Nguyễn Văn A, Bình Dương", points: 100 }; }
+
+      renderUserDashboard();
+      closeAuthModal();
+      renderHistory();
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('orderForm').reset();
+      document.getElementById('formAutoFillNotice').innerText = "(Bạn có thể tạo đơn ngay không cần đăng nhập)";
+      document.getElementById('formAutoFillNotice').style.color = "#64748b";
+      renderUserDashboard();
+      renderHistory();
+    }
+
+    function calculateTotal() {
+      let weight = parseFloat(document.getElementById('weight').value) || 0;
+      let iron = parseInt(document.getElementById('iron').value) || 0;
+      let delivery = parseInt(document.getElementById('delivery').value) || 0;
+      let total = (weight * 15000) + (iron * 10000) + delivery;
+      document.getElementById('totalAmount').innerText = total.toLocaleString('vi-VN');
+    }
+
+    function submitOrder() {
+      let name = document.getElementById('custName').value;
+      let phone = document.getElementById('custPhone').value;
+      let address = document.getElementById('custAddress').value;
+      let paymentType = document.getElementById('payment').value;
+      let totalText = document.getElementById('totalAmount').innerText;
+      let totalNum = parseInt(totalText.replace(/\./g, ''));
+
+      if (!validatePhone(phone)) { alert("SĐT phải đúng 10 số!"); return; }
+      if (!validateAddress(address)) { alert("Địa chỉ giao nhận phải dài ít nhất 10 ký tự!"); return; }
+      if (totalNum <= 0) { alert("Vui lòng nhập khối lượng giặt hoặc số lượng ủi!"); return; }
+
+      let orderId = "DH" + Math.floor(1000 + Math.random() * 9000);
+      pendingOrder = {
+        id: orderId,
+        name: name,
+        phone: phone,
+        address: address,
+        total: totalNum,
+        payment: paymentType,
+        status: "Chờ tiếp nhận",
+        date: new Date().toLocaleDateString('vi-VN')
+      };
+
+      if (paymentType.includes("Ví điện tử")) {
+        // Tự tạo liên kết Mã QR Ngân Hàng/Ví VietQR Chuẩn
+        let qrUrl = `https://img.vietqr.io/image/MB-0909123456-compact2.png?amount=${totalNum}&addInfo=THANH TOAN ${orderId}&accountName=TIEM GIAT SAY 4T`;
+        document.getElementById('qrImage').src = qrUrl;
+        document.getElementById('qrNotice').innerText = `Mã QR chuyển khoản ${totalNum.toLocaleString()}đ cho đơn ${orderId}`;
+        document.getElementById('paymentModal').style.display = 'flex';
+      } else {
+        saveOrder(pendingOrder);
+      }
+    }
+
+    function finishQRPayment() {
+      closePaymentModal();
+      if(pendingOrder) {
+        pendingOrder.payment = "Ví điện tử / QR Ngân Hàng (Đã thanh toán)";
+        saveOrder(pendingOrder);
+      }
+    }
+
+    function saveOrder(orderObj) {
+      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      orders.unshift(orderObj);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      alert(`Đã đặt đơn hàng ${orderObj.id} thành công!`);
+      updateStats();
+      renderHistory();
+      pendingOrder = null;
+    }
+
+    function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; }
+
+    function filterOrders(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderHistory();
+    }
+
+    function renderHistory() {
+      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      let container = document.getElementById('orderHistoryList');
+      let phone = currentUser ? currentUser.phone : document.getElementById('custPhone').value;
+
+      let myOrders = orders.filter(o => o.phone === phone);
+      if (currentFilter !== 'Tất cả') myOrders = myOrders.filter(o => o.status === currentFilter);
+
+      if(myOrders.length === 0) {
+        container.innerHTML = `<p style="color: #64748b; font-size:0.85rem; text-align:center; padding: 1rem 0;">Chưa có đơn hàng phù hợp.</p>`;
+        return;
+      }
+
+      let html = '';
+      myOrders.forEach(o => {
+        let badgeClass = "st-wait";
+        if(o.status === "Đang xử lý") badgeClass = "st-process";
+        if(o.status === "Đã xử lý") badgeClass = "st-done";
+        if(o.status === "Đang giao hàng") badgeClass = "st-shipping";
+        if(o.status === "Đã thanh toán") badgeClass = "st-paid";
+
+        html += `
+          <div class="order-item">
+            <div class="order-header">
+              <span><b>Mã: ${o.id}</b> (${o.date})</span>
+              <span class="badge ${badgeClass}">${o.status}</span>
+            </div>
+            <p style="font-size:0.85rem;">📍 Giao: ${o.address}</p>
+            <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.9rem;">
+              <span style="font-size:0.8rem; color:#64748b;">${o.payment}</span>
+              <strong style="color:#e11d48;">${o.total.toLocaleString()} VNĐ</strong>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleChat() {
+      let box = document.getElementById('chatBox');
+      box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function sendMessage() {
+      let input = document.getElementById('chatInput');
+      let body = document.getElementById('chatBody');
+      if(input.value.trim() !== '') {
+        body.innerHTML += `<p style="text-align:right; margin-top:5px;"><b>Bạn:</b> ${input.value}</p>`;
+        input.value = '';
+        setTimeout(() => {
+          body.innerHTML += `<p style="margin-top:5px;"><b>Cửa hàng:</b> 4T đã nhận tin nhắn và sẽ phản hồi ngay ạ!</p>`;
+          body.scrollTop = body.scrollHeight;
+        }, 800);
+      }
+    }
+  </script>
+</body>
+</html>

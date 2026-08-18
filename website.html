@@ -1,674 +1,169 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4T - Giặt Sấy Công Nghệ Nhật Bản</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#082e60" />
+  <title>4T Giặt Sấy | Tử tế – Tận tâm – Thơm sạch – Tiện lợi</title>
   <style>
-    :root {
-      --primary: #0f4c81;
-      --secondary: #1b75bc;
-      --accent: #29b6f6;
-      --light: #f4f8fb;
-      --dark: #1e293b;
-      --white: #ffffff;
-      --success: #16a34a;
-      --zalo: #0068ff;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f8fafc; color: var(--dark); line-height: 1.6; }
-
-    /* Header & Navigation */
-    header { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
-    .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; }
-    .logo { font-size: 1.8rem; font-weight: 800; color: var(--primary); text-decoration: none; }
-    .logo span { color: var(--accent); }
-
-    .nav-links { display: flex; gap: 20px; list-style: none; }
-    .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; transition: 0.2s; }
-    .nav-links a:hover { color: var(--secondary); }
-
-    .auth-buttons { display: flex; gap: 10px; align-items: center; }
-    .btn-auth { background: var(--primary); color: var(--white); padding: 0.5rem 1.2rem; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; }
-    .btn-auth-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 0.5rem 1.2rem; border-radius: 20px; cursor: pointer; font-weight: 600; }
-
-    .user-pill { display: flex; align-items: center; gap: 10px; background: var(--light); padding: 5px 15px; border-radius: 30px; border: 1px solid #cbd5e1; }
-    .user-avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-
-    /* Live Stats Bar */
-    .stats-bar { background: var(--primary); color: var(--white); padding: 0.6rem; font-size: 0.9rem; }
-    .stats-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; font-weight: 600; }
-    .stat-item span { color: var(--accent); font-size: 1.1rem; font-weight: bold; }
-
-    /* Hero Section */
-    .hero { background: linear-gradient(135deg, #0f4c81 0%, #1b75bc 100%); color: var(--white); padding: 3.5rem 1rem; text-align: center; }
-    .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-    .hero p.slogan { font-style: italic; font-size: 1.3rem; opacity: 0.95; margin-bottom: 2rem; }
-    
-    /* Japanese Tech Highlights Grid */
-    .tech-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
-    .tech-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
-    .tech-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; display: block; }
-    .tech-card h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
-    .tech-card p { font-size: 0.85rem; opacity: 0.9; }
-
-    /* General Layout Sections */
-    .section-title { text-align: center; font-size: 1.8rem; color: var(--primary); margin: 2.5rem 0 1.5rem; position: relative; }
-    .section-title::after { content: ''; width: 60px; height: 3px; background: var(--accent); display: block; margin: 8px auto 0; border-radius: 2px; }
-
-    /* About Section */
-    .about-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
-    .about-text h3 { color: var(--secondary); font-size: 1.4rem; margin-bottom: 1rem; }
-    .about-text p { margin-bottom: 1rem; color: #475569; text-align: justify; }
-    .japan-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem; }
-    .japan-badge { background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-
-    /* Contact Bar / Quick Info */
-    .contact-section { background: var(--white); border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 2rem 1rem; margin-top: 3rem; }
-    .contact-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .contact-card { background: var(--light); padding: 1.2rem; border-radius: 10px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 15px; }
-    .contact-card .icon { font-size: 2rem; }
-    .btn-zalo-link { display: inline-block; background: var(--zalo); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.85rem; margin-top: 5px; }
-
-    /* Main Grid Order Section */
-    .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-    .card { background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
-
-    /* Form Styles */
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.9rem; }
-    .form-group input, .form-group select { width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
-    .btn-submit { width: 100%; background: var(--success); color: var(--white); padding: 0.83rem; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-submit:hover { opacity: 0.9; }
-
-    /* User Dashboard Card */
-    .user-card { background: linear-gradient(135deg, #1e293b 0%, #0f4c81 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
-    .user-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .rank-badge { background: #f59e0b; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
-    .points-display { font-size: 2rem; font-weight: bold; color: var(--accent); }
-
-    /* Orders History & Filter */
-    .filter-tabs { display: flex; gap: 5px; margin: 1rem 0; overflow-x: auto; padding-bottom: 5px; }
-    .filter-btn { padding: 5px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 15px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
-    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .order-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem; background: #fff; }
-    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
-
-    /* Status Badges */
-    .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
-    .st-wait { background: #fef08a; color: #854d0e; }
-    .st-process { background: #bae6fd; color: #0369a1; }
-    .st-done { background: #bbf7d0; color: #15803d; }
-    .st-shipping { background: #fde68a; color: #b45309; }
-    .st-paid { background: #e2e8f0; color: #334155; }
-
-    /* Modals */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-card { background: var(--white); padding: 2rem; border-radius: 12px; width: 90%; max-width: 450px; position: relative; text-align: center; }
-    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; border: none; background: none; cursor: pointer; }
-    .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; }
-    .tab-btn { flex: 1; padding: 0.8rem; border: none; background: none; font-weight: 700; color: #64748b; cursor: pointer; }
-    .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-    .auth-form { display: none; text-align: left; }
-    .auth-form.active { display: block; }
-
-    /* QR Code Payment Box */
-    .qr-container { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary); margin: 1rem 0; }
-    .qr-img { width: 200px; height: 200px; object-fit: contain; border: 2px solid #e2e8f0; border-radius: 8px; margin: 0.5rem 0; }
-
-    /* Floating Contact Buttons */
-    .floating-buttons { position: fixed; bottom: 20px; right: 20px; z-index: 900; display: flex; flex-direction: column; gap: 10px; }
-    .btn-float { border: none; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); text-decoration: none; }
-    .btn-zalo { background: var(--zalo); font-weight: bold; font-size: 0.9rem; }
-    .btn-chat { background: var(--primary); }
-
-    /* Chat Widget */
-    .chat-box { display: none; position: fixed; bottom: 85px; right: 20px; width: 320px; height: 380px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); flex-direction: column; z-index: 950; }
-    .chat-header { background: var(--primary); color: white; padding: 1rem; font-weight: bold; }
-    .chat-body { flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; font-size: 0.9rem; }
-    .chat-input { display: flex; border-top: 1px solid #e2e8f0; }
-    .chat-input input { flex: 1; border: none; padding: 0.8rem; outline: none; }
-    .chat-input button { border: none; background: var(--secondary); color: white; padding: 0 1rem; cursor: pointer; }
-
-    @media (max-width: 768px) {
-      .main-content, .about-container { grid-template-columns: 1fr; }
-      .nav-links { display: none; }
-    }
+    :root{--ink:#082e60;--ink-2:#104a91;--sky:#e9f6ff;--sky-2:#bce6ff;--coral:#e9415a;--coral-dark:#bf2e44;--paper:#f6faff;--white:#fff;--muted:#60718a;--line:rgba(8,46,96,.12);--success:#16854f;--warning:#aa6b00;--radius:24px;--shadow:0 18px 50px rgba(8,46,96,.10)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:#17395f;font-family:Arial,"Segoe UI",sans-serif;line-height:1.55}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{display:none!important}.container{width:min(1160px,calc(100% - 32px));margin:auto}.eyebrow{margin:0;color:#1978bb;font-size:11px;font-weight:800;letter-spacing:.15em}.nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav-row{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none}.brand-mark{display:grid;place-items:center;width:49px;height:41px;border-radius:13px 13px 13px 4px;background:linear-gradient(135deg,var(--ink),#117bca);box-shadow:inset 0 1px rgba(255,255,255,.28);color:#fff;font-size:22px;font-weight:900;font-style:italic;letter-spacing:-.12em}.brand b{display:block;letter-spacing:.14em;font-size:13px;color:var(--ink)}.brand small{display:block;margin-top:3px;font-size:8px;font-weight:800;letter-spacing:.12em;color:#6c7c91}.nav-links{display:flex;gap:24px;align-items:center}.nav-links a{font-size:13px;text-decoration:none;font-weight:700;color:#53647d}.nav-links a:hover{color:var(--coral)}.nav-actions{display:flex;align-items:center;gap:9px}.btn{border:0;border-radius:999px;padding:11px 17px;font-weight:800;transition:transform .16s,background .16s;white-space:nowrap}.btn:active{transform:scale(.97)}.btn-ink{background:var(--ink);color:#fff}.btn-ink:hover{background:#123e75}.btn-coral{background:var(--coral);color:#fff}.btn-coral:hover{background:var(--coral-dark)}.btn-outline{border:1px solid rgba(8,46,96,.20);background:#fff;color:var(--ink)}.btn-light{background:#fff;color:var(--ink)}.mobile-menu{display:none;background:transparent;border:0;font-size:22px;color:var(--ink)}
+    .hero{overflow:hidden;background:radial-gradient(circle at 80% 20%,rgba(87,181,255,.38),transparent 27%),linear-gradient(125deg,#062857,#0b4387 58%,#10417c);color:#fff}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;min-height:560px;padding:72px 0}.hero h1{margin:17px 0 0;max-width:640px;font-family:Georgia,serif;font-size:clamp(46px,6vw,76px);line-height:.94;letter-spacing:-.055em}.hero h1 em{color:#b8e8ff}.hero .intro{max-width:580px;margin:24px 0;color:#dcecff;font-size:17px;line-height:1.7}.pill{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(255,255,255,.1);font-size:10px;font-weight:800;letter-spacing:.12em}.hero-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}.signals{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;max-width:510px;margin-top:50px}.signal b{display:block;font-size:13px}.signal small{display:block;margin-top:3px;color:#c9ddf7;font-size:10px}.brand-board{position:relative;padding:14px;border:1px solid rgba(255,255,255,.22);border-radius:30px;background:rgba(255,255,255,.10);box-shadow:0 24px 55px rgba(0,0,0,.22)}.machine-scene{position:relative;min-height:330px;overflow:hidden;border-radius:21px;background:linear-gradient(125deg,#f5f8ff 0%,#e8effc 51%,#e9e0d2 52%,#d5bd9e 100%)}.machine-scene:before{content:"";position:absolute;inset:auto auto -55px -45px;width:255px;height:255px;border-radius:50%;background:radial-gradient(circle at 47% 43%,#154a95 0 19%,#b9e9ff 20% 25%,#264f89 26% 31%,transparent 32%);opacity:.85}.brand-copy{position:absolute;left:25px;top:35px;color:#0a3371}.brand-copy .four{font-size:72px;font-weight:900;font-style:italic;letter-spacing:-.15em;line-height:.7}.brand-copy .name{display:block;margin-top:15px;font-size:29px;font-weight:900;letter-spacing:-.04em}.brand-copy .name span{color:#cf3448}.machine{position:absolute;right:38px;top:42px;width:165px;height:238px;border-radius:9px 9px 16px 16px;background:linear-gradient(105deg,#f9f9f9,#afb5bd 61%,#ececec 62%);box-shadow:18px 22px 30px rgba(34,50,70,.25)}.machine:before{content:"";position:absolute;top:16px;left:13px;right:13px;height:34px;border-radius:5px;background:#d9dde2}.drum{position:absolute;left:23px;top:65px;width:118px;height:118px;border:12px solid #303942;border-radius:50%;background:radial-gradient(circle at 33% 23%,#e8fbff,#4f8bc2 46%,#143254 74%);box-shadow:inset 0 0 15px #001d40}.machine-tag{position:absolute;right:14px;bottom:12px;padding:8px 11px;border-radius:9px;background:rgba(8,46,96,.88);color:#fff;font-size:10px;font-weight:800}.board-caption{display:flex;justify-content:space-between;gap:10px;padding:10px 4px 0;font-size:10px;font-weight:800;color:#dcecff}
+    .stats{position:relative;margin:-18px auto 0;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}.stat{display:flex;gap:11px;align-items:center;padding:17px;border-right:1px solid var(--line)}.stat:last-child{border:0}.stat-icon{font-size:20px}.stat b{display:block;color:var(--ink);font-size:14px}.stat small{display:block;margin-top:2px;color:#7788a0;font-size:9px;font-weight:800;letter-spacing:.08em}.section{padding:85px 0}.section-title{max-width:650px;margin-bottom:38px}.section h2{margin:10px 0 0;font-family:Georgia,serif;font-size:clamp(34px,4vw,52px);line-height:1;letter-spacing:-.045em;color:var(--ink)}.four-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.promise{padding:26px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 8px 23px rgba(8,46,96,.03)}.promise .p-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:var(--sky);font-size:19px}.promise h3{margin:25px 0 7px;font-size:18px;color:var(--ink)}.promise p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.services{background:#fff}.service-layout{display:grid;grid-template-columns:.78fr 1.22fr;gap:50px;align-items:center}.service-layout p{color:var(--muted);font-size:15px;line-height:1.75}.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.service{padding:26px;border:1px solid var(--line);border-radius:23px;background:#f9fcff}.service .icon{color:#1679bf;font-size:22px}.service h3{margin:35px 0 8px;color:var(--ink);font-size:15px}.service b{color:var(--coral);font-size:22px}.service p{margin:6px 0 0;font-size:12px}.notice{border-radius:28px;background:#dff2ff;padding:38px;display:flex;align-items:center;justify-content:space-between;gap:28px}.notice h2{font-size:36px}.notice p{max-width:670px;color:#536b86;font-size:14px;line-height:1.7}.contact{border-top:1px solid var(--line);background:#fff}.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding:40px 0}.contact h3{margin:0;color:var(--ink);font-size:15px}.contact p{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.6}.zalo-link{font-size:14px;font-weight:800;color:#087bd4;text-decoration:none}.disclaimer{margin-top:8px;color:#8a9aae;font-size:11px}.footer{background:var(--ink);color:#d8e8ff;padding:20px 0;font-size:11px}.footer-row{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+    .overlay{position:fixed;z-index:80;inset:0;display:none;place-items:center;padding:18px;background:rgba(4,27,60,.58)}.overlay.active{display:grid}.modal{width:min(500px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:25px;background:#fff;box-shadow:0 25px 70px rgba(0,0,0,.28)}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 24px 12px}.modal-head h3{margin:0;color:var(--ink);font-size:23px}.modal-head p{margin:6px 0 0;color:var(--muted);font-size:12px}.close{border:0;background:var(--paper);width:34px;height:34px;border-radius:50%;font-size:20px;color:var(--ink)}.modal-body{padding:12px 24px 24px}.tabs{display:flex;gap:7px;margin-bottom:17px;padding:4px;border-radius:13px;background:var(--paper)}.tabs button{flex:1;border:0;border-radius:10px;padding:9px;background:transparent;color:var(--muted);font-size:13px;font-weight:800}.tabs button.active{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(8,46,96,.10)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:block;margin-bottom:13px}.field span{display:block;margin-bottom:6px;color:#3d5270;font-size:12px;font-weight:800}.field input,.field textarea,.field select{width:100%;border:1px solid #cdd9e7;border-radius:11px;background:#fff;padding:11px 12px;color:#243d60;outline:0}.field textarea{min-height:80px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:#1984cb;box-shadow:0 0 0 3px rgba(25,132,203,.12)}.help{margin:5px 0 13px;border-left:3px solid #4aa9e3;padding:9px 11px;background:#f1f9ff;color:#56718e;font-size:11px;line-height:1.55}.order-shell{padding:70px 0}.order-layout{display:grid;grid-template-columns:1.12fr .88fr;gap:24px;align-items:start}.panel{border:1px solid var(--line);border-radius:25px;background:#fff;box-shadow:0 10px 24px rgba(8,46,96,.04)}.panel-pad{padding:27px}.panel h2{margin:0;color:var(--ink);font-family:Georgia,serif;font-size:31px;letter-spacing:-.03em}.panel h3{margin:0;color:var(--ink);font-size:16px}.subheading{margin:6px 0 0;color:var(--muted);font-size:13px}.guest-warning{display:flex;gap:10px;margin:19px 0;padding:12px;border:1px solid #f5c4cd;border-radius:14px;background:#fff5f6;color:#8d4553;font-size:12px;line-height:1.55}.divider{margin:24px 0;border:0;border-top:1px solid var(--line)}.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.choice{position:relative;border:1px solid #cfdcea;border-radius:14px;padding:13px;cursor:pointer}.choice input{position:absolute;opacity:0}.choice:has(input:checked){border-color:#1483ca;background:#e9f6ff}.choice b{display:block;color:var(--ink);font-size:13px}.choice small{display:block;margin-top:4px;color:#71839a;font-size:10px}.payment-grid{grid-template-columns:repeat(3,1fr)}.payment-grid .choice{min-height:95px}.total-box{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}.total-box small{color:var(--muted);font-size:12px}.total-box strong{display:block;margin-top:2px;color:var(--coral);font-size:25px}.aside-dark{border:0;background:linear-gradient(145deg,#082e60,#124e96);color:#fff}.aside-dark h3{color:#fff;font-size:22px}.aside-dark p{color:#d4e9ff;font-size:13px;line-height:1.7}.aside-light{margin-top:14px}.benefits{padding-left:18px;color:var(--muted);font-size:13px;line-height:2}.account-shell{padding:62px 0}.account-top{display:flex;justify-content:space-between;gap:20px;align-items:end}.account-top h1{margin:9px 0 0;color:var(--ink);font-family:Georgia,serif;font-size:47px;line-height:1;letter-spacing:-.04em}.account-top p{margin:9px 0 0;color:var(--muted);font-size:13px}.loyalty-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin:28px 0}.loyalty{padding:28px;border-radius:25px;background:linear-gradient(135deg,#082e60,#0b4b94);color:#fff}.loyalty small{font-weight:800;letter-spacing:.12em;color:#bee4ff;font-size:10px}.points{margin-top:14px;font-size:52px;font-weight:900;letter-spacing:-.06em}.points span{font-size:15px;letter-spacing:0}.loyalty p{max-width:530px;margin:10px 0 0;color:#d8ebff;font-size:12px;line-height:1.7}.ledger{padding:28px;border:1px solid var(--line);border-radius:25px;background:#fff}.ledger b{display:block;margin-top:18px;color:var(--ink);font-size:29px}.ledger p{margin:4px 0;color:var(--muted);font-size:12px}.orders-title{display:flex;justify-content:space-between;gap:12px;align-items:end}.orders-title h2{margin:8px 0 0;font-family:Georgia,serif;color:var(--ink);font-size:36px}.filters{display:flex;gap:6px;overflow:auto;margin:20px 0}.filter{border:1px solid #cbd9e6;border-radius:999px;background:#fff;padding:7px 11px;color:#64758d;font-size:11px;font-weight:800;white-space:nowrap}.filter.active{background:var(--ink);border-color:var(--ink);color:#fff}.order-card{margin-bottom:12px;border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}.order-main{display:flex;justify-content:space-between;gap:14px;padding:18px}.order-code{font-size:11px;font-weight:900;letter-spacing:.1em;color:#657892}.order-name{margin:3px 0 0;color:var(--ink);font-size:15px;font-weight:800}.order-meta{margin:4px 0 0;color:var(--muted);font-size:11px}.badge{display:inline-flex;align-items:center;align-self:start;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:800;white-space:nowrap}.waiting{background:#fff3d7;color:#986300}.processing{background:#e7f5ff;color:#0b6faf}.done{background:#e6f8ed;color:#167b4d}.order-foot{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);background:#fbfdff;padding:12px 18px}.text-btn{border:0;background:transparent;padding:0;color:var(--coral);font-size:11px;font-weight:800}.empty{padding:45px 20px;border:1px dashed #c7d6e5;border-radius:20px;background:#fff;text-align:center;color:#657892}.empty b{display:block;color:var(--ink);margin:9px 0 4px}.stars{display:flex;gap:7px;margin:15px 0}.star{border:0;background:transparent;padding:2px;color:#ccd8e5;font-size:29px}.star.active{color:#f2a41d}.chat-launch{position:fixed;right:22px;bottom:22px;z-index:50;border:0;border-radius:999px;background:var(--ink);box-shadow:0 12px 25px rgba(8,46,96,.30);padding:14px 18px;color:#fff;font-weight:800}.chat{position:fixed;right:22px;bottom:80px;z-index:51;display:none;width:min(360px,calc(100% - 32px));overflow:hidden;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 22px 55px rgba(8,46,96,.25)}.chat.open{display:block}.chat-head{display:flex;justify-content:space-between;align-items:center;background:var(--ink);padding:14px 16px;color:#fff}.chat-head b{font-size:14px}.chat-head small{display:block;margin-top:2px;color:#bfddff;font-size:10px}.chat-head button{border:0;background:transparent;color:#fff;font-size:20px}.chat-body{height:260px;overflow:auto;background:#f5f9ff;padding:13px}.bubble{max-width:85%;margin:0 0 9px;border-radius:15px;padding:9px 11px;font-size:12px;line-height:1.5}.store-bubble{background:#fff;color:#425a78}.user-bubble{margin-left:auto;background:var(--coral);color:#fff}.chat-input{display:flex;gap:8px;border-top:1px solid var(--line);padding:10px}.chat-input input{flex:1;min-width:0;border:1px solid #cdd9e7;border-radius:12px;padding:10px}.chat-input button{border:0;border-radius:12px;background:var(--coral);padding:0 13px;color:#fff;font-weight:800}.toast{position:fixed;top:90px;left:50%;z-index:99;display:none;max-width:min(500px,calc(100% - 32px));transform:translateX(-50%);border-radius:14px;background:#17395f;box-shadow:var(--shadow);padding:12px 17px;color:#fff;font-size:13px}.toast.show{display:block}.zalo-float{position:fixed;right:22px;bottom:88px;z-index:50;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#0a7bd8;color:#fff;text-decoration:none;font-size:10px;font-weight:900;box-shadow:0 10px 22px rgba(10,123,216,.28)}
+    @media(max-width:800px){.nav-links,.nav-actions .login{display:none}.mobile-menu{display:block}.nav-row{min-height:64px}.mobile-links{display:none;padding:0 0 14px}.mobile-links.open{display:grid;gap:6px}.mobile-links a{padding:8px 3px;text-decoration:none;color:#53647d;font-size:13px;font-weight:700}.hero-grid,.service-layout,.order-layout{grid-template-columns:1fr}.hero-grid{gap:32px;min-height:auto;padding:55px 0}.hero h1{font-size:48px}.machine-scene{min-height:265px}.machine{right:22px;transform:scale(.82);transform-origin:top right}.brand-copy{left:18px;top:29px}.brand-copy .four{font-size:58px}.brand-copy .name{font-size:22px}.signals{margin-top:30px}.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.four-grid{grid-template-columns:1fr 1fr}.section{padding:60px 0}.service-grid{gap:10px}.notice,.account-top{align-items:flex-start;flex-direction:column}.notice{padding:25px}.notice h2{font-size:30px}.contact-grid,.loyalty-grid{grid-template-columns:1fr}.form-row,.payment-grid{grid-template-columns:1fr}.choice-grid{grid-template-columns:1fr}.account-top h1{font-size:40px}.account-shell{padding:45px 0}.zalo-float{bottom:86px}.chat{right:16px;bottom:76px}.chat-launch{right:16px;bottom:16px}.hero-actions .btn{width:auto}.order-shell{padding:45px 0}}
+    @media(max-width:440px){.brand b{font-size:11px}.brand small{font-size:7px}.brand-mark{width:42px;height:36px}.four-grid{grid-template-columns:1fr}.stats{width:calc(100% - 20px)}.stat{padding:12px 10px}.stat b{font-size:12px}.service-grid{grid-template-columns:1fr}.order-main{flex-direction:column}.payment-grid{grid-template-columns:1fr}.hero h1{font-size:43px}}
+    /* Sửa lỗi menu bị hiển thị lặp lại: menu điện thoại chỉ xuất hiện khi người dùng bấm nút ☰. */
+    #mobileLinks{display:none!important}
+    @media(max-width:800px){#mobileLinks.open{display:grid!important;gap:6px}}
+    /* Dùng trực tiếp banner thương hiệu 4T.jpg đặt cùng thư mục với tệp HTML. */
+    .machine-scene{min-height:0!important;aspect-ratio:128/67;background:#eaf2ff url("4T.jpg") center/cover no-repeat!important}
+    .machine-scene:before,.machine-scene .brand-copy,.machine-scene .machine{display:none!important}
+    /* Chuẩn hóa tiếng Việt: dùng font hệ thống sẵn có, không phụ thuộc phông tải mạng. */
+    :root{--font-vn-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Tahoma,sans-serif;--font-vn-display:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Tahoma,sans-serif}
+    html,body,button,input,textarea,select,.btn,.nav-links a,.mobile-links a{font-family:var(--font-vn-sans)!important;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+    .hero h1,.section h2,.panel h2,.account-top h1,.orders-title h2{font-family:var(--font-vn-display)!important;font-weight:800!important;letter-spacing:-.035em!important;word-spacing:normal!important}
+    .hero h1 em{font-family:var(--font-vn-display)!important;font-style:italic!important}
+    .brand b,.eyebrow,.pill,.stat small{font-family:var(--font-vn-sans)!important;letter-spacing:.08em!important}
+    /* Mô-đun giao–nhận và bảng giá ship cho phiên bản chạy cục bộ. */
+    .delivery-module{margin:18px 0;padding:17px;border:1px solid var(--line);border-radius:18px;background:#f9fcff}.delivery-module h3{margin:0;color:var(--ink);font-size:15px}.delivery-module>p{margin:5px 0 14px;color:#61738c;font-size:12px;line-height:1.6}.delivery-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.delivery-option{position:relative;min-height:82px;border:1px solid #cddbe9;border-radius:14px;padding:13px;cursor:pointer}.delivery-option:has(input:checked){border-color:#1684cb;background:#e9f6ff}.delivery-option input{position:absolute;opacity:0}.delivery-option b{display:block;color:var(--ink);font-size:13px}.delivery-option small{display:block;margin-top:4px;color:#6e8198;font-size:10px;line-height:1.5}.delivery-distance{display:none;margin-top:13px}.delivery-distance.show{display:block}.delivery-fee-note{margin:10px 0 0;border-left:3px solid #2794d9;padding:8px 10px;background:#edf8ff;color:#52718f;font-size:11px;line-height:1.6}.price-breakdown{margin-top:8px;color:#60738d;font-size:11px;line-height:1.65}.price-breakdown b{color:#164d85}.member-fill-note{display:none;margin:10px 0 0;border-radius:10px;background:#e5f5eb;padding:8px 10px;color:#28734d;font-size:11px;line-height:1.55}.member-fill-note.show{display:block}@media(max-width:800px){.delivery-options{grid-template-columns:1fr}.delivery-module{padding:14px}.total-box{align-items:flex-start;flex-direction:column}.total-box .btn{width:100%}}@media(max-width:440px){.panel-pad{padding:18px}.hero h1{font-size:39px!important}.section h2{font-size:33px!important}}
   </style>
 </head>
 <body>
-
-  <!-- Header & Navigation -->
-  <header>
-    <div class="nav-container">
-      <a href="#" class="logo">4T <span>GIẶT SẤY</span></a>
-      <ul class="nav-links">
-        <li><a href="#about">Giới Thiệu</a></li>
-        <li><a href="#tech">Công Nghệ Nhật</a></li>
-        <li><a href="#order">Đặt Hàng</a></li>
-        <li><a href="#contact">Liên Hệ</a></li>
-      </ul>
-      <div class="auth-buttons" id="authNav">
-        <button class="btn-auth-outline" onclick="openAuthModal('login')">Đăng Nhập</button>
-        <button class="btn-auth" onclick="openAuthModal('register')">Đăng Ký</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Live Stats Bar -->
-  <div class="stats-bar">
-    <div class="stats-container">
-      <div class="stat-item">👁️ Lượt truy cập: <span id="statVisits">1,245</span></div>
-      <div class="stat-item">📦 Đơn hàng phục vụ: <span id="statOrders">328</span></div>
-      <div class="stat-item">👤 Khách hàng đăng ký: <span id="statUsers">152</span></div>
-    </div>
-  </div>
-
-  <!-- Hero Banner: Giới thiệu Máy Giặt Nhật -->
-  <section class="hero" id="tech">
-    <h1>Giặt Sấy 4T - Công Nghệ Chuẩn Nhật Bản</h1>
-    <p class="slogan">Thơm sạch mỗi ngày – Tiện lợi mỗi lần</p>
-    
-    <div class="tech-grid">
-      <div class="tech-card">
-        <span class="icon">🌀</span>
-        <h3>Giặt Sạch Sâu</h3>
-        <p>Đánh bay vết bẩn cứng đầu nhờ sóng siêu âm hiện đại</p>
-      </div>
-      <div class="tech-card">
-        <span class="icon">♨️</span>
-        <h3>Sấy Khô Nhanh</h3>
-        <p>Công nghệ sấy bơm nhiệt Heatpump tiết kiệm, chống nhăn sợi vải</p>
-      </div>
-      <div class="tech-card">
-        <span class="icon">🌸</span>
-        <h3>Thơm Lâu Tự Nhiên</h3>
-        <p>Lưu hương sâu, giữ sợi vải mềm mại nguyên bản</p>
-      </div>
-      <div class="tech-card">
-        <span class="icon">🛡️</span>
-        <h3>Diệt Khuẩn UV</h3>
-        <p>Loại bỏ 99.9% vi khuẩn và bụi mịn gây dị ứng</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Giới Thiệu Cửa Hàng -->
-  <section class="about-container" id="about" style="margin-top: 3rem;">
-    <div>
-      <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?auto=format&fit=crop&w=600&q=80" alt="Cửa hàng giặt ủi 4T" style="width:100%; border-radius:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-    </div>
-    <div class="about-text">
-      <h3>Chào mừng bạn đến với Tiệm Giặt Sấy 4T</h3>
-      <p>Cửa hàng Giặt Sấy 4T tự hào mang đến giải pháp chăm sóc trang phục hàng đầu với hệ thống máy giặt sấy nhập khẩu nguyên chiếc từ Nhật Bản. Chúng tôi thấu hiểu từng chất liệu vải và áp dụng quy trình phân loại nghiêm ngặt trước khi làm sạch.</p>
-      <p>Không chỉ giặt sạch thông thường, 4T bảo vệ tối đa độ bền màu và phom dáng quần áo của gia đình bạn. Đội ngũ giao nhận tận nơi nhanh chóng, thân thiện luôn sẵn sàng phục vụ.</p>
-      <div class="japan-badges">
-        <span class="japan-badge">✓ Tiêu chuẩn vệ sinh Nhật Bản</span>
-        <span class="japan-badge">✓ Giặt riêng từng máy</span>
-        <span class="japan-badge">✓ Giao nhận tận nhà</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Thông Tin Liên Hệ Direct & Zalo Link -->
-  <section class="contact-section" id="contact">
-    <h2 class="section-title" style="margin-top: 0;">Thông Tin Liên Hệ</h2>
-    <div class="contact-grid">
-      <div class="contact-card">
-        <span class="icon">📍</span>
-        <div>
-          <strong>ĐỊA CHỈ CỬA HÀNG</strong>
-          <p style="font-size:0.9rem; color:#475569;">123 Nguyễn Văn A, P. Bình Hòa, TP. Thuận An, Bình Dương</p>
-        </div>
-      </div>
-      <div class="contact-card">
-        <span class="icon">📞</span>
-        <div>
-          <strong>HOTLINE CHĂM SÓC KHÁCH HÀNG</strong>
-          <p style="font-size:0.9rem; color:#475569;">0909 123 456 (8:00 - 21:00 hàng ngày)</p>
-        </div>
-      </div>
-      <div class="contact-card">
-        <span class="icon">💬</span>
-        <div>
-          <strong>ZALO CỬA HÀNG</strong><br>
-          <a href="https://zalo.me/0909123456" target="_blank" class="btn-zalo-link">👉 Trực tiếp Chat Zalo: 0909 123 456</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Main Order & Tracking Area -->
-  <div class="main-content" id="order">
-    
-    <!-- Cột Trái: Form Tạo Đơn Hàng -->
-    <div>
-      <div class="card">
-        <h2 style="color:var(--primary); margin-bottom:0.3rem;">Tạo Đơn Hàng Dịch Vụ</h2>
-        <p id="formAutoFillNotice" style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">(Bạn có thể tạo đơn ngay không cần đăng nhập)</p>
-        
-        <form id="orderForm" oninput="calculateTotal()">
-          <div class="form-group">
-            <label>Họ và tên khách hàng (*):</label>
-            <input type="text" id="custName" placeholder="Nhập tên người nhận" required>
-          </div>
-          <div class="form-group">
-            <label>Số điện thoại (* - Đủ 10 số):</label>
-            <input type="tel" id="custPhone" placeholder="VD: 0909123456" maxlength="10" required>
-          </div>
-          <div class="form-group">
-            <label>Địa chỉ nhận & giao hàng (* - Tối thiểu 10 ký tự):</label>
-            <input type="text" id="custAddress" placeholder="Nhập địa chỉ nhà chi tiết" required>
-          </div>
-
-          <hr style="margin: 1rem 0; border: none; border-top: 1px solid #e2e8f0;">
-
-          <div class="form-group">
-            <label>Giặt & Sấy khô (15,000đ/kg):</label>
-            <input type="number" id="weight" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label>Ủi / Là hơi nước (10,000đ/cái):</label>
-            <input type="number" id="iron" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label>Dịch vụ giao nhận tận nơi:</label>
-            <select id="delivery">
-              <option value="0">Tự mang đến cửa hàng</option>
-              <option value="15000">Nhận và giao hàng tận nhà (+15,000đ)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Hình thức thanh toán:</label>
-            <select id="payment">
-              <option value="Tiền mặt">Tiền mặt khi nhận hàng</option>
-              <option value="Ví điện tử / Ngân hàng">Liên kết Ví Điện Tử / Chuyển khoản QR Ngân hàng</option>
-            </select>
-          </div>
-
-          <h3 style="color: #e11d48; margin: 1rem 0;">Tổng tiền thanh toán: <span id="totalAmount">0</span> VNĐ</h3>
-          <button type="button" class="btn-submit" onclick="submitOrder()">Xác Nhận Đặt Đơn Hàng</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Cột Phải: Dashboard Tài khoản & Lịch Sử Đơn -->
-    <div>
-      <div id="accountDashboard"></div>
-
-      <div class="card">
-        <h3 style="color:var(--primary);">Theo Dõi Lịch Sử Đơn Hàng</h3>
-        
-        <div class="filter-tabs">
-          <button class="filter-btn active" onclick="filterOrders('Tất cả', this)">Tất cả</button>
-          <button class="filter-btn" onclick="filterOrders('Chờ tiếp nhận', this)">Chờ tiếp nhận</button>
-          <button class="filter-btn" onclick="filterOrders('Đang xử lý', this)">Đang xử lý</button>
-          <button class="filter-btn" onclick="filterOrders('Đang giao hàng', this)">Đang giao hàng</button>
-          <button class="filter-btn" onclick="filterOrders('Đã thanh toán', this)">Đã thanh toán</button>
-        </div>
-
-        <div id="orderHistoryList"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Modal Thanh Toán QR Ngân Hàng / Ví Điện Tử -->
-  <div class="modal-overlay" id="paymentModal">
-    <div class="modal-card">
-      <button class="close-modal" onclick="closePaymentModal()">&times;</button>
-      <h3 style="color:var(--primary);">Quét Mã QR Thanh Toán</h3>
-      <p style="font-size:0.9rem; color:#64748b; margin-top:5px;">Hỗ trợ tất cả ứng dụng Ngân hàng, Momo, ZaloPay, VNPay</p>
-      
-      <div class="qr-container">
-        <img id="qrImage" class="qr-img" src="" alt="Mã QR Thanh Toán VietQR">
-        <p style="font-size:0.85rem; font-weight:bold; color:var(--primary);" id="qrNotice">Đang khởi tạo mã QR...</p>
-      </div>
-
-      <p style="font-size:0.85rem; text-align:left; background:#f1f5f9; padding:8px; border-radius:6px; margin-bottom:1rem;">
-        <b>Chủ tài khoản:</b> TIEM GIAT SAY 4T<br>
-        <b>Số tài khoản:</b> 0909123456<br>
-        <b>Ngân hàng:</b> MBBank (Ngân Hàng Quân Đội)
-      </p>
-
-      <button class="btn-submit" onclick="finishQRPayment()">Tôi Đã Hoàn Tất Thanh Toán</button>
-    </div>
-  </div>
-
-  <!-- Modal Đăng Nhập / Đăng Ký -->
-  <div class="modal-overlay" id="authModal">
-    <div class="modal-card">
-      <button class="close-modal" onclick="closeAuthModal()">&times;</button>
-      <div class="auth-tabs">
-        <button class="tab-btn active" id="loginTabBtn" onclick="switchTab('login')">Đăng Nhập</button>
-        <button class="tab-btn" id="registerTabBtn" onclick="switchTab('register')">Đăng Ký</button>
-      </div>
-
-      <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label>Số điện thoại:</label>
-          <input type="tel" id="loginPhone" placeholder="SĐT 10 chữ số" required>
-        </div>
-        <div class="form-group">
-          <label>Mật khẩu:</label>
-          <input type="password" placeholder="Mật khẩu" required>
-        </div>
-        <button type="submit" class="btn-submit">Đăng Nhập</button>
-      </form>
-
-      <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label>Họ và tên (*):</label>
-          <input type="text" id="regName" placeholder="Tên của bạn" required>
-        </div>
-        <div class="form-group">
-          <label>Số điện thoại (* - Đủ 10 số):</label>
-          <input type="tel" id="regPhone" placeholder="VD: 0909123456" maxlength="10" required>
-        </div>
-        <div class="form-group">
-          <label>Địa chỉ (* - Tối thiểu 10 ký tự):</label>
-          <input type="text" id="regAddress" placeholder="Địa chỉ chi tiết" required>
-        </div>
-        <div class="form-group">
-          <label>Tọa độ định vị vị trí (*):</label>
-          <button type="button" onclick="getLocation()" style="background: var(--accent); border:none; color:white; padding:0.5rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold; width:100%;">📍 Bắt buộc: Gắn vị trí GPS của tôi</button>
-          <input type="text" id="regGPS" placeholder="Tọa độ GPS" readonly required style="margin-top:0.3rem; background:#f1f5f9;">
-        </div>
-        <div class="form-group">
-          <label>Mật khẩu (*):</label>
-          <input type="password" placeholder="Mật khẩu" required>
-        </div>
-        <button type="submit" class="btn-submit">Tạo Tài Khoản Mới</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Floating Contact Buttons -->
-  <div class="floating-buttons">
-    <a href="https://zalo.me/0909123456" target="_blank" class="btn-float btn-zalo" title="Chat Zalo Cửa Hàng">Zalo</a>
-    <button class="btn-float btn-chat" onclick="toggleChat()" title="Chat Trực Tuyến">💬</button>
-  </div>
-
-  <!-- Chat Box -->
-  <div class="chat-box" id="chatBox">
-    <div class="chat-header">Hỗ Trợ Khách Hàng - 4T Laundry</div>
-    <div class="chat-body" id="chatBody">
-      <p><strong>Cửa hàng:</strong> Xin chào! Chúng tôi có thể giúp gì cho bạn về dịch vụ giặt sấy Nhật Bản hôm nay?</p>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
-      <button onclick="sendMessage()">Gửi</button>
-    </div>
-  </div>
-
+  <header class="nav"><div class="container"><div class="nav-row"><a class="brand" href="#top"><span class="brand-mark">4T</span><span><b>GIẶT SẤY 4T</b><small>THƠM SẠCH · TIỆN LỢI</small></span></a><nav class="nav-links"><a href="#dich-vu">Dịch vụ</a><a href="#cam-ket">4T cam kết</a><a href="#dat-don">Đặt đơn</a><a href="#tai-khoan">Tài khoản</a></nav><div class="nav-actions" id="navActions"><button class="btn btn-outline login" onclick="openAuth('login')">Đăng nhập</button><a href="#dat-don"><button class="btn btn-coral">⌁ Đặt đơn</button></a></div><button class="mobile-menu" aria-label="Mở menu" onclick="toggleMenu()">☰</button></div><nav class="mobile-links" id="mobileLinks"><a href="#dich-vu" onclick="closeMenu()">Dịch vụ</a><a href="#cam-ket" onclick="closeMenu()">4T cam kết</a><a href="#dat-don" onclick="closeMenu()">Đặt đơn</a><a href="#tai-khoan" onclick="closeMenu()">Tài khoản</a></nav></div></header>
+  <main id="top">
+    <section class="hero"><div class="container hero-grid"><div><span class="pill">✦ GIẶT SẤY THEO CÔNG NGHỆ NHẬT</span><h1>Giặt sạch sâu.<br><em>Thơm sạch mỗi ngày.</em></h1><p class="intro">4T chăm sóc từng mẻ giặt với tinh thần <b>Tử tế – Tận tâm – Thơm sạch – Tiện lợi</b>. Đặt lịch trực tuyến, 4T xác nhận và nhận trả tận nơi tại Thuận An, Bình Dương.</p><div class="hero-actions"><a href="#dat-don"><button class="btn btn-coral">Đặt đơn giặt sấy →</button></a><a href="#dich-vu"><button class="btn btn-light">Khám phá dịch vụ</button></a></div><div class="signals"><div class="signal"><b>Sạch sâu</b><small>Giặt kỹ từng mẻ</small></div><div class="signal"><b>Khô nhanh</b><small>Sấy hiện đại</small></div><div class="signal"><b>Nhận trả</b><small>Tận nơi</small></div></div></div><div class="brand-board"><div class="machine-scene"><div class="brand-copy"><div class="four">4T</div><span class="name">GIẶT SẤY<br>THEO CÔNG NGHỆ<br><span>NHẬT</span></span></div><div class="machine"><div class="drum"></div><span class="machine-tag">GIẶT SẠCH · THƠM THO</span></div></div><div class="board-caption"><span>4T · TỬ TẾ ĐẾN TỪNG MẺ GIẶT</span><span>✓</span></div></div></div></section>
+    <section class="container stats" aria-label="Thống kê cục bộ"><div class="stat"><span class="stat-icon">◷</span><span><b>06:30–21:00</b><small>PHỤC VỤ MỖI NGÀY</small></span></div><div class="stat"><span class="stat-icon">📦</span><span><b id="statOrders">0</b><small>ĐƠN HÀNG TRÊN THIẾT BỊ</small></span></div><div class="stat"><span class="stat-icon">✦</span><span><b>4T</b><small>CHUẨN PHỤC VỤ</small></span></div><div class="stat"><span class="stat-icon">👁️</span><span><b id="statVisits">0</b><small>LƯỢT MỞ TỆP NÀY</small></span></div></section>
+    <section class="section" id="cam-ket"><div class="container"><div class="section-title"><p class="eyebrow">4T LÀ CÁCH CHÚNG TÔI PHỤC VỤ</p><h2>Mỗi đơn hàng là một lời hứa được giữ trọn.</h2></div><div class="four-grid"><article class="promise"><span class="p-icon">♡</span><h3>Tử tế</h3><p>Tiếp nhận rõ ràng, ghi chú minh bạch và báo giá trước khi xử lý.</p></article><article class="promise"><span class="p-icon">✦</span><h3>Tận tâm</h3><p>Chăm chút từng mẻ giặt, lưu ý riêng với các yêu cầu của khách.</p></article><article class="promise"><span class="p-icon">✧</span><h3>Thơm sạch</h3><p>Giặt sạch sâu, sấy khô nhanh và chăm sóc sợi vải nhẹ nhàng.</p></article><article class="promise"><span class="p-icon">⌁</span><h3>Tiện lợi</h3><p>Đặt lịch online, nhận trả tận nơi và theo dõi đơn bằng tài khoản.</p></article></div></div></section>
+    <section class="section services" id="dich-vu"><div class="container service-layout"><div><p class="eyebrow">DỊCH VỤ 4T</p><h2>Chọn nhịp giặt phù hợp với bạn.</h2><p>Khách có thể đặt đơn ngay cả khi chưa đăng nhập. Khi tạo tài khoản 4T, bạn mới xem được tiến độ, lịch sử đơn và điểm tích lũy của mình trên thiết bị này.</p><a href="#dat-don"><button class="btn btn-ink">Đặt lịch lấy đồ</button></a></div><div class="service-grid"><article class="service"><span class="icon">▣</span><h3>Giặt sấy tiêu chuẩn</h3><b>15.000đ/kg</b><p>Tối thiểu 3 kg · thời gian dự kiến 24 giờ</p></article><article class="service"><span class="icon">◷</span><h3>Giặt sấy nhanh</h3><b>30.000đ/kg</b><p>Ưu tiên xử lý · dự kiến 4–8 giờ</p></article><article class="service"><span class="icon">⌁</span><h3>Nhận & giao tận nơi</h3><b>Theo tuyến</b><p>4T liên hệ chốt khung giờ trước khi đến</p></article><article class="service"><span class="icon">▤</span><h3>Thanh toán linh hoạt</h3><b>Tiền mặt · QR · Ví</b><p>Chọn phương thức khi tạo đơn</p></article></div></div></section>
+    <section class="section"><div class="container"><div class="notice"><div><p class="eyebrow">TÀI KHOẢN 4T</p><h2>Đặt đơn không cần đăng nhập.<br>Đăng nhập để nhận nhiều hơn.</h2><p>Khách vãng lai vẫn gửi yêu cầu nhận đồ được. Để bảo vệ dữ liệu, khách vãng lai không xem được tiến độ, lịch sử đơn hoặc nhận điểm tích lũy trong bản một tệp.</p></div><div><a href="#dat-don"><button class="btn btn-coral">Đặt đơn ngay</button></a><button class="btn btn-outline" onclick="openAuth('register')">Tạo tài khoản</button></div></div></div></section>
+    <section class="order-shell" id="dat-don"><div class="container order-layout"><section class="panel"><div class="panel-pad"><p class="eyebrow">ĐẶT LỊCH NHẬN ĐỒ</p><h2>4T lo phần giặt.<br>Bạn giữ thời gian cho mình.</h2><div id="guestNotice" class="guest-warning"><span>!</span><span><b>Bạn đang đặt đơn không cần tài khoản.</b><br>Đơn vẫn được gửi, nhưng bạn không xem tiến độ hoặc tích điểm trong website. <button class="text-btn" onclick="openAuth('login')">Đăng nhập để nhận quyền lợi →</button></span></div><form id="orderForm" onsubmit="submitOrder(event)"><hr class="divider"><h3>1. Thông tin nhận đồ</h3><div class="form-row" style="margin-top:15px"><label class="field"><span>Họ và tên *</span><input id="orderName" required placeholder="Ví dụ: Nguyễn Minh Anh"></label><label class="field"><span>Số điện thoại *</span><input id="orderPhone" required inputmode="tel" maxlength="10" placeholder="09xx xxx xxx"></label></div><label class="field"><span>Địa chỉ lấy đồ *</span><textarea id="orderAddress" required placeholder="Số nhà, đường, phường/xã, ghi chú điểm nhận..."></textarea></label><div class="form-row"><label class="field"><span>Khung giờ mong muốn *</span><select id="pickupWindow"><option>Sáng 08:00–11:00</option><option>Trưa 11:00–14:00</option><option>Chiều 14:00–17:00</option><option>Tối 17:00–20:00</option></select></label><label class="field"><span>Khối lượng ước tính *</span><input id="orderKg" type="number" min="1" max="100" value="3" oninput="calculateTotal()"></label></div><hr class="divider"><h3>2. Chọn dịch vụ</h3><div class="choice-grid" style="margin-top:14px"><label class="choice"><input type="radio" name="service" value="standard" checked onchange="calculateTotal()"><b>Tiêu chuẩn · 15.000đ/kg</b><small>Tối thiểu 3 kg · dự kiến 24 giờ</small></label><label class="choice"><input type="radio" name="service" value="express" onchange="calculateTotal()"><b>Nhanh · 30.000đ/kg</b><small>Ưu tiên xử lý · dự kiến 4–8 giờ</small></label></div><hr class="divider"><h3>3. Thanh toán</h3><div class="choice-grid payment-grid" style="margin-top:14px"><label class="choice"><input type="radio" name="payment" value="cash" checked><b>◉ Tiền mặt</b><small>Thanh toán khi nhận/giao</small></label><label class="choice"><input type="radio" name="payment" value="bank"><b>▤ App ngân hàng</b><small>4T gửi QR sau xác nhận</small></label><label class="choice"><input type="radio" name="payment" value="wallet"><b>◌ Ví điện tử</b><small>4T gửi hướng dẫn sau xác nhận</small></label></div><label class="field" style="margin-top:18px"><span>Ghi chú cho 4T</span><textarea id="orderNotes" placeholder="Đồ dễ phai màu, yêu cầu tách riêng, mã cổng..."></textarea></label><div class="total-box"><span><small>Tạm tính</small><strong id="orderTotal">45.000đ</strong></span><button class="btn btn-coral" type="submit">Gửi lịch lấy đồ →</button></div></form></div></section><aside><section class="panel panel-pad aside-dark"><span>⌁</span><h3 style="margin-top:22px">4T sẽ xác nhận trước khi đến.</h3><p>Lịch online là yêu cầu nhận đồ. Nhân viên 4T gọi hoặc nhắn Zalo để chốt thời gian, khối lượng và hình thức thanh toán.</p><a href="https://zalo.me/0909123456" target="_blank" rel="noreferrer"><button class="btn btn-light">Chat Zalo 4T</button></a></section><section class="panel panel-pad aside-light"><span style="color:#1679bf">✦</span><h3 style="margin-top:18px">Tài khoản 4T có gì?</h3><ul class="benefits"><li>Xem tiến độ từng đơn đang xử lý</li><li>Nhận điểm khi hoàn tất đơn</li><li>Lưu lịch sử và đánh giá dịch vụ</li></ul></section></aside></div></section>
+    <section class="account-shell" id="tai-khoan"><div class="container"><div id="accountContent"></div></div></section>
+    <section class="contact"><div class="container contact-grid"><div><h3>4T Giặt Sấy</h3><p>Tử tế – Tận tâm – Thơm sạch – Tiện lợi.</p></div><div><h3>Địa chỉ cửa hàng</h3><p>123 Nguyễn Văn A, P. Bình Hòa,<br>TP. Thuận An, Bình Dương</p></div><div><a class="zalo-link" href="https://zalo.me/0909123456" target="_blank" rel="noreferrer">Hotline / Zalo: 0909 123 456</a><p>06:30–21:00 · mỗi ngày</p><p class="disclaimer">Thông tin dựa theo bảng hiệu 4T được cung cấp.</p></div></div></section>
+  </main>
+  <footer class="footer"><div class="container footer-row"><span>© 4T Giặt Sấy</span></div></footer>
+  <a class="zalo-float" href="https://zalo.me/0909123456" target="_blank" rel="noreferrer" title="Chat Zalo cửa hàng">Zalo</a><button class="chat-launch" onclick="toggleChat()">◌ Hỗ trợ 4T</button><section class="chat" id="chatBox"><div class="chat-head"><span><b>4T hỗ trợ nhanh</b><small>Phản hồi mô phỏng trong bản cục bộ</small></span><button onclick="toggleChat()">×</button></div><div id="chatBody" class="chat-body"></div><form class="chat-input" onsubmit="sendChat(event)"><input id="chatInput" autocomplete="off" placeholder="Nhập tin nhắn..."><button>Gửi</button></form></section>
+  <div class="overlay" id="authModal"><section class="modal"><div class="modal-head"><div><h3>Tài khoản 4T</h3><p>Bản chạy cục bộ: thông tin chỉ được lưu trong trình duyệt này.</p></div><button class="close" onclick="closeModal('authModal')">×</button></div><div class="modal-body"><div class="tabs"><button id="loginTab" class="active" onclick="showAuthTab('login')">Đăng nhập</button><button id="registerTab" onclick="showAuthTab('register')">Tạo tài khoản</button></div><form id="loginForm" onsubmit="login(event)"><label class="field"><span>Số điện thoại đã đăng ký</span><input id="loginPhone" required inputmode="tel" maxlength="10" placeholder="09xx xxx xxx"></label><div class="help">Trong phiên bản một tệp, đăng nhập dùng số điện thoại đã tạo trên chính trình duyệt này; không có xác thực máy chủ.</div><button class="btn btn-coral" type="submit">Đăng nhập</button></form><form id="registerForm" class="hidden" onsubmit="register(event)"><div class="form-row"><label class="field"><span>Họ và tên *</span><input id="registerName" required placeholder="Tên của bạn"></label><label class="field"><span>Số điện thoại *</span><input id="registerPhone" required inputmode="tel" maxlength="10" placeholder="09xx xxx xxx"></label></div><label class="field"><span>Địa chỉ *</span><textarea id="registerAddress" required placeholder="Địa chỉ nhận đồ thường dùng"></textarea></label><div class="help">Tạo tài khoản giúp bạn xem đơn và tích điểm trên trình duyệt này. Khi triển khai thật, cần máy chủ và đăng nhập bảo mật.</div><button class="btn btn-coral" type="submit">Tạo tài khoản 4T</button></form></div></section></div>
+  <div class="overlay" id="resultModal"><section class="modal"><div class="modal-head"><div><h3 id="resultTitle">4T đã nhận lịch</h3><p id="resultSubtitle">Đơn của bạn đã được lưu trên thiết bị.</p></div><button class="close" onclick="closeModal('resultModal')">×</button></div><div class="modal-body" id="resultBody"></div></section></div>
+  <div class="overlay" id="reviewModal"><section class="modal"><div class="modal-head"><div><h3>Đánh giá đơn hàng</h3><p>Góp ý được lưu cục bộ trong trình duyệt này.</p></div><button class="close" onclick="closeModal('reviewModal')">×</button></div><form class="modal-body" onsubmit="saveReview(event)"><div class="stars" id="starPicker"><button type="button" class="star active" data-value="1" onclick="setRating(1)">★</button><button type="button" class="star active" data-value="2" onclick="setRating(2)">★</button><button type="button" class="star active" data-value="3" onclick="setRating(3)">★</button><button type="button" class="star active" data-value="4" onclick="setRating(4)">★</button><button type="button" class="star active" data-value="5" onclick="setRating(5)">★</button></div><label class="field"><span>Chia sẻ thêm với 4T (tùy chọn)</span><textarea id="reviewComment" placeholder="Điều bạn hài lòng hoặc 4T có thể cải thiện..."></textarea></label><button class="btn btn-coral" type="submit">Gửi đánh giá</button></form></section></div>
+  <div class="toast" id="toast"></div>
   <script>
-    let currentUser = null;
-    let currentFilter = 'Tất cả';
-    let pendingOrder = null;
+    const K={users:'4t_local_users',orders:'4t_local_orders',session:'4t_local_session',visits:'4t_local_visits',chat:'4t_local_chat'};
+    let filter='all',reviewOrderId=null,rating=5;
+    const read=(key,fallback)=>{try{const value=localStorage.getItem(key);return value?JSON.parse(value):fallback}catch{return fallback}};
+    const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+    const esc=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const money=value=>Number(value||0).toLocaleString('vi-VN')+'đ';
+    const users=()=>read(K.users,[]); const orders=()=>read(K.orders,[]); const session=()=>read(K.session,null);
+    function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3400)}
+    function init(){const v=Number(read(K.visits,0))+1;write(K.visits,v);renderAll();calculateTotal();renderChat()}
+    function renderAll(){renderNav();renderStats();renderOrderForm();renderAccount()}
+    function renderStats(){document.getElementById('statVisits').textContent=read(K.visits,0).toLocaleString('vi-VN');document.getElementById('statOrders').textContent=orders().length.toLocaleString('vi-VN')}
+    function renderNav(){const s=session(),el=document.getElementById('navActions');el.innerHTML=s?`<a href="#tai-khoan" class="btn btn-outline login">${esc(s.name.split(' ')[0])}</a><button class="btn btn-coral" onclick="logout()">Đăng xuất</button>`:`<button class="btn btn-outline login" onclick="openAuth('login')">Đăng nhập</button><a href="#dat-don"><button class="btn btn-coral">⌁ Đặt đơn</button></a>`}
+    function renderOrderForm(){const s=session(),notice=document.getElementById('guestNotice');if(s){notice.classList.add('hidden');document.getElementById('orderName').value=s.name;document.getElementById('orderPhone').value=s.phone;document.getElementById('orderAddress').value=s.address}else{notice.classList.remove('hidden')}}
+    function calculateTotal(){const kg=Math.max(3,Number(document.getElementById('orderKg')?.value||3));const type=document.querySelector('input[name="service"]:checked')?.value||'standard';document.getElementById('orderTotal').textContent=money(kg*(type==='express'?30000:15000))}
+    function openAuth(tab){document.getElementById('authModal').classList.add('active');showAuthTab(tab)} function closeModal(id){document.getElementById(id).classList.remove('active')}
+    function showAuthTab(tab){const login=tab==='login';document.getElementById('loginTab').classList.toggle('active',login);document.getElementById('registerTab').classList.toggle('active',!login);document.getElementById('loginForm').classList.toggle('hidden',!login);document.getElementById('registerForm').classList.toggle('hidden',login)}
+    function validPhone(phone){return /^0\d{9}$/.test(phone)}
+    function register(e){e.preventDefault();const name=document.getElementById('registerName').value.trim(),phone=document.getElementById('registerPhone').value.trim(),address=document.getElementById('registerAddress').value.trim();if(!validPhone(phone))return toast('Số điện thoại cần đủ 10 số và bắt đầu bằng 0.');if(address.length<8)return toast('Vui lòng nhập địa chỉ nhận đồ rõ hơn.');let list=users();if(list.some(x=>x.phone===phone))return toast('Số điện thoại này đã có tài khoản cục bộ. Hãy đăng nhập.');const user={name,phone,address,points:0,createdAt:Date.now()};list.push(user);write(K.users,list);write(K.session,user);closeModal('authModal');renderAll();toast('Đã tạo tài khoản 4T trên trình duyệt này.');location.hash='tai-khoan'}
+    function login(e){e.preventDefault();const phone=document.getElementById('loginPhone').value.trim(),user=users().find(x=>x.phone===phone);if(!user)return toast('Chưa tìm thấy tài khoản trên trình duyệt này. Hãy tạo tài khoản trước.');write(K.session,user);closeModal('authModal');renderAll();toast('Đăng nhập thành công.');location.hash='tai-khoan'}
+    function logout(){localStorage.removeItem(K.session);document.getElementById('orderForm').reset();renderAll();calculateTotal();toast('Đã đăng xuất khỏi tài khoản cục bộ.')}
+    function submitOrder(e){e.preventDefault();const s=session(),name=document.getElementById('orderName').value.trim(),phone=document.getElementById('orderPhone').value.trim(),address=document.getElementById('orderAddress').value.trim(),kg=Math.max(3,Number(document.getElementById('orderKg').value||3)),type=document.querySelector('input[name="service"]:checked').value,payment=document.querySelector('input[name="payment"]:checked').value,notes=document.getElementById('orderNotes').value.trim();if(!validPhone(phone))return toast('Số điện thoại cần đủ 10 số và bắt đầu bằng 0.');if(address.length<8)return toast('Vui lòng nhập địa chỉ nhận đồ rõ hơn.');const total=kg*(type==='express'?30000:15000),order={id:'4T-'+Math.random().toString(36).slice(2,8).toUpperCase(),name,phone,address,kg,type,payment,notes,total,status:'Đã tiếp nhận',createdAt:Date.now(),memberPhone:s?.phone||null,pointsAwarded:false,review:null};const list=orders();list.unshift(order);write(K.orders,list);renderStats();if(s)renderAccount();showResult(order,Boolean(s));document.getElementById('orderNotes').value=''}
+    function showResult(order,isMember){document.getElementById('resultTitle').textContent='4T đã nhận lịch lấy đồ';document.getElementById('resultSubtitle').textContent=`Mã đơn ${order.id} · Tạm tính ${money(order.total)}`;let pay=order.payment==='cash'?'Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ.':order.payment==='bank'?'App ngân hàng: 4T sẽ gửi QR chuyển khoản sau khi xác nhận đơn.':'Ví điện tử: 4T sẽ gửi hướng dẫn thanh toán sau khi xác nhận đơn.';document.getElementById('resultBody').innerHTML=`<div class="help"><b>${esc(pay)}</b><br>Phiên bản một tệp không kết nối ngân hàng, QR merchant hoặc ví điện tử thật.</div>${isMember?`<p style="font-size:13px;color:#58708d;line-height:1.7">Đơn được gắn với tài khoản của bạn. Hãy vào <a href="#tai-khoan" onclick="closeModal('resultModal')" style="font-weight:800;color:#e9415a">Tài khoản</a> để xem tiến độ. Điểm sẽ được cộng khi đơn chuyển sang “Hoàn tất (mô phỏng)”.</p>`:`<p style="font-size:13px;color:#8d4553;line-height:1.7"><b>Đơn khách vãng lai đã được lưu.</b><br>Để bảo vệ dữ liệu, bạn không xem được tiến độ hoặc tích điểm. Hãy đăng nhập trước khi đặt đơn sau.</p>`}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;document.getElementById('resultModal').classList.add('active')}
+    function statusClass(status){return status==='Hoàn tất'?'done':status==='Đang xử lý'?'processing':'waiting'}
+    function renderAccount(){const shell=document.getElementById('accountContent'),s=session();if(!s){shell.innerHTML=`<div class="panel panel-pad" style="max-width:760px;margin:auto;background:linear-gradient(135deg,#082e60,#124e96);color:#fff"><p class="eyebrow" style="color:#b9e7ff">TÀI KHOẢN 4T</p><h2 style="color:#fff;margin-top:9px">Theo dõi từng mẻ giặt.<br>Tích từng điểm 4T.</h2><p style="margin:18px 0;color:#d8e9ff;font-size:14px;line-height:1.7">Đăng nhập để xem đơn, tiến độ, điểm tích lũy và gửi đánh giá sau khi hoàn tất. Đơn khách vãng lai không hiển thị ở đây.</p><button class="btn btn-coral" onclick="openAuth('login')">Đăng nhập / tạo tài khoản</button></div>`;return}const user=users().find(x=>x.phone===s.phone)||s;const own=orders().filter(x=>x.memberPhone===user.phone);const display=filter==='all'?own:own.filter(x=>x.status===filter);shell.innerHTML=`<div class="account-top"><div><p class="eyebrow">TÀI KHOẢN 4T</p><h1>Chào ${esc(user.name.split(' ')[0])}.</h1><p>Đơn hàng, tiến độ và điểm tích lũy trên thiết bị này.</p></div><a href="#dat-don"><button class="btn btn-coral">⌁ Đặt đơn mới</button></a></div><div class="loyalty-grid"><section class="loyalty"><small>ĐIỂM 4T CỦA BẠN</small><div class="points">${Number(user.points||0)}<span> điểm</span></div><p>Mỗi 10.000đ giá trị đơn hoàn tất được tích 1 điểm. Đây là mô phỏng cục bộ; hệ thống thật cần được cửa hàng xác nhận đơn hoàn tất.</p></section><section class="ledger"><span style="color:#1679bf;font-size:20px">▤</span><b>${own.length}</b><p>Đơn tạo bằng tài khoản này</p><p style="border-top:1px solid var(--line);padding-top:13px;margin-top:19px">Tích điểm khi hoàn tất đơn.</p></section></div><div class="orders-title"><div><p class="eyebrow">ĐƠN HÀNG CỦA BẠN</p><h2>Tiến độ xử lý</h2></div><span style="font-size:12px;font-weight:800;color:#71839a">${own.length} đơn</span></div><div class="filters">${[['all','Tất cả'],['Đã tiếp nhận','Đã tiếp nhận'],['Đang xử lý','Đang xử lý'],['Hoàn tất','Hoàn tất']].map(([key,label])=>`<button class="filter ${filter===key?'active':''}" onclick="setFilter('${key}')">${label}</button>`).join('')}</div><div>${display.length?display.map(orderCard).join(''):`<div class="empty">⌁<b>Chưa có đơn phù hợp</b><span style="font-size:12px">Đặt đơn khi đang đăng nhập để theo dõi và tích điểm.</span></div>`}</div>`}
+    function orderCard(o){const status=o.status==='Hoàn tất'?'Hoàn tất':o.status;const type=o.type==='express'?'Giặt sấy nhanh':'Giặt sấy tiêu chuẩn';return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString('vi-VN')} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${o.payment==='cash'?'Tiền mặt':o.payment==='bank'?'App ngân hàng':'Ví điện tử'} · ${esc(o.address)}</span>${o.status!=='Hoàn tất'?`<button class="text-btn" onclick="completeDemo('${o.id}')">Mô phỏng hoàn tất & tích điểm</button>`:o.review?`<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>`:`<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`}</div></article>`}
+    function setFilter(value){filter=value;renderAccount()}
+    function completeDemo(id){const s=session();let list=orders(),o=list.find(x=>x.id===id&&x.memberPhone===s?.phone);if(!o)return; o.status='Hoàn tất';if(!o.pointsAwarded){const earned=Math.floor(o.total/10000);let listUsers=users();const index=listUsers.findIndex(x=>x.phone===s.phone);if(index>-1){listUsers[index].points=Number(listUsers[index].points||0)+earned;write(K.users,listUsers);write(K.session,listUsers[index]);}o.pointsAwarded=true;toast(`Đơn ${id} hoàn tất (mô phỏng). Đã cộng ${earned} điểm 4T.`)}write(K.orders,list);renderAll()}
+    function openReview(id){reviewOrderId=id;rating=5;document.getElementById('reviewComment').value='';setRating(5);document.getElementById('reviewModal').classList.add('active')}
+    function setRating(value){rating=value;document.querySelectorAll('.star').forEach(el=>el.classList.toggle('active',Number(el.dataset.value)<=value))}
+    function saveReview(e){e.preventDefault();let list=orders(),o=list.find(x=>x.id===reviewOrderId);if(o){o.review={rating,comment:document.getElementById('reviewComment').value.trim(),createdAt:Date.now()};write(K.orders,list);closeModal('reviewModal');renderAccount();toast('Cảm ơn bạn đã gửi đánh giá cho 4T.')}}
+    function toggleChat(){document.getElementById('chatBox').classList.toggle('open')}
+    function renderChat(){let list=read(K.chat,[{role:'store',text:'Xin chào! 4T có thể hỗ trợ lịch lấy đồ, dịch vụ hoặc hình thức thanh toán.'}]);document.getElementById('chatBody').innerHTML=list.map(m=>`<div class="bubble ${m.role==='user'?'user-bubble':'store-bubble'}">${esc(m.text)}</div>`).join('');const body=document.getElementById('chatBody');body.scrollTop=body.scrollHeight}
+    function sendChat(e){e.preventDefault();const input=document.getElementById('chatInput'),text=input.value.trim();if(!text)return;let list=read(K.chat,[]);list.push({role:'user',text});write(K.chat,list);input.value='';renderChat();setTimeout(()=>{const reply=[{role:'store',text:'4T đã nhận tin nhắn. Chúng tôi sẽ phản hồi trong giờ phục vụ.'}];write(K.chat,[...read(K.chat,[]),...reply]);renderChat()},500)}
+    function toggleMenu(){document.getElementById('mobileLinks').classList.toggle('open')} function closeMenu(){document.getElementById('mobileLinks').classList.remove('open')}
 
-    window.onload = function() {
-      let visits = parseInt(localStorage.getItem('visits') || '1245') + 1;
-      localStorage.setItem('visits', visits);
-      document.getElementById('statVisits').innerText = visits.toLocaleString();
-      
-      updateStats();
-      renderUserDashboard();
-      renderHistory();
-    };
-
-    function updateStats() {
-      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      let users = JSON.parse(localStorage.getItem('users') || '[]');
-      document.getElementById('statOrders').innerText = (328 + orders.length).toLocaleString();
-      document.getElementById('statUsers').innerText = (152 + users.length).toLocaleString();
+    /* --- Giao–nhận và phí ship: các hàm phía dưới thay thế logic tính tổng ban đầu. --- */
+    function installDeliveryModule(){
+      const form=document.getElementById('orderForm');
+      if(!form||document.getElementById('deliveryModule'))return;
+      const firstDivider=form.querySelector('.divider');
+      const module=document.createElement('section');
+      module.id='deliveryModule';module.className='delivery-module';
+      module.innerHTML=`<h3>1. Dịch vụ giao–nhận</h3><p>Chọn hình thức phù hợp. Phí giao–nhận được tính theo khoảng cách ước tính từ cửa hàng 4T.</p><div class="delivery-options"><label class="delivery-option"><input type="radio" name="deliveryMode" value="store" checked onchange="updateDeliveryUI()"><b>⌂ Nhận & trả tại cửa hàng</b><small>Khách tự mang đồ đến và nhận lại tại 4T · không có phí ship.</small></label><label class="delivery-option"><input type="radio" name="deliveryMode" value="address" onchange="updateDeliveryUI()"><b>⌁ Nhận & giao theo địa chỉ</b><small>4T nhận và giao theo thông tin khách hàng điền ở trên.</small></label></div><div id="deliveryDistanceWrap" class="delivery-distance"><label class="field"><span>Khoảng cách ước tính từ cửa hàng 4T (km) *</span><input id="deliveryDistance" type="number" min="0" step="0.1" value="0" inputmode="decimal" oninput="calculateTotal()"></label></div><p id="deliveryFeeNote" class="delivery-fee-note"></p>`;
+      firstDivider.before(module);
+      const headings=form.querySelectorAll(':scope > h3');
+      if(headings.length>=3){headings[0].textContent='2. Thông tin nhận đồ';headings[1].textContent='3. Chọn dịch vụ';headings[2].textContent='4. Thanh toán'}
+      const memberNote=document.createElement('p');memberNote.id='memberFillNote';memberNote.className='member-fill-note';
+      document.getElementById('orderAddress').closest('label').after(memberNote);
+      const total=document.getElementById('orderTotal');
+      total.insertAdjacentHTML('afterend','<span id="priceBreakdown" class="price-breakdown"></span>');
+      updateDeliveryUI();
     }
-
-    function renderUserDashboard() {
-      let container = document.getElementById('accountDashboard');
-      let nav = document.getElementById('authNav');
-
-      if (currentUser) {
-        nav.innerHTML = `
-          <div class="user-pill">
-            <div class="user-avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
-            <span style="font-weight:600; font-size:0.9rem;">${currentUser.name}</span>
-          </div>
-          <button class="btn-auth-outline" onclick="logout()" style="padding:0.3rem 0.8rem; font-size:0.85rem;">Đăng xuất</button>
-        `;
-
-        container.innerHTML = `
-          <div class="user-card">
-            <div class="user-card-header">
-              <div>
-                <h3 style="margin:0;">${currentUser.name}</h3>
-                <p style="font-size:0.85rem; opacity:0.8;">📞 ${currentUser.phone}</p>
-              </div>
-              <span class="rank-badge">Khách Hàng Thân Thiết</span>
-            </div>
-            <p style="font-size:0.85rem; margin-bottom: 5px;">Điểm tích lũy dịch vụ:</p>
-            <div class="points-display">${currentUser.points || 100} <span style="font-size:1rem; font-weight:normal;">Điểm</span></div>
-          </div>
-        `;
-
-        document.getElementById('custName').value = currentUser.name;
-        document.getElementById('custPhone').value = currentUser.phone;
-        document.getElementById('custAddress').value = currentUser.address;
-        document.getElementById('formAutoFillNotice').innerText = "✅ Tự động điền dữ liệu từ tài khoản đã đăng nhập.";
-        document.getElementById('formAutoFillNotice').style.color = "green";
-
-      } else {
-        nav.innerHTML = `
-          <button class="btn-auth-outline" onclick="openAuthModal('login')">Đăng Nhập</button>
-          <button class="btn-auth" onclick="openAuthModal('register')">Đăng Ký</button>
-        `;
-
-        container.innerHTML = `
-          <div class="card" style="background:#f8fafc; border:1px dashed #cbd5e1;">
-            <p><strong>Dành cho Khách Hàng:</strong> Đăng nhập tài khoản để xem điểm tích lũy và theo dõi lịch sử dịch vụ đầy đủ!</p>
-            <button class="btn-auth-outline" onclick="openAuthModal('login')" style="margin-top:10px; width:100%;">Đăng Nhập / Đăng Ký</button>
-          </div>
-        `;
-      }
+    function getDeliveryDetails(){
+      const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value||'store';
+      const kg=Math.max(3,Number(document.getElementById('orderKg')?.value||3));
+      const distance=Math.max(0,Number(document.getElementById('deliveryDistance')?.value||0));
+      const roundedKm=Math.ceil(distance);
+      const free=mode==='address'&&kg>10&&distance<=5;
+      const shippingFee=mode==='store'||free?0:roundedKm*2000;
+      return {mode,kg,distance,roundedKm,free,shippingFee,label:mode==='store'?'Nhận & trả tại cửa hàng':'Nhận & giao theo địa chỉ khách yêu cầu'};
     }
-
-    function openAuthModal(type) { document.getElementById('authModal').style.display = 'flex'; switchTab(type); }
-    function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
-    function switchTab(type) {
-      if(type === 'login') {
-        document.getElementById('loginTabBtn').classList.add('active'); document.getElementById('registerTabBtn').classList.remove('active');
-        document.getElementById('loginForm').classList.add('active'); document.getElementById('registerForm').classList.remove('active');
-      } else {
-        document.getElementById('registerTabBtn').classList.add('active'); document.getElementById('loginTabBtn').classList.remove('active');
-        document.getElementById('registerForm').classList.add('active'); document.getElementById('loginForm').classList.remove('active');
-      }
+    function updateDeliveryUI(){
+      const details=getDeliveryDetails();
+      const wrap=document.getElementById('deliveryDistanceWrap'),note=document.getElementById('deliveryFeeNote');
+      if(!wrap||!note)return;
+      wrap.classList.toggle('show',details.mode==='address');
+      const address=document.getElementById('orderAddress'),addressTitle=address?.closest('label')?.querySelector('span');
+      if(address){address.required=details.mode==='address';address.placeholder=details.mode==='address'?'Số nhà, đường, phường/xã, ghi chú điểm nhận...':'Không bắt buộc khi khách nhận và trả tại cửa hàng';}
+      if(addressTitle)addressTitle.textContent=details.mode==='address'?'Địa chỉ giao–nhận *':'Địa chỉ giao–nhận (không bắt buộc)';
+      note.innerHTML=details.mode==='store'?'<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T.':'<b>Chính sách giao–nhận:</b> miễn phí khi đơn trên 10 kg và trong bán kính 5 km. Các trường hợp còn lại tính 2.000đ cho mỗi km, làm tròn lên.';
+      calculateTotal();
     }
-
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          document.getElementById('regGPS').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-        }, () => alert("Vui lòng bật Geolocation/GPS trên thiết bị!"));
-      } else { alert("Trình duyệt không hỗ trợ vị trí GPS."); }
+    function calculateTotal(){
+      const kg=Math.max(3,Number(document.getElementById('orderKg')?.value||3));
+      const type=document.querySelector('input[name="service"]:checked')?.value||'standard';
+      const serviceFee=kg*(type==='express'?30000:15000),delivery=getDeliveryDetails(),total=serviceFee+delivery.shippingFee;
+      const totalNode=document.getElementById('orderTotal'),breakdown=document.getElementById('priceBreakdown');
+      if(totalNode)totalNode.textContent=money(total);
+      if(breakdown)breakdown.innerHTML=`Dịch vụ: <b>${money(serviceFee)}</b><br>Giao–nhận: <b>${delivery.shippingFee===0?'Miễn phí':money(delivery.shippingFee)}</b>${delivery.mode==='address'?` · ${delivery.distance} km`:' '}`;
     }
-
-    function validatePhone(phone) { return /^0\d{9}$/.test(phone); }
-    function validateAddress(address) { return address.trim().length >= 10; }
-
-    function handleRegister(e) {
+    function renderOrderForm(){
+      const s=session(),notice=document.getElementById('guestNotice'),memberNote=document.getElementById('memberFillNote');
+      if(s){
+        notice?.classList.add('hidden');
+        document.getElementById('orderName').value=s.name;
+        document.getElementById('orderPhone').value=s.phone;
+        document.getElementById('orderAddress').value=s.address;
+        if(memberNote){memberNote.textContent='✓ Đã tự điền thông tin từ tài khoản 4T. Bạn vẫn có thể sửa bất kỳ trường nào theo nhu cầu.';memberNote.classList.add('show')}
+      }else{notice?.classList.remove('hidden');memberNote?.classList.remove('show')}
+      updateDeliveryUI();
+    }
+    function submitOrder(e){
       e.preventDefault();
-      let name = document.getElementById('regName').value;
-      let phone = document.getElementById('regPhone').value;
-      let address = document.getElementById('regAddress').value;
-      let gps = document.getElementById('regGPS').value;
-
-      if (!validatePhone(phone)) { alert("Số điện thoại phải đủ 10 số (VD: 0909123456)!"); return; }
-      if (!validateAddress(address)) { alert("Địa chỉ phải nhập chi tiết tối thiểu 10 ký tự!"); return; }
-      if (!gps) { alert("Vui lòng bấm nút lấy tọa độ vị trí GPS!"); return; }
-
-      let users = JSON.parse(localStorage.getItem('users') || '[]');
-      let newUser = { name, phone, address, gps, points: 50 };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-
-      alert('Đăng ký tài khoản thành công! Tặng ngay 50 điểm tích lũy.');
-      updateStats();
-      currentUser = newUser;
-      renderUserDashboard();
-      closeAuthModal();
-      renderHistory();
+      const s=session(),name=document.getElementById('orderName').value.trim(),phone=document.getElementById('orderPhone').value.trim(),address=document.getElementById('orderAddress').value.trim(),kg=Math.max(3,Number(document.getElementById('orderKg').value||3)),type=document.querySelector('input[name="service"]:checked').value,payment=document.querySelector('input[name="payment"]:checked').value,notes=document.getElementById('orderNotes').value.trim(),delivery=getDeliveryDetails();
+      if(!validPhone(phone))return toast('Số điện thoại cần đủ 10 số và bắt đầu bằng 0.');
+      if(delivery.mode==='address'&&address.length<8)return toast('Vui lòng nhập địa chỉ giao–nhận rõ hơn.');
+      if(delivery.mode==='address'&&delivery.distance<=0)return toast('Vui lòng nhập khoảng cách ước tính từ cửa hàng 4T.');
+      const serviceFee=kg*(type==='express'?30000:15000),total=serviceFee+delivery.shippingFee;
+      const order={id:'4T-'+Math.random().toString(36).slice(2,8).toUpperCase(),name,phone,address,kg,type,payment,notes,total,serviceFee,shippingFee:delivery.shippingFee,distanceKm:delivery.distance,deliveryMode:delivery.mode,deliveryLabel:delivery.label,status:'Đã tiếp nhận',createdAt:Date.now(),memberPhone:s?.phone||null,pointsAwarded:false,review:null};
+      const list=orders();list.unshift(order);write(K.orders,list);renderStats();if(s)renderAccount();showResult(order,Boolean(s));document.getElementById('orderNotes').value='';
     }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      let phone = document.getElementById('loginPhone').value;
-      if (!validatePhone(phone)) { alert("Số điện thoại không đủ 10 số!"); return; }
-
-      let users = JSON.parse(localStorage.getItem('users') || '[]');
-      let user = users.find(u => u.phone === phone);
-      
-      if(user) { currentUser = user; } 
-      else { currentUser = { name: "Khách Hàng", phone: phone, address: "123 Nguyễn Văn A, Bình Dương", points: 100 }; }
-
-      renderUserDashboard();
-      closeAuthModal();
-      renderHistory();
+    function showResult(order,isMember){
+      document.getElementById('resultTitle').textContent='4T đã nhận lịch lấy đồ';
+      document.getElementById('resultSubtitle').textContent=`Mã đơn ${order.id} · Tạm tính ${money(order.total)}`;
+      const paymentText=order.payment==='cash'?'Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ.':order.payment==='bank'?'App ngân hàng: 4T sẽ gửi QR chuyển khoản sau khi xác nhận đơn.':'Ví điện tử: 4T sẽ gửi hướng dẫn thanh toán sau khi xác nhận đơn.';
+      const deliveryText=order.deliveryMode==='store'?'Khách nhận & trả tại cửa hàng 4T.':`${order.deliveryLabel} · ${order.distanceKm} km · phí ship ${order.shippingFee===0?'miễn phí':money(order.shippingFee)}.`;
+      document.getElementById('resultBody').innerHTML=`<div class="help"><b>${esc(deliveryText)}</b><br>Dịch vụ ${money(order.serviceFee)} · ${esc(paymentText)}<br>Phiên bản một tệp không kết nối ngân hàng, QR merchant hoặc ví điện tử thật.</div>${isMember?`<p style="font-size:13px;color:#58708d;line-height:1.7">Đơn được gắn với tài khoản của bạn. Hãy vào <a href="#tai-khoan" onclick="closeModal('resultModal')" style="font-weight:800;color:#e9415a">Tài khoản</a> để xem tiến độ. Điểm được cộng khi đơn chuyển sang “Hoàn tất (mô phỏng)”.</p>`:`<p style="font-size:13px;color:#8d4553;line-height:1.7"><b>Đơn khách vãng lai đã được lưu.</b><br>Để bảo vệ dữ liệu, bạn không xem được tiến độ hoặc tích điểm. Hãy đăng nhập trước khi đặt đơn sau.</p>`}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
+      document.getElementById('resultModal').classList.add('active');
     }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById('orderForm').reset();
-      document.getElementById('formAutoFillNotice').innerText = "(Bạn có thể tạo đơn ngay không cần đăng nhập)";
-      document.getElementById('formAutoFillNotice').style.color = "#64748b";
-      renderUserDashboard();
-      renderHistory();
+    function orderCard(o){
+      const status=o.status==='Hoàn tất'?'Hoàn tất':o.status,type=o.type==='express'?'Giặt sấy nhanh':'Giặt sấy tiêu chuẩn';
+      const delivery=o.deliveryLabel||'Nhận & trả tại cửa hàng',ship=Number(o.shippingFee||0),distance=o.deliveryMode==='address'?` · ${o.distanceKm||0} km`:'';
+      return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString('vi-VN')} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${esc(delivery)}${distance} · ship ${ship===0?'miễn phí':money(ship)}<br>${o.payment==='cash'?'Tiền mặt':o.payment==='bank'?'App ngân hàng':'Ví điện tử'}</span>${o.status!=='Hoàn tất'?`<button class="text-btn" onclick="completeDemo('${o.id}')">Mô phỏng hoàn tất & tích điểm</button>`:o.review?`<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>`:`<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`}</div></article>`;
     }
-
-    function calculateTotal() {
-      let weight = parseFloat(document.getElementById('weight').value) || 0;
-      let iron = parseInt(document.getElementById('iron').value) || 0;
-      let delivery = parseInt(document.getElementById('delivery').value) || 0;
-      let total = (weight * 15000) + (iron * 10000) + delivery;
-      document.getElementById('totalAmount').innerText = total.toLocaleString('vi-VN');
-    }
-
-    function submitOrder() {
-      let name = document.getElementById('custName').value;
-      let phone = document.getElementById('custPhone').value;
-      let address = document.getElementById('custAddress').value;
-      let paymentType = document.getElementById('payment').value;
-      let totalText = document.getElementById('totalAmount').innerText;
-      let totalNum = parseInt(totalText.replace(/\./g, ''));
-
-      if (!validatePhone(phone)) { alert("SĐT phải đúng 10 số!"); return; }
-      if (!validateAddress(address)) { alert("Địa chỉ giao nhận phải dài ít nhất 10 ký tự!"); return; }
-      if (totalNum <= 0) { alert("Vui lòng nhập khối lượng giặt hoặc số lượng ủi!"); return; }
-
-      let orderId = "DH" + Math.floor(1000 + Math.random() * 9000);
-      pendingOrder = {
-        id: orderId,
-        name: name,
-        phone: phone,
-        address: address,
-        total: totalNum,
-        payment: paymentType,
-        status: "Chờ tiếp nhận",
-        date: new Date().toLocaleDateString('vi-VN')
-      };
-
-      if (paymentType.includes("Ví điện tử")) {
-        // Tự tạo liên kết Mã QR Ngân Hàng/Ví VietQR Chuẩn
-        let qrUrl = `https://img.vietqr.io/image/MB-0909123456-compact2.png?amount=${totalNum}&addInfo=THANH TOAN ${orderId}&accountName=TIEM GIAT SAY 4T`;
-        document.getElementById('qrImage').src = qrUrl;
-        document.getElementById('qrNotice').innerText = `Mã QR chuyển khoản ${totalNum.toLocaleString()}đ cho đơn ${orderId}`;
-        document.getElementById('paymentModal').style.display = 'flex';
-      } else {
-        saveOrder(pendingOrder);
-      }
-    }
-
-    function finishQRPayment() {
-      closePaymentModal();
-      if(pendingOrder) {
-        pendingOrder.payment = "Ví điện tử / QR Ngân Hàng (Đã thanh toán)";
-        saveOrder(pendingOrder);
-      }
-    }
-
-    function saveOrder(orderObj) {
-      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      orders.unshift(orderObj);
-      localStorage.setItem('orders', JSON.stringify(orders));
-      alert(`Đã đặt đơn hàng ${orderObj.id} thành công!`);
-      updateStats();
-      renderHistory();
-      pendingOrder = null;
-    }
-
-    function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; }
-
-    function filterOrders(status, btn) {
-      currentFilter = status;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderHistory();
-    }
-
-    function renderHistory() {
-      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      let container = document.getElementById('orderHistoryList');
-      let phone = currentUser ? currentUser.phone : document.getElementById('custPhone').value;
-
-      let myOrders = orders.filter(o => o.phone === phone);
-      if (currentFilter !== 'Tất cả') myOrders = myOrders.filter(o => o.status === currentFilter);
-
-      if(myOrders.length === 0) {
-        container.innerHTML = `<p style="color: #64748b; font-size:0.85rem; text-align:center; padding: 1rem 0;">Chưa có đơn hàng phù hợp.</p>`;
-        return;
-      }
-
-      let html = '';
-      myOrders.forEach(o => {
-        let badgeClass = "st-wait";
-        if(o.status === "Đang xử lý") badgeClass = "st-process";
-        if(o.status === "Đã xử lý") badgeClass = "st-done";
-        if(o.status === "Đang giao hàng") badgeClass = "st-shipping";
-        if(o.status === "Đã thanh toán") badgeClass = "st-paid";
-
-        html += `
-          <div class="order-item">
-            <div class="order-header">
-              <span><b>Mã: ${o.id}</b> (${o.date})</span>
-              <span class="badge ${badgeClass}">${o.status}</span>
-            </div>
-            <p style="font-size:0.85rem;">📍 Giao: ${o.address}</p>
-            <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.9rem;">
-              <span style="font-size:0.8rem; color:#64748b;">${o.payment}</span>
-              <strong style="color:#e11d48;">${o.total.toLocaleString()} VNĐ</strong>
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function toggleChat() {
-      let box = document.getElementById('chatBox');
-      box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    function sendMessage() {
-      let input = document.getElementById('chatInput');
-      let body = document.getElementById('chatBody');
-      if(input.value.trim() !== '') {
-        body.innerHTML += `<p style="text-align:right; margin-top:5px;"><b>Bạn:</b> ${input.value}</p>`;
-        input.value = '';
-        setTimeout(() => {
-          body.innerHTML += `<p style="margin-top:5px;"><b>Cửa hàng:</b> 4T đã nhận tin nhắn và sẽ phản hồi ngay ạ!</p>`;
-          body.scrollTop = body.scrollHeight;
-        }, 800);
-      }
-    }
+    function init(){installDeliveryModule();const v=Number(read(K.visits,0))+1;write(K.visits,v);renderAll();calculateTotal();renderChat()}
+    window.addEventListener('DOMContentLoaded',init);
   </script>
 </body>
 </html>

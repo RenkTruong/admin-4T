@@ -412,6 +412,14 @@
         letter-spacing: -0.045em;
         color: var(--ink);
       }
+      .section-title .single-line-title {
+        white-space: nowrap;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--ink-2);
+      }
       .four-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -466,6 +474,16 @@
         color: var(--muted);
         font-size: 13px;
         line-height: 1.65;
+      }
+      .store-map-link {
+        color: var(--ink-2);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .store-map-link:hover,
+      .store-map-link:focus-visible {
+        color: var(--coral);
+        text-decoration: underline;
       }
       .services {
         background: #fff;
@@ -1154,6 +1172,10 @@
         box-shadow: 0 10px 22px rgba(10, 123, 216, 0.28);
       }
       @media (max-width: 800px) {
+        .section-title .single-line-title {
+          white-space: normal;
+          font-size: 29px;
+        }
         .nav-links,
         .nav-actions .login {
           display: none;
@@ -1606,7 +1628,9 @@
         <div class="container">
           <div class="section-title">
             <p class="eyebrow">4T LÀ CÁCH CHÚNG TÔI PHỤC VỤ</p>
-            <h2>Mỗi đơn hàng là một lời hứa được giữ trọn.</h2>
+            <h2 class="single-line-title">
+              Mỗi đơn hàng là một lời hứa được giữ trọn.
+            </h2>
           </div>
           <div class="four-grid">
             <article class="promise" tabindex="0">
@@ -1648,8 +1672,8 @@
               <b>Giặt sạch sâu</b><br />
               <b>Sấy khô nhanh</b><br />
               <b>Thơm lâu</b><br />
-              <b>Diệt khuẩn:</b> Tính năng giúp loại bỏ bụi mịn, giữ quần áo luôn
-              như mới.
+              <b>Diệt khuẩn:</b> Tính năng giúp loại bỏ bụi mịn, giữ quần áo
+              luôn như mới.
             </p>
             <a href="#dat-don"
               ><button class="btn btn-ink">Đặt lịch lấy đồ</button></a
@@ -1691,11 +1715,6 @@
               <h2>
                 Đặt đơn không cần đăng nhập.<br />Đăng nhập để nhận nhiều hơn.
               </h2>
-              <p>
-                Khách vãng lai vẫn gửi yêu cầu nhận đồ được. Để bảo vệ dữ liệu,
-                khách vãng lai không xem được tiến độ, lịch sử đơn hoặc nhận
-                điểm tích lũy trong bản một tệp.
-              </p>
             </div>
             <div>
               <a href="#dat-don"
@@ -1871,7 +1890,7 @@
           </div>
           <div>
             <h3>Địa chỉ cửa hàng</h3>
-            <p>123 Nguyễn Văn A, P. Bình Hòa,<br />TP. Thuận An, Bình Dương</p>
+            <p>123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh</p>
           </div>
           <div>
             <a
@@ -2072,6 +2091,7 @@
         chat: "4t_local_chat",
       };
       const STORE_ADDRESS = "123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh";
+      const STORE_MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(STORE_ADDRESS)}`;
       const STORE_GEOCODE_ADDRESS =
         "123 Liên Khu 4-5, Phường Bình Tân, Thành phố Hồ Chí Minh, Việt Nam";
       let distanceTimer = 0,
@@ -2640,8 +2660,7 @@
         if (intro)
           intro.innerHTML = `4T chăm sóc từng mẻ giặt với tinh thần <b>Tử tế – Tận tâm – Thơm sạch – Tiện lợi</b>. Đặt lịch trực tuyến, 4T xác nhận và nhận trả tận nơi.`;
         if (contact)
-          contact.innerHTML =
-            "123 Liên Khu 4-5,<br>Phường Bình Tân, Hồ Chí Minh";
+          contact.innerHTML = `<a class="store-map-link" href="${STORE_MAP_URL}" target="_blank" rel="noopener noreferrer">${STORE_ADDRESS}</a>`;
         if (visitLabel) visitLabel.textContent = "Lượt truy cập";
         if (addressLabel) addressLabel.textContent = "Địa chỉ gửi hàng *";
       }
@@ -2823,7 +2842,7 @@
               : "Địa chỉ gửi hàng (không bắt buộc)";
         note.innerHTML =
           details.mode === "store"
-            ? "<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T."
+            ? "<b>Miễn phí ship</b>"
             : "<b>Chính sách giao–nhận:</b> miễn phí khi đơn trên 10 kg và trong bán kính 5 km. Các trường hợp còn lại tính 2.000đ cho mỗi km, làm tròn lên.";
         calculateTotal();
         if (details.mode === "address") scheduleDistanceLookup();

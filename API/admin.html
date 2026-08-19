@@ -88,10 +88,195 @@
     .card-title { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
 
     /* Table Styling */
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 600px; }
-    th { background: #f8fafc; padding: 0.8rem; color: #475569; font-weight: 600; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
-    td { padding: 0.8rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-    tr:hover { background: #f8fafc; }
+    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.9rem; min-width: 760px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 76, 129, 0.04); }
+    .modern-table thead th {
+      background: linear-gradient(180deg, #f8fbff 0%, #edf6ff 100%);
+      padding: 0.9rem 0.8rem;
+      color: #1e3a5f;
+      font-weight: 700;
+      border-bottom: 1px solid #dfeaf5;
+      white-space: nowrap;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .modern-table thead th:first-child { border-top-left-radius: 12px; }
+    .modern-table thead th:last-child { border-top-right-radius: 12px; }
+    .modern-table tbody td {
+      padding: 0.9rem 0.8rem;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: middle;
+      background: #fff;
+    }
+    .modern-table tbody tr:last-child td { border-bottom: none; }
+    .modern-table tbody tr:hover td {
+      background: #f8fbff;
+    }
+    .table-cell-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eef6ff;
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .customer-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 150px;
+    }
+    .customer-name {
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .customer-meta {
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .service-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 145px;
+    }
+    .service-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #eef9f4;
+      color: #0f766e;
+      font-size: 0.72rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .service-weight {
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+    .money-value {
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.01em;
+    }
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-block;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .badge-pending { background: #fff7e6; color: #a16207; border-color: #f7d68e; }
+    .badge-processing { background: #e0f2fe; color: #075985; border-color: #7dd3fc; }
+    .badge-processed { background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
+    .badge-shipping { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
+    .badge-completed { background: #d1fae5; color: #065f46; border-color: #86efac; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+    .action-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+      min-width: 360px;
+    }
+    .action-panel {
+      display: grid;
+      grid-template-columns: minmax(110px, 1.2fr) minmax(130px, 1.4fr) minmax(170px, 2fr);
+      gap: 10px;
+      background: linear-gradient(180deg, #f8fbff 0%, #f6f8fb 100%);
+      border: 1px solid #dfeaf5;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 8px 20px rgba(15, 76, 129, 0.04);
+    }
+    .action-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    .action-column-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #4b647d;
+      padding: 0 2px;
+      white-space: nowrap;
+      overflow: visible;
+      text-overflow: clip;
+      min-height: 18px;
+    }
+    .action-current {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 78px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .action-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 8px;
+      min-height: 78px;
+      justify-content: center;
+    }
+    .action-box .select-status {
+      width: 100%;
+      min-width: 120px;
+      min-height: 36px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      font-weight: 600;
+      padding: 7px 10px;
+      font-size: 0.9rem;
+      text-overflow: ellipsis;
+      overflow: visible;
+    }
+    .action-box .badge {
+      width: fit-content;
+      align-self: center;
+    }
+    .action-stack .btn {
+      width: 100%;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
+      min-width: 88px;
+      border-radius: 10px;
+      min-height: 36px;
+      font-size: 0.76rem;
+      padding: 6px 8px;
+    }
+    .action-buttons-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 2px;
+      width: 100%;
+    }
 
     /* Badges & Status */
     .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; white-space: nowrap; }
@@ -123,9 +308,210 @@
 
     /* Modal Styling */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 1rem; }
-    .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 650px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
-    .close-modal { cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #64748b; }
+    .modal-content {
+      background: linear-gradient(180deg, #ffffff 0%, #f5faff 100%);
+      padding: 1.5rem 1.4rem 1.2rem;
+      border-radius: 18px;
+      width: 650px;
+      max-width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 18px 45px rgba(15, 76, 129, 0.18);
+      border: 1px solid #dbeaf8;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.7rem;
+      background: linear-gradient(90deg, rgba(15, 76, 129, 0.06), rgba(27, 117, 188, 0.02));
+      margin: -1.5rem -1.4rem 1rem;
+      padding: 1rem 1.4rem;
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+    }
+    .modal-header h3 {
+      color: var(--primary);
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+    .close-modal { cursor: pointer; font-size: 1.4rem; font-weight: bold; color: #64748b; transition: 0.2s; }
+    .close-modal:hover { color: var(--primary); }
+    .confirm-card {
+      background: linear-gradient(135deg, #fff7f7 0%, #ffffff 100%);
+      border: 1px solid #fecaca;
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      margin: 0.5rem 0 1rem;
+      box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.04);
+    }
+    .confirm-stacked {
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .status-confirm-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #0f172a;
+      box-shadow: 0 8px 20px rgba(15, 76, 129, 0.05);
+    }
+    .status-confirm-box strong {
+      color: var(--primary);
+    }
+    .confirm-warning {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, #fee2e2 0%, #fff1f2 100%);
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      margin-bottom: 0.9rem;
+      box-shadow: 0 5px 14px rgba(239, 68, 68, 0.12);
+    }
+    .confirm-warning .warning-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.12);
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .confirm-order-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px 18px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      box-shadow: 0 6px 18px rgba(15, 76, 129, 0.04);
+    }
+    .confirm-order-box strong { color: #111827; }
+    .confirm-order-box .muted { color: #64748b; }
+    .notice-modal {
+      display: none;
+      position: fixed;
+      z-index: 1200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .notice-modal-content {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border-radius: 18px;
+      width: 520px;
+      max-width: 100%;
+      border: 1px solid #dbeafe;
+      box-shadow: 0 18px 44px rgba(15, 76, 129, 0.2);
+      overflow: hidden;
+    }
+    .notice-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.2rem;
+      background: linear-gradient(90deg, #eef6ff 0%, #f8fafc 100%);
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .notice-header h3 {
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .notice-body {
+      padding: 1.2rem 1.2rem 1rem;
+      color: #334155;
+      font-size: 0.97rem;
+      line-height: 1.7;
+    }
+    .notice-body .notice-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      margin-right: 12px;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      color: #b45309;
+      box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.18);
+      vertical-align: middle;
+    }
+    .notice-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 1.2rem 1.1rem;
+    }
+    .delete-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+      border: 1px solid #dbeafe;
+      color: #0f172a;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    .delete-status-row .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+    .delete-status-row .waiting {
+      background: #fff7ed;
+      color: #b45309;
+      border-color: #fdba74;
+    }
+    .delete-status-row .locked {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
+    }
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-secondary { background: #e2e8f0; color: #0f172a; }
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
     .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
@@ -255,6 +641,7 @@
       <div class="card-header">
         <span class="card-title">📦 Quản Lý Theo Dõi Đơn Hàng</span>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="openCreateOrderModal()" id="btnCreateOrder">+ Tạo Đơn Hàng</button>
           <button class="btn btn-success" onclick="exportOrdersData()" id="btnExportOrders">📥 Xuất Excel Đơn Hàng</button>
           <input type="text" id="searchOrderInput" class="search-input" placeholder="🔍 Tìm tên hoặc SĐT..." onkeyup="renderOrdersTable()">
           <div>
@@ -265,7 +652,7 @@
               <option value="Đang xử lý">Đang xử lý</option>
               <option value="Đã xử lý">Đã xử lý</option>
               <option value="Đang giao hàng">Đang giao hàng</option>
-              <option value="Hoàn tất đơn hàng">Hoàn tất đơn hàng</option>
+              <option value="Hoàn tất">Hoàn tất</option>
               <option value="Đã hủy">Đã hủy</option>
             </select>
           </div>
@@ -273,7 +660,7 @@
       </div>
 
       <div>
-        <table>
+        <table class="modern-table">
           <thead>
             <tr>
               <th>Mã Đơn</th>
@@ -283,8 +670,9 @@
               <th>Thanh Toán</th>
               <th>Tổng Tiền</th>
               <th>Thời Gian</th>
-              <th>Trạng Thái</th>
-              <th>Cập Nhật</th>
+              <th>Doanh Thu</th>
+              <th>Trạng thái</th>
+              <th>Thao Tác</th>
             </tr>
           </thead>
           <tbody id="ordersTableBody"></tbody>
@@ -427,6 +815,121 @@
 
   </div>
 
+  <!-- MODAL: Tạo đơn hàng thủ công cho khách chưa đặt trên web -->
+  <div class="modal" id="manualOrderModal">
+    <div class="modal-content" style="width: 620px; max-width: 92vw;">
+      <div class="modal-header">
+        <h3>📝 Tạo Đơn Hàng Thủ Công</h3>
+        <span class="close-modal" onclick="closeModal('manualOrderModal')">&times;</span>
+      </div>
+      <form id="manualOrderForm" onsubmit="saveManualOrder(event)">
+        <div class="form-group">
+          <label>Họ tên khách hàng:</label>
+          <input type="text" id="manualCustomerName" required placeholder="vd: Nguyễn Văn A">
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại:</label>
+          <input type="tel" id="manualCustomerPhone" required placeholder="vd: 0912345678" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Dịch vụ:</label>
+          <select id="manualService" class="select-status" style="width: 100%;">
+            <option value="Giặt sấy tiêu chuẩn">Giặt sấy tiêu chuẩn</option>
+            <option value="Giặt sấy nhanh">Giặt sấy nhanh</option>
+            <option value="Giặt khô">Giặt khô</option>
+            <option value="Giặt sấy combo">Giặt sấy combo</option>
+            <option value="Ủi đồ">Ủi đồ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Khối lượng (kg):</label>
+          <input type="number" id="manualWeight" required min="1" step="0.5" value="5" oninput="updateManualOrderPreview()">
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ giao nhận:</label>
+          <input type="text" id="manualAddress" required placeholder="vd: 123 Lê Lợi, Q.1, TP.HCM" oninput="updateManualOrderPreview()">
+        </div>
+        <div class="form-group">
+          <label>Hình thức thanh toán:</label>
+          <select id="manualPaymentMethod" class="select-status" style="width: 100%;">
+            <option value="Tiền mặt">Tiền mặt</option>
+            <option value="Mã QR">Mã QR</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Dịch vụ giao nhận:</label>
+          <select id="manualDeliveryService" class="select-status" style="width: 100%;">
+            <option value="Nhận tại cửa hàng">Nhận tại cửa hàng</option>
+            <option value="Giao tận nơi">Giao tận nơi</option>
+            <option value="Giao hàng nhanh">Giao hàng nhanh</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tổng tiền dự kiến:</label>
+          <input type="text" id="manualOrderTotalPreview" readonly style="background: #f8fafc; font-weight: 700; color: var(--primary);">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">Lưu Đơn Hàng</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Xác nhận xóa đơn hàng -->
+  <div class="modal" id="deleteOrderConfirmModal">
+    <div class="modal-content" style="width: 440px; max-width: 92vw;">
+      <div class="modal-header">
+        <h3>🗑️ Xác nhận xóa đơn hàng</h3>
+        <span class="close-modal" onclick="closeModal('deleteOrderConfirmModal')">&times;</span>
+      </div>
+      <div id="deleteOrderConfirmBody"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="closeModal('deleteOrderConfirmModal')">Hủy</button>
+        <button class="btn btn-danger" onclick="confirmDeleteOrder()">Xác nhận xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="statusConfirmModal">
+    <div class="modal-content" style="width: 430px; max-width: 92vw;">
+      <div class="modal-header">
+        <h3>🔁 Xác nhận đổi trạng thái</h3>
+        <span class="close-modal" onclick="closeModal('statusConfirmModal')">&times;</span>
+      </div>
+      <div id="statusConfirmBody"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="closeModal('statusConfirmModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="confirmStatusTransition()">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-modal" id="appNoticeModal">
+    <div class="notice-modal-content">
+      <div class="notice-header">
+        <h3>⚠️ Thông báo</h3>
+        <span class="close-modal" onclick="closeNoticeModal()">&times;</span>
+      </div>
+      <div class="notice-body" id="appNoticeBody"></div>
+      <div class="notice-footer">
+        <button class="btn btn-primary" onclick="closeNoticeModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Xem trước & in hóa đơn -->
+  <div class="modal" id="billPreviewModal">
+    <div class="modal-content" style="width: 820px; max-width: 94vw;">
+      <div class="modal-header">
+        <h3>🧾 Xem Trước Hóa Đơn</h3>
+        <span class="close-modal" onclick="closeModal('billPreviewModal')">&times;</span>
+      </div>
+      <div id="billPreviewBody" style="padding: 8px 0; text-align: center;"></div>
+      <div style="display: flex; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="printCurrentBill()">🖨️ In Trực Tiếp</button>
+        <button class="btn btn-success" onclick="closeModal('billPreviewModal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Chi tiết Đơn Hàng & Lịch sử thay đổi toàn bộ -->
   <div class="modal" id="orderDetailModal">
     <div class="modal-content">
@@ -478,15 +981,18 @@
           <label>Phân Quyền Chức Năng Chi Tiết:</label>
           <div class="permissions-grid">
             <label><input type="checkbox" class="perm-checkbox" value="orders"> Quản lý đơn hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="create_order"> Tạo đơn hàng thủ công</label>
+            <label><input type="checkbox" class="perm-checkbox" value="delete_order"> Xóa đơn hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="view_order_detail"> Xem Chi Tiết đơn hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="view_order_history"> Xem Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng</label>
+            <label><input type="checkbox" class="perm-checkbox" value="print_bill"> In hóa đơn theo đơn hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="customer_new_password"> Mật khẩu mới cho khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="customer_chat"> Chat</label>
             <label><input type="checkbox" class="perm-checkbox" value="customer_lock"> Khóa khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="customer_delete"> Xóa khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="export"> Xuất dữ liệu Excel</label>
             <label><input type="checkbox" class="perm-checkbox" value="manage_admins"> Quản lý tài khoản Admin</label>
-            <label><input type="checkbox" class="perm-checkbox" value="footer_stats"> Xem Thống Kê Cuối Trang</label>
+            <label><input type="checkbox" class="perm-checkbox" value="footer_stats"> Xem Thống Kê</label>
           </div>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 0.95rem;">Lưu Tài Khoản</button>
@@ -520,14 +1026,81 @@
     const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
     const nativeSetItem=Storage.prototype.setItem;
     function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}
-    Storage.prototype.setItem=function(key,value){nativeSetItem.call(this,key,value);if(!window.__hydratingCloud)cloudPut(key,JSON.parse(value))};
+    Storage.prototype.setItem=function(key,value){
+      nativeSetItem.call(this,key,String(value));
+      if(window.__hydratingCloud || !CLOUD_KEYS.has(key)) return;
+      try {
+        const parsed = JSON.parse(String(value));
+        cloudPut(key, parsed);
+      } catch (error) {
+        cloudPut(key, String(value));
+      }
+    };
     async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
     function installStoreAddress(){const card=document.querySelector('#loginScreen .login-card');if(card&&!card.querySelector('.store-address')){const address=document.createElement('p');address.className='store-address';address.textContent='123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh';address.style='text-align:center;color:#64748b;font-size:.85rem;margin:-1rem 0 1.2rem';card.querySelector('h2').after(address)}}
     
+    const STORE_BANK_ACCOUNT = "19036623385014";
+    const STORE_BANK_CODE = "TCB";
+    const STORE_BANK_HOLDER = "Tạ Thị Thùy Trinh";
+
     function calculateShipping(weight, address) {
         let basePrice = weight * 15000; // Giá ví dụ 15k/kg
         let extraFee = address.toLowerCase().includes("xa") ? 20000 : 0;
         return basePrice + extraFee;
+    }
+
+    function normalizePaymentMethod(value) {
+      const v = String(value || '').trim();
+      if (['App ngân hàng', 'Mã QR', 'bank', 'qr', 'Ví điện tử'].includes(v)) return 'Mã QR';
+      return 'Tiền mặt';
+    }
+
+    function normalizeRevenueStatus(order) {
+      if (!order) return 'Chờ thu';
+      if (order.revenueStatus) return order.revenueStatus;
+      return 'Chờ thu';
+    }
+
+    function getStatusSequence() {
+      return ['Chờ tiếp nhận', 'Đã tiếp nhận', 'Đang xử lý', 'Đã xử lý', 'Đang giao hàng', 'Hoàn tất'];
+    }
+
+    function getAllowedNextStatuses(currentStatus, order = null) {
+      const sequence = getStatusSequence();
+      const currentIndex = sequence.indexOf(currentStatus);
+      if (currentIndex === -1) return [];
+      const nextStatuses = [];
+      if (currentIndex + 1 < sequence.length) {
+        nextStatuses.push(sequence[currentIndex + 1]);
+      }
+      if (currentStatus === 'Đang giao hàng') {
+        const revenueStatus = normalizeRevenueStatus(order);
+        if (revenueStatus === 'Đã thu') {
+          nextStatuses.push('Hoàn tất');
+        }
+      }
+      return nextStatuses;
+    }
+
+    function isStatusTransitionAllowed(oldStatus, newStatus, order = null) {
+      if (!oldStatus || !newStatus || oldStatus === newStatus) return false;
+      if (oldStatus === 'Đã hủy' || oldStatus === 'Hoàn tất') return false;
+      if (newStatus === 'Đã hủy') return false;
+      const sequence = getStatusSequence();
+      const oldIndex = sequence.indexOf(oldStatus);
+      const newIndex = sequence.indexOf(newStatus);
+      if (oldIndex === -1 || newIndex === -1) return false;
+      if (newStatus === 'Hoàn tất') {
+        const revenueStatus = normalizeRevenueStatus(order);
+        if (revenueStatus !== 'Đã thu') return false;
+      }
+      return newIndex === oldIndex + 1;
+    }
+
+    function getBankQrUrl(amount, orderId) {
+      const note = encodeURIComponent(`Thanh toan don ${orderId}`);
+      const accountName = encodeURIComponent(STORE_BANK_HOLDER);
+      return `https://img.vietqr.io/image/${STORE_BANK_CODE}-${STORE_BANK_ACCOUNT}-compact.png?amount=${amount}&addInfo=${note}&accountName=${accountName}`;
     }
 
     function updateTotalUI() {
@@ -570,7 +1143,7 @@
     // Khởi tạo dữ liệu mẫu
     function initDefaultData() {
       let sampleAdmins = [
-        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "view_order_detail", "view_order_history", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false }
+        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "create_order", "delete_order", "view_order_detail", "view_order_history", "print_bill", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false }
       ];
       if (!localStorage.getItem('adminAccounts')) {
         localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
@@ -580,12 +1153,20 @@
         localStorage.setItem('adminAccounts', JSON.stringify(admins));
       }
 
+      if (!localStorage.getItem('orders_v2')) {
+        localStorage.setItem('orders_v2', JSON.stringify([]));
+      }
+
       if (!localStorage.getItem('orderActionLogs')) {
         localStorage.setItem('orderActionLogs', JSON.stringify([]));
       }
 
       if (!localStorage.getItem('websiteVisitsLog')) {
         localStorage.setItem('websiteVisitsLog', JSON.stringify([]));
+      }
+
+      if (!localStorage.getItem('websiteVisitsCount')) {
+        localStorage.setItem('websiteVisitsCount', '0');
       }
     }
 
@@ -705,6 +1286,7 @@
       let perms = admin.permissions || [];
 
       document.getElementById('sectionOrders').style.display = (isRoot || perms.includes('orders')) ? 'block' : 'none';
+      document.getElementById('btnCreateOrder').style.display = (isRoot || perms.includes('create_order')) ? 'inline-block' : 'none';
       
       let canViewAnyHistory = isRoot || perms.includes('view_order_history');
       document.getElementById('sectionOrderLogs').style.display = canViewAnyHistory ? 'block' : 'none';
@@ -743,6 +1325,541 @@
     }
 
     // --- QUẢN LÝ ĐƠN HÀNG ---
+    function updateManualOrderPreview() {
+      let weight = Number(document.getElementById('manualWeight')?.value || 0);
+      let address = document.getElementById('manualAddress')?.value || '';
+      let total = calculateShipping(weight, address);
+      document.getElementById('manualOrderTotalPreview').value = total.toLocaleString() + ' VNĐ';
+    }
+
+    function openCreateOrderModal() {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = currentAdminUsername === 'admin4T';
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('create_order'))) {
+        alert('Bạn không có quyền tạo đơn hàng thủ công!');
+        return;
+      }
+      document.getElementById('manualOrderForm').reset();
+      document.getElementById('manualWeight').value = '5';
+      document.getElementById('manualPaymentMethod').value = 'Tiền mặt';
+      document.getElementById('manualDeliveryService').value = 'Nhận tại cửa hàng';
+      updateManualOrderPreview();
+      document.getElementById('manualOrderModal').style.display = 'flex';
+    }
+
+    function saveManualOrder(event) {
+      event.preventDefault();
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = currentAdminUsername === 'admin4T';
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('create_order'))) {
+        alert('Bạn không có quyền tạo đơn hàng thủ công!');
+        return;
+      }
+
+      let name = document.getElementById('manualCustomerName').value.trim();
+      let phone = document.getElementById('manualCustomerPhone').value.trim();
+      let service = document.getElementById('manualService').value;
+      let weight = Number(document.getElementById('manualWeight').value || 0);
+      let address = document.getElementById('manualAddress').value.trim();
+      let paymentMethod = document.getElementById('manualPaymentMethod').value;
+      let deliveryService = document.getElementById('manualDeliveryService').value;
+
+      if (!name || !phone || !address || weight <= 0) {
+        alert('Vui lòng nhập đầy đủ thông tin đơn hàng.');
+        return;
+      }
+      if (!/^0\d{9}$/.test(phone)) {
+        alert('Số điện thoại không hợp lệ! Vui lòng nhập 10 số bắt đầu bằng 0.');
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let today = new Date();
+      let now = today.toLocaleString('vi-VN');
+      let orderId = `4T-${String(today.getFullYear()).slice(-2)}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${String(orders.length + 1).padStart(4,'0')}`;
+      let total = calculateShipping(weight, address);
+      let newOrder = {
+        id: orderId,
+        customerName: name,
+        name: name,
+        phone: phone,
+        service: service,
+        weight: weight,
+        address: address,
+        total: total,
+        paymentMethod: paymentMethod,
+        deliveryService: deliveryService,
+        status: 'Chờ tiếp nhận',
+        revenueStatus: 'Chờ thu',
+        time: now,
+        createdAt: new Date().toISOString(),
+        history: [{
+          action: 'Tạo đơn hàng thủ công bởi admin',
+          performer: `${adminObj ? adminObj.fullname : currentAdminUsername} (${currentAdminUsername})`,
+          time: now
+        }]
+      };
+
+      orders.unshift(newOrder);
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      logOrderAction(orderId, 'Mới', 'Chờ tiếp nhận', currentAdminUsername);
+      closeModal('manualOrderModal');
+      renderOrdersTable();
+      renderOrderLogsTable();
+      calculateFooterStats();
+      alert(`Đã tạo đơn hàng thành công: ${orderId}`);
+    }
+
+    function getBillTemplateKey() {
+      return 'luxury';
+    }
+
+    function getBillPrintFormat() {
+      return 'receipt';
+    }
+
+    function getServicePricing(order) {
+      const weight = Number(order.weight || 0);
+      const unitPrice = 15000;
+      const baseAmount = weight * unitPrice;
+      const deliveryFee = (order.deliveryService || '').toLowerCase().includes('giao') && !(order.deliveryService || '').toLowerCase().includes('tại cửa hàng') ? 20000 : 0;
+      const discount = 0;
+      const total = Number(order.total || 0) || baseAmount + deliveryFee - discount;
+      return { baseAmount, deliveryFee, discount, total };
+    }
+
+    function generateQrSvg(data, size = 88) {
+      const matrixSize = 21;
+      const cellSize = size / matrixSize;
+      const finder = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+      let cells = [];
+      for (let y = 0; y < matrixSize; y++) {
+        for (let x = 0; x < matrixSize; x++) {
+          const inFinder = (
+            (x < 7 && y < 7) ||
+            (x > matrixSize - 8 && y < 7) ||
+            (x < 7 && y > matrixSize - 8)
+          );
+          const val = inFinder
+            ? ((x + y) % 2 === 0 ? 1 : 0)
+            : (((data.charCodeAt((x * 5 + y * 7) % data.length) + x * 19 + y * 13) % 7) > 3 ? 1 : 0);
+          cells.push({ x, y, val });
+        }
+      }
+
+      const rects = cells.map(({ x, y, val }) => {
+        if (!val) return '';
+        const px = x * cellSize;
+        const py = y * cellSize;
+        return `<rect x="${px.toFixed(2)}" y="${py.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" fill="#111827" rx="0.2"/>`;
+      }).join('');
+
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block; margin:0 auto;">
+          <rect width="${size}" height="${size}" fill="#ffffff"/>
+          ${rects}
+        </svg>
+      `;
+    }
+
+    function buildBillHtml(order, templateKey = getBillTemplateKey(), printFormat = getBillPrintFormat()) {
+      const { baseAmount, deliveryFee, discount, total } = getServicePricing(order);
+      const orderTime = order.time || new Date().toLocaleString('vi-VN');
+      const customerName = order.customerName || order.name || 'Khách vãng lai';
+      const paymentMethod = normalizePaymentMethod(order.paymentMethod || 'Tiền mặt');
+      const deliveryService = order.deliveryService || 'Nhận tại cửa hàng';
+      const serviceName = order.service || 'Giặt sấy';
+      const qrCodeSvg = generateQrSvg(`${order.id}|${customerName}|${Number(total||0)}`);
+      const bankQrImage = paymentMethod === 'Mã QR'
+        ? `<div style="margin:8px auto 0; width:68px; height:68px; display:flex; align-items:center; justify-content:center; border:1px solid #dfeaf3; border-radius:6px; padding:3px; background:#fff;">
+            <img src="${getBankQrUrl(Number(total || 0), order.id)}" alt="QR thanh toán 4T" style="width:100%; height:100%; object-fit:cover; display:block;" />
+          </div>`
+        : '';
+      const receiptStyles = printFormat === 'receipt' ? `
+        width: 80mm;
+        min-width: 80mm;
+        max-width: 80mm;
+        margin: 0 auto;
+        padding: 6px 5px 8px 5px;
+        border-radius: 10px;
+        border: 1px solid #dfeaf3;
+        box-shadow: none;
+        background: #fff;
+        font-family: 'Segoe UI', Arial, sans-serif;
+      ` : `
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 26px;
+      `;
+
+      const receiptHeader = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px dashed #94a3b8; padding-bottom:6px; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+            <div style="width:26px; height:26px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#0f172a; display:flex; align-items:center; justify-content:center;">
+              <img src="4T.jpg" alt="4T logo" style="width:100%; height:100%; object-fit:cover; display:block;" />
+            </div>
+            <div style="min-width:0;">
+              <div style="font-size:13px; font-weight:900; letter-spacing:0.1em; color:#0f172a; line-height:1.1;">4T</div>
+              <div style="font-size:7px; color:#64748b; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;">Giặt sấy theo công nghệ Nhật</div>
+            </div>
+          </div>
+          <div style="text-align:right; font-size:7px; color:#475569; line-height:1.4;">
+            <div style="font-weight:800; color:#0f172a; font-size:12px;">${order.id}</div>
+            <div>${orderTime}</div>
+          </div>
+        </div>
+      `;
+
+      const receiptCustomer = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 6px; font-size:7.5px; color:#1f2937; line-height:1.5; margin-bottom:8px;">
+          <div><strong>KH:</strong> ${customerName}</div>
+          <div><strong>ĐT:</strong> ${order.phone || '...'}</div>
+          <div style="grid-column: 1 / -1;"><strong>ĐC:</strong> ${order.address || '...'}</div>
+          <div><strong>DV:</strong> ${serviceName}</div>
+          <div><strong>KL:</strong> ${Number(order.weight || 0)} kg</div>
+          <div><strong>TT:</strong> ${paymentMethod}</div>
+          <div><strong>GN:</strong> ${deliveryService}</div>
+        </div>
+      `;
+
+      const receiptTable = `
+        <table style="width:100%; border-collapse:collapse; font-size:7px; margin-bottom:8px;">
+          <thead>
+            <tr>
+              <th style="padding:3px 2px; text-align:left; border-bottom:1px solid #dfeaf3; font-weight:700; color:#334155;">SP</th>
+              <th style="padding:3px 2px; text-align:right; border-bottom:1px solid #dfeaf3; font-weight:700; color:#334155;">SL</th>
+              <th style="padding:3px 2px; text-align:right; border-bottom:1px solid #dfeaf3; font-weight:700; color:#334155;">TT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7;">${serviceName}</td>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7; text-align:right;">${Number(order.weight || 0)}</td>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7; text-align:right;">${baseAmount.toLocaleString()}đ</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7;">Phí giao</td>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7; text-align:right;">-</td>
+              <td style="padding:3px 2px; border-bottom:1px solid #eef2f7; text-align:right;">${deliveryFee.toLocaleString()}đ</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const receiptSummary = `
+        <div style="font-size:7.5px; color:#0f172a; line-height:1.8; border-top:1px dashed #94a3b8; padding-top:6px; margin-top:4px;">
+          <div style="display:flex; justify-content:space-between;"><span>Tạm tính</span><strong>${baseAmount.toLocaleString()}đ</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Phí giao</span><strong>${deliveryFee.toLocaleString()}đ</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Giảm giá</span><strong>-${discount.toLocaleString()}đ</strong></div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:900; margin-top:4px; padding-top:4px; border-top:1px solid #cbd5e1; color:#0f172a;"><span>Tổng</span><span>${Number(total || 0).toLocaleString()}đ</span></div>
+        </div>
+      `;
+
+      const receiptFooter = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; border-top:1px dashed #94a3b8; padding-top:8px;">
+          <div style="flex:1; font-size:7px; color:#64748b; line-height:1.5; text-align:center;">
+            <div style="font-weight:700; color:#0f172a; margin-bottom:3px;">Cảm ơn quý khách!</div>
+            <div>Hẹn gặp lại</div>
+          </div>
+          <div style="width:62px; height:62px; border:1px solid #dbeafe; padding:2px; border-radius:5px; background:#fff; display:flex; align-items:center; justify-content:center;">
+            ${paymentMethod === 'Mã QR' ? bankQrImage || qrCodeSvg : qrCodeSvg}
+          </div>
+        </div>
+      `;
+
+      if (printFormat === 'receipt') {
+        return `
+          <div style="${receiptStyles}">
+            ${receiptHeader}
+            ${receiptCustomer}
+            ${receiptTable}
+            ${receiptSummary}
+            ${receiptFooter}
+          </div>
+        `;
+      }
+
+      const commonHeader = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px; border-bottom:2px solid #0f172a; padding-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:56px; height:56px; border-radius:18px; background:linear-gradient(135deg,#0f172a,#1d4ed8); display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 20px rgba(15,23,42,0.18); overflow:hidden; flex-shrink:0;">
+              <img src="4T.jpg" alt="4T logo" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:18px;" />
+            </div>
+            <div>
+              <div style="font-size: 1.9rem; font-weight:900; letter-spacing:0.08em; color:#0f172a; line-height:1;">4T</div>
+              <div style="font-size: 0.82rem; color:#475569; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; margin-top:4px;">Giặt sấy theo công nghệ Nhật</div>
+              <div style="font-size: 0.75rem; color:#64748b; margin-top: 4px;">123 Liên Khu 4-5, Phường Bình Tân, TP.HCM</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size: 0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Invoice No.</div>
+            <div style="font-weight:800; font-size:1.4rem; color:#0f172a;">${order.id}</div>
+            <div style="font-size:0.74rem; color:#64748b; margin-top:4px;">${orderTime}</div>
+          </div>
+        </div>
+      `;
+
+      const commonInfo = `
+        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; margin-bottom: 18px; font-size:0.9rem; color:#1f2937;">
+          <div><strong>Khách hàng:</strong> ${customerName}</div>
+          <div><strong>Số điện thoại:</strong> ${order.phone || 'Chưa cập nhật'}</div>
+          <div><strong>Dịch vụ:</strong> ${serviceName}</div>
+          <div><strong>Khối lượng:</strong> ${Number(order.weight || 0).toLocaleString()} kg</div>
+          <div style="grid-column: 1 / -1;"><strong>Địa chỉ:</strong> ${order.address || 'Chưa cập nhật địa chỉ'}</div>
+          <div><strong>Thanh toán:</strong> ${paymentMethod}</div>
+          <div><strong>Giao nhận:</strong> ${deliveryService}</div>
+          <div><strong>Trạng thái:</strong> ${order.status || 'Chờ tiếp nhận'}</div>
+          <div><strong>Nhân viên:</strong> ${localStorage.getItem('loggedAdmin') || 'Admin'}</div>
+        </div>
+      `;
+
+      const commonTable = `
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:0.92rem;">
+          <thead>
+            <tr>
+              <th style="padding: 12px 10px; text-align:left; border: 1px solid #e2e8f0; background:#f8fafc;">Mô tả</th>
+              <th style="padding: 12px 10px; text-align:right; border: 1px solid #e2e8f0; background:#f8fafc;">Đơn giá</th>
+              <th style="padding: 12px 10px; text-align:right; border: 1px solid #e2e8f0; background:#f8fafc;">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0;">${serviceName}</td>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0; text-align:right;">${baseAmount.toLocaleString()} VNĐ</td>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0; text-align:right;">${baseAmount.toLocaleString()} VNĐ</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0;">Phí giao nhận</td>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0; text-align:right;">${deliveryFee.toLocaleString()} VNĐ</td>
+              <td style="padding: 12px 10px; border: 1px solid #e2e8f0; text-align:right;">${deliveryFee.toLocaleString()} VNĐ</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      const summary = `
+        <div style="border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; padding:14px 16px; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; color:#334155; margin-bottom:8px; font-size:0.9rem;">
+            <span>Tạm tính</span>
+            <strong>${baseAmount.toLocaleString()} VNĐ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; color:#334155; margin-bottom:8px; font-size:0.9rem;">
+            <span>Phí giao nhận</span>
+            <strong>${deliveryFee.toLocaleString()} VNĐ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; color:#334155; margin-bottom:8px; font-size:0.9rem;">
+            <span>Giảm giá</span>
+            <strong>-${discount.toLocaleString()} VNĐ</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px solid #cbd5e1; padding-top:12px;">
+            <span style="font-size:1rem; font-weight:800; color:#0f172a;">Tổng thanh toán</span>
+            <span style="font-size:1.6rem; font-weight:900; color:#2563eb;">${Number(total || 0).toLocaleString()} VNĐ</span>
+          </div>
+        </div>
+      `;
+
+      const paperWrapper = printFormat === 'receipt'
+        ? '<div style="background:#fff; border-radius:8px; padding:4px; width: 100%; display:flex; justify-content:center;">'
+        : '<div style="width:100%; display:flex; justify-content:center;">';
+
+      if (templateKey === 'luxury') {
+        return `${paperWrapper}
+          <div style="${receiptStyles} background: linear-gradient(135deg, #fffaf5 0%, #ffffff 100%); border:1px solid #e7d8c8; border-radius:18px; box-shadow:0 12px 26px rgba(15,23,42,0.12); color:#111827; text-align:left; font-family:Arial,sans-serif;">
+            ${commonHeader}
+            <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:12px 14px; margin-bottom:18px;">
+              <div style="font-size:0.78rem; letter-spacing:0.12em; color:#9a5b00; text-transform:uppercase; font-weight:800;">Luxury Care</div>
+              <div style="font-size:1.05rem; font-weight:700; color:#7c2d12; margin-top:4px;">Hóa đơn dịch vụ giặt sấy 4T</div>
+            </div>
+            ${commonInfo}
+            ${commonTable}
+            ${summary}
+            <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#64748b;">Cảm ơn quý khách đã tin tưởng 4T Laundry. Hẹn gặp lại quý khách!</div>
+          </div>
+        </div>`;
+      }
+
+      if (templateKey === 'compact') {
+        return `${paperWrapper}
+          <div style="${receiptStyles} background:#fff; border:1px solid #e2e8f0; border-radius:12px; color:#111827; text-align:left; font-family:Arial,sans-serif; box-shadow:0 4px 12px rgba(15,23,42,0.06);">
+            ${commonHeader}
+            ${commonInfo}
+            ${commonTable}
+            ${summary}
+          </div>
+        </div>`;
+      }
+
+      return `${paperWrapper}
+        <div style="${receiptStyles} background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border:1px solid #dbeafe; border-radius:18px; box-shadow:0 10px 22px rgba(37,99,235,0.08); color:#111827; text-align:left; font-family:Arial,sans-serif;">
+          ${commonHeader}
+          <div style="display:flex; justify-content:space-between; align-items:center; background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%); color:white; border-radius:12px; padding:12px 16px; margin-bottom:18px;">
+            <div style="font-size:0.8rem; letter-spacing:0.08em; text-transform:uppercase; opacity:0.9;">Hóa đơn thanh toán</div>
+            <div style="font-size:1rem; font-weight:800;">${order.status || 'Chờ tiếp nhận'}</div>
+          </div>
+          ${commonInfo}
+          ${commonTable}
+          ${summary}
+          <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#64748b;">Cảm ơn quý khách đã sử dụng dịch vụ của 4T Laundry.</div>
+        </div>
+      </div>`;
+    }
+
+    async function previewBillByOrder(orderIndex, forcedTemplate = null) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = currentAdminUsername === 'admin4T';
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('print_bill'))) {
+        alert('Bạn không có quyền in hóa đơn!');
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let order = orders[orderIndex];
+      if (!order) return;
+
+      let templateKey = forcedTemplate || getBillTemplateKey();
+      let apiBase = localStorage.getItem('billApiBase') || window.BILL_API_BASE || (location.protocol === 'file:' ? 'http://localhost:8787' : location.origin);
+      let billHtml = null;
+
+      if (apiBase) {
+        try {
+          const response = await fetch(`${apiBase.replace(/\/$/, '')}/api/invoice/preview`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: order.id, order })
+          });
+          if (response.ok) {
+            const payload = await response.json();
+            billHtml = payload.html || payload.billHtml || null;
+          }
+        } catch (error) {
+          console.warn('Bill API unavailable, falling back to local invoice template:', error);
+        }
+      }
+
+      if (!billHtml) {
+        billHtml = buildBillHtml(order, templateKey, getBillPrintFormat());
+      }
+
+      const previewBody = document.getElementById('billPreviewBody');
+      if (previewBody) {
+        previewBody.dataset.orderIndex = String(orderIndex);
+        previewBody.innerHTML = billHtml;
+      }
+      document.getElementById('billPreviewModal').style.display = 'flex';
+    }
+
+    function printCurrentBill() {
+      const billContent = document.getElementById('billPreviewBody').innerHTML;
+      const printFormat = getBillPrintFormat();
+      const printWindow = window.open('', '_blank', 'width=900,height=800');
+      if (!printWindow) {
+        alert('Trình duyệt đang chặn cửa sổ in. Vui lòng cho phép popup để in hóa đơn.');
+        return;
+      }
+
+      const printCss = printFormat === 'receipt'
+        ? '@page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; background: #fff; } .receipt-wrap { width: 80mm; margin: 0 auto; } }'
+        : '@page { size: A4 portrait; margin: 10mm; } body { margin: 0; padding: 0; background: #fff; }';
+
+      printWindow.document.write('<html><head><title>Hóa Đơn 4T</title><style>' + printCss + 'body{font-family:Arial,sans-serif;padding:20px;background:#fff}.print-shell{display:flex;justify-content:center}.receipt-wrap{max-width:80mm;}.page-break{page-break-after:always;}</style></head><body><div class="print-shell">' + billContent + '</div></body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
+
+    function openOrderDetail(index) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      let canViewDetail = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_detail'));
+
+      if (!canViewDetail) {
+        alert("Bạn không có quyền xem Chi Tiết đơn hàng!");
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let o = orders[index];
+
+      let customerObj = users.find(u => u.phone === o.phone || u.name === o.customerName);
+      let addressInfo = o.address || (customerObj ? customerObj.address : 'Chưa cập nhật địa chỉ');
+
+      let canViewHistory = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_history'));
+      let canPrintBill = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('print_bill'));
+
+      let historyRows = "";
+      if (canViewHistory) {
+        if (o.history && o.history.length > 0) {
+          o.history.forEach(h => {
+            historyRows += `
+              <tr>
+                <td>${h.action}</td>
+                <td><span style="font-weight: 600; color: var(--secondary);">${h.performer}</span></td>
+                <td><small>${h.time}</small></td>
+              </tr>
+            `;
+          });
+        } else {
+          historyRows = `<tr><td colspan="3" style="text-align: center; color: #94a3b8;">Chưa có lịch sử thay đổi trạng thái nào.</td></tr>`;
+        }
+      } else {
+        historyRows = `<tr><td colspan="3" style="text-align: center; color: var(--danger);">🔒 Tài khoản của bạn không được phân quyền xem Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng này.</td></tr>`;
+      }
+
+      let body = document.getElementById('orderDetailBody');
+      body.innerHTML = `
+        <div class="form-group">
+          <label>Loại dịch vụ/vải:</label>
+          <input type="text" id="editService" value="${o.service}">
+        </div>
+        <div class="form-group">
+          <label>Số Kg:</label>
+          <input type="number" id="editWeight" value="${o.weight || 1}" oninput="updateTotalUI()">
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ giao-nhận:</label>
+          <input type="text" id="editAddress" value="${addressInfo}" oninput="updateTotalUI()">
+        </div>
+        <p><strong>Tổng Tiền Thực Tế:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+        <button class="btn btn-primary" onclick="saveOrderChanges(${index})" style="width:100%; margin-top:10px;">Lưu Thay Đổi Đơn Hàng</button>
+        ${canPrintBill ? `<button class="btn btn-success" onclick="previewBillByOrder(${index})" style="width:100%; margin-top:10px;">🧾 Xem Trước / In Hóa Đơn</button>` : ''}
+        
+        <hr style="margin: 15px 0;">
+        <div style="font-size: 0.8rem; color: #64748b;">
+          <p>Mã Đơn: ${o.id}</p>
+          <p>Khách: ${o.customerName} (${o.phone})</p>
+        </div>
+
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+        <h4 style="color: var(--primary); margin-bottom: 10px; font-size: 1rem;">📜 Toàn Bộ Lịch Sử Thay Đổi Trạng Thái Đơn Hàng:</h4>
+        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Hành Động / Thay Đổi</th>
+                <th>Người Thực Hiện</th>
+                <th>Thời Gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${historyRows}
+            </tbody>
+          </table>
+        </div>
+      `;
+      document.getElementById('orderDetailModal').style.display = 'flex';
+    }
+
+    // --- QUẢN LÝ KHÁCH HÀNG & PHÂN QUYỀN ---
     function renderOrdersTable() {
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
       let filterStatus = document.getElementById('filterOrderStatus').value;
@@ -755,6 +1872,8 @@
       let adminObj = admins.find(a => a.username === currentAdminUsername);
       let isRoot = (currentAdminUsername === 'admin4T');
       let canViewDetail = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('view_order_detail'));
+      let canPrintBill = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('print_bill'));
+      let canDeleteOrder = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('delete_order'));
 
       let realRevenue = 0, estimatedRevenue = 0;
       let countPending = 0, countProcessing = 0, countProcessed = 0, countShipping = 0, countCompleted = 0, countCancelled = 0;
@@ -763,10 +1882,11 @@
         const customerName = o.customerName || o.name || "Khách Vãng Lai";
         const service = o.service || (o.type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn");
         const deliveryService = o.deliveryService || o.deliveryLabel || "Nhận tại cửa hàng";
-        const paymentMethod = o.paymentMethod || (o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử");
+        const paymentMethod = normalizePaymentMethod(o.paymentMethod || (o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "Mã QR" : "Mã QR"));
         const total = Number(o.total || 0);
         const orderTime = o.time || new Date(o.createdAt || Date.now()).toLocaleString("vi-VN");
-        const isCompleted = o.status === "Hoàn tất" || o.status === "Hoàn tất đơn hàng";
+        const isCompleted = o.status === "Hoàn tất";
+        const revenueStatus = normalizeRevenueStatus(o);
         if (o.status !== "Đã hủy") {
           estimatedRevenue += total;
         }
@@ -778,22 +1898,29 @@
         else if (isCompleted) countCompleted++;
         else if (o.status === "Đã hủy") countCancelled++;
 
-        if (o.status !== "Đã hủy" && (paymentMethod === "App ngân hàng" || paymentMethod === "Ví điện tử" || (paymentMethod === "Tiền mặt" && isCompleted))) {
+        if (o.status !== "Đã hủy" && revenueStatus === "Đã thu") {
           realRevenue += total;
         }
 
         if (filterStatus !== "ALL" && o.status !== filterStatus) return;
         if (searchQuery && !customerName.toLowerCase().includes(searchQuery) && !String(o.phone || "").includes(searchQuery)) return;
 
-        let badgeClass = "badge-pending";
-        if (o.status === "Đang xử lý") badgeClass = "badge-processing";
-        else if (o.status === "Đã xử lý") badgeClass = "badge-processed";
-        else if (o.status === "Đang giao hàng") badgeClass = "badge-shipping";
+        let badgeClass = getStatusBadgeClass(o.status);
+        if (o.status === "Đã hủy") badgeClass = "badge-cancelled";
         else if (isCompleted) badgeClass = "badge-completed";
-        else if (o.status === "Đã hủy") badgeClass = "badge-cancelled";
 
+        let revenueBadgeClass = revenueStatus === "Đã thu" ? "badge-completed" : "badge-pending";
         let isFinalState = (isCompleted || o.status === "Đã hủy");
         let disabledAttr = isFinalState ? "disabled title=\"Đơn hàng đã hoàn tất hoặc đã hủy, không thể thay đổi trạng thái!\"" : "";
+        let canFinalizeStatus = revenueStatus === 'Đã thu' || o.status === 'Hoàn tất';
+        let allowedNextStatuses = getAllowedNextStatuses(o.status, o);
+
+        let revenueSelectHtml = revenueStatus === 'Đã thu'
+          ? `<span class="badge badge-completed" style="width: fit-content;">Đã thu</span>`
+          : `<select class="select-status" onchange="updateRevenueStatus(${index}, this.value)">
+              <option value="Chờ thu" ${revenueStatus==='Chờ thu'?'selected':''}>Chờ thu</option>
+              <option value="Đã thu" ${revenueStatus==='Đã thu'?'selected':''}>Đã thu</option>
+            </select>`;
 
         let cancelOptionHtml = isRoot ? `<option value="Đã hủy" ${o.status==='Đã hủy'?'selected':''}>Đã hủy</option>` : '';
 
@@ -803,25 +1930,55 @@
 
         tbody.innerHTML += `
           <tr>
-            <td>${orderIdColumn}</td>
-            <td>${customerName}<br><small style="color:#64748b;">${o.phone || ""}</small></td>
-            <td>${service}</td>
-            <td><small style="color:#0284c7; font-weight:600;">${deliveryService}</small></td>
-            <td><span style="font-weight: 600; font-size: 0.85rem;">${paymentMethod}</span></td>
-            <td><strong style="color:var(--primary);">${total.toLocaleString()} VNĐ</strong></td>
-            <td><small>${orderTime}</small></td>
-            <td><span class="badge ${badgeClass}">${o.status}</span></td>
             <td>
-              <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)" ${disabledAttr}>
-                <option value="Chờ tiếp nhận" ${o.status==='Chờ tiếp nhận'?'selected':''}>Chờ tiếp nhận</option>
-                <option value="Đã tiếp nhận" ${o.status==='Đã tiếp nhận'?'selected':''}>Đã tiếp nhận</option>
-                <option value="Đang xử lý" ${o.status==='Đang xử lý'?'selected':''}>Đang xử lý</option>
-                <option value="Đã xử lý" ${o.status==='Đã xử lý'?'selected':''}>Đã xử lý</option>
-                <option value="Đang giao hàng" ${o.status==='Đang giao hàng'?'selected':''}>Đang giao hàng</option>
-                <option value="Hoàn tất" ${o.status==='Hoàn tất'?'selected':''}>Hoàn tất</option>
-                <option value="Hoàn tất đơn hàng" ${o.status==='Hoàn tất đơn hàng'?'selected':''}>Hoàn tất đơn hàng</option>
-                ${cancelOptionHtml}
-              </select>
+              <div class="table-cell-label">${orderIdColumn}</div>
+            </td>
+            <td>
+              <div class="customer-block">
+                <span class="customer-name">${customerName}</span>
+                <span class="customer-meta">${o.phone || "—"}</span>
+              </div>
+            </td>
+            <td>
+              <div class="service-block">
+                <span class="service-chip">${service}</span>
+                <span class="service-weight">${o.weight || 0} kg</span>
+              </div>
+            </td>
+            <td>
+              <span class="customer-meta" style="display:block; font-weight:700; color:var(--secondary);">${deliveryService}</span>
+            </td>
+            <td>
+              <span style="font-weight: 700; font-size: 0.83rem; color:#334155;">${paymentMethod}</span>
+            </td>
+            <td><span class="money-value">${total.toLocaleString()} VNĐ</span></td>
+            <td><span class="customer-meta">${orderTime}</span></td>
+            <td>
+              <div class="action-box" style="min-height: 72px; justify-content: center;">
+                ${revenueSelectHtml}
+              </div>
+            </td>
+            <td>
+              <div class="action-box" style="min-height: 72px; justify-content: center;">
+                <span class="badge ${badgeClass}" style="margin-bottom: 6px; white-space: nowrap;">${o.status}</span>
+                <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)" ${disabledAttr}>
+                  <option value="Chờ tiếp nhận" ${o.status==='Chờ tiếp nhận'?'selected':''} ${!allowedNextStatuses.includes('Chờ tiếp nhận') && o.status !== 'Chờ tiếp nhận' ? 'disabled' : ''}>Chờ tiếp nhận</option>
+                  <option value="Đã tiếp nhận" ${o.status==='Đã tiếp nhận'?'selected':''} ${!allowedNextStatuses.includes('Đã tiếp nhận') && o.status !== 'Đã tiếp nhận' ? 'disabled' : ''}>Đã tiếp nhận</option>
+                  <option value="Đang xử lý" ${o.status==='Đang xử lý'?'selected':''} ${!allowedNextStatuses.includes('Đang xử lý') && o.status !== 'Đang xử lý' ? 'disabled' : ''}>Đang xử lý</option>
+                  <option value="Đã xử lý" ${o.status==='Đã xử lý'?'selected':''} ${!allowedNextStatuses.includes('Đã xử lý') && o.status !== 'Đã xử lý' ? 'disabled' : ''}>Đã xử lý</option>
+                  <option value="Đang giao hàng" ${o.status==='Đang giao hàng'?'selected':''} ${!allowedNextStatuses.includes('Đang giao hàng') && o.status !== 'Đang giao hàng' ? 'disabled' : ''}>Đang giao hàng</option>
+                  <option value="Hoàn tất" ${o.status==='Hoàn tất'?'selected':''} ${(!canFinalizeStatus && o.status !== 'Hoàn tất') || !allowedNextStatuses.includes('Hoàn tất') ? 'disabled' : ''}>Hoàn tất</option>
+                  ${cancelOptionHtml}
+                </select>
+              </div>
+            </td>
+            <td>
+              <div class="action-box" style="min-height: 72px; justify-content: center;">
+                <div class="action-buttons-row" style="width: 100%;">
+                  ${canPrintBill ? `<button class="btn btn-success" onclick="previewBillByOrder(${index})">🧾 In đơn</button>` : ''}
+                  ${canDeleteOrder ? `<button class="btn btn-lock" style="background:#ef4444;" onclick="openDeleteOrderConfirm(${index})">🗑️ Xóa</button>` : ''}
+                </div>
+              </div>
             </td>
           </tr>
         `;
@@ -837,60 +1994,271 @@
       document.getElementById('countCancelled').innerText = countCancelled;
     }
 
+    function updateRevenueStatus(index, nextStatus) {
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      if (!orders[index]) return;
+
+      let currentStatus = normalizeRevenueStatus(orders[index]);
+      if (currentStatus === 'Đã thu' && nextStatus === 'Chờ thu') {
+        showAppNotice('Đơn hàng đã ở trạng thái "Đã thu", không cho phép chuyển về trạng thái chưa thu.');
+        return;
+      }
+
+      if (currentStatus === nextStatus) return;
+
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let adminFullName = adminObj ? adminObj.fullname : currentAdminUsername;
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                       String(now.getSeconds()).padStart(2, '0');
+
+      orders[index].revenueStatus = nextStatus;
+      if (!orders[index].revenueHistory) orders[index].revenueHistory = [];
+      orders[index].revenueHistory.push({
+        action: nextStatus === 'Đã thu' ? 'Xác nhận thu tiền' : 'Đặt lại trạng thái chờ thu',
+        performer: `${adminFullName} (${currentAdminUsername})`,
+        time: timeString,
+        amount: Number(orders[index].total || 0)
+      });
+
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      logOrderAction(orders[index].id, `Doanh thu: "${currentStatus}"`, `"${nextStatus}"`, currentAdminUsername);
+      renderOrdersTable();
+      calculateFooterStats();
+    }
+
+    function openStatusTransitionConfirm(index, oldStatus, newStatus, selectElement) {
+      const orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      const order = orders[index];
+      if (!order) return;
+
+      const body = document.getElementById('statusConfirmBody');
+      body.innerHTML = `
+        <div class="confirm-card">
+          <div class="confirm-warning"><span class="warning-icon">⚠</span> Xác nhận thay đổi trạng thái</div>
+          <div class="confirm-stacked">
+            <div class="status-confirm-box">
+              <span class="muted">Mã đơn</span>
+              <strong>${order.id}</strong>
+            </div>
+            <div class="status-confirm-box">
+              <span class="muted">Từ</span>
+              <span class="badge badge-pending">${oldStatus}</span>
+            </div>
+            <div class="status-confirm-box">
+              <span class="muted">Sang</span>
+              <span class="badge badge-completed">${newStatus}</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin: 0; color: #475569; font-size: 0.92rem; line-height: 1.7; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px;">
+          Trạng thái sẽ được cập nhật theo đúng luồng quy trình. Sau khi xác nhận, hệ thống sẽ ghi nhận lịch sử thay đổi và không cho phép quay lại trạng thái cũ.
+        </p>
+      `;
+      window.__pendingStatusChange = { index, oldStatus, newStatus, selectElement };
+      document.getElementById('statusConfirmModal').style.display = 'flex';
+    }
+
+    function confirmStatusTransition() {
+      const payload = window.__pendingStatusChange;
+      closeModal('statusConfirmModal');
+      if (!payload) return;
+      delete window.__pendingStatusChange;
+      const orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      if (!orders[payload.index]) return;
+      const oldStatus = orders[payload.index].status;
+      const newStatus = payload.newStatus;
+      const selectElement = payload.selectElement;
+      if (oldStatus !== payload.oldStatus) {
+        if (selectElement) selectElement.value = oldStatus;
+        return;
+      }
+      if (newStatus === 'Hoàn tất' && normalizeRevenueStatus(orders[payload.index]) !== 'Đã thu') {
+        if (selectElement) selectElement.value = oldStatus;
+        showAppNotice('Chỉ được chuyển trạng thái Hoàn tất khi Doanh thu đã chuyển sang "Đã thu".');
+        return;
+      }
+      if (!isStatusTransitionAllowed(oldStatus, newStatus, orders[payload.index])) {
+        if (selectElement) selectElement.value = oldStatus;
+        showAppNotice('Không cho phép thao tác ngược luồng trạng thái. Vui lòng chọn trạng thái tiếp theo theo thứ tự quy định.');
+        return;
+      }
+      orders[payload.index].status = newStatus;
+      const statusBadge = selectElement && selectElement.parentElement ? selectElement.parentElement.querySelector('.badge') : null;
+      if (statusBadge) {
+        statusBadge.className = `badge ${getStatusBadgeClass(newStatus)}`;
+        statusBadge.textContent = newStatus;
+      }
+      if (!orders[payload.index].history) orders[payload.index].history = [];
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                       String(now.getSeconds()).padStart(2, '0');
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let adminFullName = adminObj ? adminObj.fullname : currentAdminUsername;
+      orders[payload.index].history.push({
+        action: `Thay đổi trạng thái: "${oldStatus}" ➔ "${newStatus}"`,
+        performer: `${adminFullName} (${currentAdminUsername})`,
+        time: timeString
+      });
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      logOrderAction(orders[payload.index].id, oldStatus, newStatus, currentAdminUsername);
+      renderOrdersTable();
+      renderOrderLogsTable();
+      calculateFooterStats();
+    }
+
+    function showAppNotice(message) {
+      const body = document.getElementById('appNoticeBody');
+      if (!body) {
+        alert(message);
+        return;
+      }
+      body.innerHTML = `<div style="display:flex; align-items:flex-start;"><span class="notice-icon">⚠</span><div>${message}</div></div>`;
+      document.getElementById('appNoticeModal').style.display = 'flex';
+    }
+
+    function closeNoticeModal() {
+      const modal = document.getElementById('appNoticeModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openDeleteOrderConfirm(index) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = (currentAdminUsername === 'admin4T');
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('delete_order'))) {
+        showAppNotice('Bạn không có quyền xóa đơn hàng!');
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let order = orders[index];
+      if (!order) return;
+
+      const modal = document.getElementById('deleteOrderConfirmModal');
+      const body = document.getElementById('deleteOrderConfirmBody');
+      const deleteConfirmBtn = modal.querySelector('.btn-danger');
+      const revenueStatus = normalizeRevenueStatus(order);
+      const canDelete = revenueStatus === 'Chờ thu';
+      modal.dataset.orderIndex = String(index);
+      body.innerHTML = `
+        <div class="confirm-card">
+          <div class="confirm-warning"><span class="warning-icon">⚠</span> ${canDelete ? 'Hành động này không thể hoàn tác' : 'Không thể hủy đơn hàng'}</div>
+          <div class="confirm-order-box">
+            <div class="muted">Mã đơn hàng</div>
+            <strong>${order.id}</strong>
+            <div class="muted">Khách hàng</div>
+            <strong>${order.customerName || order.name || 'Khách vãng lai'}</strong>
+            <div class="muted">Số điện thoại</div>
+            <strong>${order.phone || '—'}</strong>
+            <div class="muted">Tổng tiền</div>
+            <strong>${Number(order.total || 0).toLocaleString()} VNĐ</strong>
+          </div>
+          <div class="delete-status-row">
+            <span>Doanh thu</span>
+            <span class="status-chip ${canDelete ? 'waiting' : 'locked'}">${revenueStatus}</span>
+          </div>
+        </div>
+        <p style="margin: 0; color: ${canDelete ? '#475569' : '#991b1b'}; font-size: 0.92rem; line-height: 1.7; background: ${canDelete ? '#f8fafc' : '#fff1f2'}; border: 1px solid ${canDelete ? '#e2e8f0' : '#fecaca'}; border-radius: 10px; padding: 12px 14px;">
+          ${canDelete
+            ? 'Bạn có chắc chắn muốn xóa đơn hàng này khỏi hệ thống không? Tất cả lịch sử, thông tin liên quan và dữ liệu gắn với đơn hàng này sẽ bị loại bỏ khỏi giao diện quản lý.'
+            : 'Chỉ được hủy đơn hàng khi doanh thu đang ở trạng thái Chờ thu. Hiện đơn này đang ở trạng thái Đã thu, nên không thể xóa khỏi hệ thống.'}
+        </p>
+      `;
+      if (deleteConfirmBtn) {
+        deleteConfirmBtn.disabled = !canDelete;
+        deleteConfirmBtn.style.opacity = canDelete ? '1' : '0.5';
+        deleteConfirmBtn.style.cursor = canDelete ? 'pointer' : 'not-allowed';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function confirmDeleteOrder() {
+      const modal = document.getElementById('deleteOrderConfirmModal');
+      const index = Number(modal.dataset.orderIndex || -1);
+      if (index < 0) return;
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let order = orders[index];
+      if (!order) {
+        closeModal('deleteOrderConfirmModal');
+        return;
+      }
+
+      const revenueStatus = normalizeRevenueStatus(order);
+      if (revenueStatus !== 'Chờ thu') {
+        closeModal('deleteOrderConfirmModal');
+        showAppNotice('Chỉ được hủy đơn hàng khi Doanh thu ở điều kiện Chờ thu.');
+        return;
+      }
+
+      orders.splice(index, 1);
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      closeModal('deleteOrderConfirmModal');
+      renderOrdersTable();
+      renderOrderLogsTable();
+      calculateFooterStats();
+      alert(`Đã xóa đơn hàng ${order.id}.`);
+    }
+
+    function getStatusBadgeClass(status) {
+      if (status === "Đang xử lý") return "badge-processing";
+      if (status === "Đã xử lý") return "badge-processed";
+      if (status === "Đang giao hàng") return "badge-shipping";
+      if (status === "Hoàn tất") return "badge-completed";
+      if (status === "Đã hủy") return "badge-cancelled";
+      return "badge-pending";
+    }
+
     function confirmAndUpdateOrderStatus(index, selectElement) {
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
-      let oldStatus = orders[index].id ? orders[index].status : "";
+      let oldStatus = orders[index] && orders[index].id ? orders[index].status : "";
 
-      if (oldStatus === "Hoàn tất" || oldStatus === "Hoàn tất đơn hàng" || oldStatus === "Đã hủy") {
-        alert("Đơn hàng này đã ở trạng thái 'Hoàn tất đơn hàng' hoặc 'Đã hủy', không thể đổi lại trạng thái!");
+      if (!orders[index]) return;
+
+      if (oldStatus === "Hoàn tất" || oldStatus === "Đã hủy") {
+        alert("Đơn hàng này đã ở trạng thái cuối cùng hoặc đã hủy, không thể đổi lại trạng thái!");
         selectElement.value = oldStatus;
         return;
       }
 
       let newStatus = selectElement.value;
       let currentAdminUsername = localStorage.getItem('loggedAdmin');
-      
+
       if (newStatus === "Đã hủy" && currentAdminUsername !== "admin4T") {
-        alert("Tài khoản nhân viên không được phép chuyển đơn hàng sang tình trạng Hủy!");
+        showAppNotice('Đơn hàng đã thu tiền không được phép Hủy');
         selectElement.value = oldStatus;
         return;
       }
 
       if (oldStatus === newStatus) return;
 
-      let confirmChange = confirm(`Bạn có chắc chắn muốn chuyển trạng thái đơn hàng [${orders[index].id}] từ "${oldStatus}" sang "${newStatus}" không?`);
-
-      if (confirmChange) {
-        orders[index].status = newStatus;
-
-        if (!orders[index].history) orders[index].history = [];
-        let now = new Date();
-        let timeString = now.getFullYear() + '-' + 
-                         String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                         String(now.getDate()).padStart(2, '0') + ' ' + 
-                         String(now.getHours()).padStart(2, '0') + ':' + 
-                         String(now.getMinutes()).padStart(2, '0') + ':' + 
-                         String(now.getSeconds()).padStart(2, '0');
-
-        let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-        let adminObj = admins.find(a => a.username === currentAdminUsername);
-        let adminFullName = adminObj ? adminObj.fullname : currentAdminUsername;
-
-        orders[index].history.push({
-          action: `Thay đổi trạng thái: "${oldStatus}" ➔ "${newStatus}"`,
-          performer: `${adminFullName} (${currentAdminUsername})`,
-          time: timeString
-        });
-
-        localStorage.setItem('orders_v2', JSON.stringify(orders));
-        logOrderAction(orders[index].id, oldStatus, newStatus, currentAdminUsername);
-
-        renderOrdersTable();
-        renderOrderLogsTable();
-        calculateFooterStats();
-      } else {
+      if (newStatus === 'Hoàn tất' && normalizeRevenueStatus(orders[index]) !== 'Đã thu') {
+        showAppNotice('Chỉ được chuyển trạng thái Hoàn tất khi Doanh thu đã chuyển sang "Đã thu".');
         selectElement.value = oldStatus;
+        return;
       }
+
+      if (!isStatusTransitionAllowed(oldStatus, newStatus, orders[index])) {
+        showAppNotice('Không cho phép thao tác ngược luồng trạng thái. Vui lòng chọn trạng thái tiếp theo theo thứ tự quy định.');
+        selectElement.value = oldStatus;
+        return;
+      }
+
+      openStatusTransitionConfirm(index, oldStatus, newStatus, selectElement);
     }
 
     function logOrderAction(orderId, oldStatus, newStatus, username) {
@@ -939,6 +2307,30 @@
           </tr>
         `;
       });
+    }
+
+    function logRevenueCollection(orderId, status, amount, username) {
+      let logs = JSON.parse(localStorage.getItem('orderActionLogs') || '[]');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === username);
+      let adminFullName = adminObj ? adminObj.fullname : username;
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0') + ':' + 
+                       String(now.getSeconds()).padStart(2, '0');
+
+      logs.unshift({
+        orderId: orderId,
+        action: status === 'Đã thu' ? `Xác nhận thu tiền: ${Number(amount || 0).toLocaleString()} VNĐ` : `Huỷ xác nhận thu tiền: ${Number(amount || 0).toLocaleString()} VNĐ`,
+        performer: `${adminFullName} (${username})`,
+        time: timeString
+      });
+
+      if (logs.length > 150) logs.pop();
+      localStorage.setItem('orderActionLogs', JSON.stringify(logs));
     }
 
     function openOrderDetail(index) {
@@ -1348,30 +2740,41 @@
     }
 
     // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN (CẬP NHẬT CHUẨN WEBSITE 4T) ---
+    function getDateOnly(value) {
+      if (value === null || value === undefined) return '';
+      const raw = String(value).trim();
+      if (!raw) return '';
+      const datePart = raw.split(' ')[0];
+      return datePart || '';
+    }
+
     function calculateFooterStats() {
-      let fromDateStr = document.getElementById('statFromDate').value;
-      let toDateStr = document.getElementById('statToDate').value;
+      let fromDateStr = document.getElementById('statFromDate') ? document.getElementById('statFromDate').value : '';
+      let toDateStr = document.getElementById('statToDate') ? document.getElementById('statToDate').value : '';
 
       let visitsLog = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
 
       let filteredVisits = visitsLog.filter(v => {
-        let visitDate = v.time.split(' ')[0];
+        let visitDate = getDateOnly(v && v.time);
+        if (!visitDate) return true;
         if (fromDateStr && visitDate < fromDateStr) return false;
         if (toDateStr && visitDate > toDateStr) return false;
         return true;
       });
 
       let filteredUsers = users.filter(u => {
-        let userDate = (u.createdAt || "2026-01-01 00:00:00").split(' ')[0];
+        let userDate = getDateOnly((u && (u.createdAt || u.created_at || u.lastAccess)));
+        if (!userDate) return true;
         if (fromDateStr && userDate < fromDateStr) return false;
         if (toDateStr && userDate > toDateStr) return false;
         return true;
       });
 
       let filteredOrders = orders.filter(o => {
-        let orderDate = o.time.split(' ')[0];
+        let orderDate = getDateOnly((o && (o.time || o.createdAt || o.created_at)));
+        if (!orderDate) return true;
         if (fromDateStr && orderDate < fromDateStr) return false;
         if (toDateStr && orderDate > toDateStr) return false;
         return true;
@@ -1383,23 +2786,23 @@
       
       let realCollectedRevenue = 0;
       filteredOrders.forEach(o => {
-        let isDone = (o.status === "Hoàn tất đơn hàng" || o.status === "Đã xử lý");
-        let isPaidOnline = (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử");
-        let isPaidCashCompleted = (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng");
-
-        if (o.status !== "Đã hủy" && (isPaidOnline || isPaidCashCompleted || isDone)) {
-          realCollectedRevenue += o.total;
+        const revenueStatus = normalizeRevenueStatus(o);
+        if (o.status !== "Đã hủy" && revenueStatus === "Đã thu") {
+          realCollectedRevenue += Number(o.total || 0);
         }
       });
 
       const totalCustomerVisits = fromDateStr || toDateStr ? filteredVisits.length : Number(localStorage.getItem('websiteVisitsCount') || filteredVisits.length);
-      document.getElementById('footerValVisits').innerText = totalCustomerVisits.toLocaleString();
-      document.getElementById('footerValAccounts').innerText = totalAccountsCount.toLocaleString();
-      document.getElementById('footerValOrders').innerText = totalOrdersCount.toLocaleString();
-      document.getElementById('footerValRevenue').innerText = realCollectedRevenue.toLocaleString() + " VNĐ";
-      if(document.getElementById('footerValCancelled')) {
-        document.getElementById('footerValCancelled').innerText = totalCancelledCount.toLocaleString();
-      }
+      const footerValVisits = document.getElementById('footerValVisits');
+      const footerValAccounts = document.getElementById('footerValAccounts');
+      const footerValOrders = document.getElementById('footerValOrders');
+      const footerValRevenue = document.getElementById('footerValRevenue');
+      const footerValCancelled = document.getElementById('footerValCancelled');
+      if (footerValVisits) footerValVisits.innerText = totalCustomerVisits.toLocaleString();
+      if (footerValAccounts) footerValAccounts.innerText = totalAccountsCount.toLocaleString();
+      if (footerValOrders) footerValOrders.innerText = totalOrdersCount.toLocaleString();
+      if (footerValRevenue) footerValRevenue.innerText = realCollectedRevenue.toLocaleString() + " VNĐ";
+      if (footerValCancelled) footerValCancelled.innerText = totalCancelledCount.toLocaleString();
     }
 
     function resetFooterStatsDate() {

@@ -423,6 +423,19 @@
         border-radius: 22px;
         background: #fff;
         box-shadow: 0 8px 23px rgba(8, 46, 96, 0.03);
+        transition:
+          transform 0.22s ease,
+          box-shadow 0.22s ease,
+          border-color 0.22s ease,
+          background-color 0.22s ease;
+      }
+      .promise:hover,
+      .promise:focus-visible {
+        transform: translateY(-8px);
+        border-color: #8fd0f3;
+        background: #eff9ff;
+        box-shadow: 0 18px 32px rgba(8, 46, 96, 0.14);
+        outline: none;
       }
       .promise .p-icon {
         display: grid;
@@ -432,6 +445,16 @@
         border-radius: 13px;
         background: var(--sky);
         font-size: 19px;
+        transition:
+          background-color 0.22s ease,
+          color 0.22s ease,
+          transform 0.22s ease;
+      }
+      .promise:hover .p-icon,
+      .promise:focus-visible .p-icon {
+        background: var(--coral);
+        color: #fff;
+        transform: rotate(-8deg) scale(1.08);
       }
       .promise h3 {
         margin: 25px 0 7px;
@@ -1586,26 +1609,26 @@
             <h2>Mỗi đơn hàng là một lời hứa được giữ trọn.</h2>
           </div>
           <div class="four-grid">
-            <article class="promise">
+            <article class="promise" tabindex="0">
               <span class="p-icon">♡</span>
               <h3>Tử tế</h3>
               <p>
                 Tiếp nhận rõ ràng, ghi chú minh bạch và báo giá trước khi xử lý.
               </p>
             </article>
-            <article class="promise">
+            <article class="promise" tabindex="0">
               <span class="p-icon">✦</span>
               <h3>Tận tâm</h3>
               <p>
                 Chăm chút từng mẻ giặt, lưu ý riêng với các yêu cầu của khách.
               </p>
             </article>
-            <article class="promise">
+            <article class="promise" tabindex="0">
               <span class="p-icon">✧</span>
               <h3>Thơm sạch</h3>
               <p>Giặt sạch sâu, sấy khô nhanh và chăm sóc sợi vải nhẹ nhàng.</p>
             </article>
-            <article class="promise">
+            <article class="promise" tabindex="0">
               <span class="p-icon">⌁</span>
               <h3>Tiện lợi</h3>
               <p>

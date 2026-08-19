@@ -594,7 +594,6 @@
       await hydrateCloudData();
       installStoreAddress();
       initDefaultData();
-      recordVisit();      // Ghi nhận lượt truy cập mới vào localStorage
       checkAuthStatus();
     };
 
@@ -1391,7 +1390,8 @@
         }
       });
 
-      document.getElementById('footerValVisits').innerText = filteredVisits.length.toLocaleString();
+      const totalCustomerVisits = fromDateStr || toDateStr ? filteredVisits.length : Number(localStorage.getItem('websiteVisitsCount') || filteredVisits.length);
+      document.getElementById('footerValVisits').innerText = totalCustomerVisits.toLocaleString();
       document.getElementById('footerValAccounts').innerText = totalAccountsCount.toLocaleString();
       document.getElementById('footerValOrders').innerText = totalOrdersCount.toLocaleString();
       document.getElementById('footerValRevenue').innerText = realCollectedRevenue.toLocaleString() + " VNĐ";

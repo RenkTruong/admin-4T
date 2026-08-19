@@ -882,7 +882,24 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       .payment-grid .choice {
-        min-height: 95px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 86px;
+        padding: 10px 8px;
+        border-radius: 14px;
+        border: 2px solid #bfd8ee;
+        background: linear-gradient(180deg, #f5fbff, #edf6ff);
+        text-align: center;
+      }
+      .payment-grid .choice b {
+        display: block;
+        font-size: clamp(14px, 1.15vw, 17px);
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+      }
+      .payment-grid .choice small {
+        display: none;
       }
       .total-box {
         display: flex;
@@ -2016,7 +2033,7 @@
                       value="cash"
                       checked
                     /><b>💵 Tiền mặt</b
-                    ><small>Thanh toán khi nhận/giao</small></label
+                    ></label
                   ><label class="choice"
                     ><input type="radio" name="payment" value="bank" /><b
                       >🏦 Mã QR</b

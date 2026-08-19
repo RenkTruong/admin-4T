@@ -260,6 +260,7 @@
             <select id="filterOrderStatus" onchange="renderOrdersTable()" class="select-status" style="padding: 6px 12px;">
               <option value="ALL">Tất cả đơn hàng</option>
               <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
+              <option value="Đã tiếp nhận">Đã tiếp nhận</option>
               <option value="Đang xử lý">Đang xử lý</option>
               <option value="Đã xử lý">Đã xử lý</option>
               <option value="Đang giao hàng">Đang giao hàng</option>
@@ -514,6 +515,12 @@
   </div>
 
   <script>
+    const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog']);
+    const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
+    const nativeSetItem=Storage.prototype.setItem;
+    function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}
+    Storage.prototype.setItem=function(key,value){nativeSetItem.call(this,key,value);if(!window.__hydratingCloud)cloudPut(key,JSON.parse(value))};
+    async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
     
     function calculateShipping(weight, address) {
         let basePrice = weight * 15000; // Giá ví dụ 15k/kg
@@ -582,14 +589,15 @@
 
     let activeChatPhone = null;
 
-    window.onload = function() {
+    window.onload = async function() {
+      await hydrateCloudData();
       initDefaultData();
       recordVisit();      // Ghi nhận lượt truy cập mới vào localStorage
       checkAuthStatus();
     };
 
     function recordVisit() {
-      let visits = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
+      let visits = Number(localStorage.getItem('websiteVisitsCount') || '0') + 1;
       let now = new Date();
       let timeString = now.getFullYear() + '-' + 
                        String(now.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -597,8 +605,10 @@
                        String(now.getHours()).padStart(2, '0') + ':' + 
                        String(now.getMinutes()).padStart(2, '0') + ':' + 
                        String(now.getSeconds()).padStart(2, '0');
-      visits.push({ time: timeString });
-      localStorage.setItem('websiteVisitsLog', JSON.stringify(visits));
+      localStorage.setItem('websiteVisitsCount', String(visits));
+      let visitsLog = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
+      visitsLog.push({ time: timeString });
+      localStorage.setItem('websiteVisitsLog', JSON.stringify(visitsLog));
     }
 
     // --- ĐĂNG NHẬP & XÁC THỰC ---
@@ -748,32 +758,39 @@
       let countPending = 0, countProcessing = 0, countProcessed = 0, countShipping = 0, countCompleted = 0, countCancelled = 0;
 
       orders.forEach((o, index) => {
+        const customerName = o.customerName || o.name || "Khách Vãng Lai";
+        const service = o.service || (o.type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn");
+        const deliveryService = o.deliveryService || o.deliveryLabel || "Nhận tại cửa hàng";
+        const paymentMethod = o.paymentMethod || (o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử");
+        const total = Number(o.total || 0);
+        const orderTime = o.time || new Date(o.createdAt || Date.now()).toLocaleString("vi-VN");
+        const isCompleted = o.status === "Hoàn tất" || o.status === "Hoàn tất đơn hàng";
         if (o.status !== "Đã hủy") {
-          estimatedRevenue += o.total;
+          estimatedRevenue += total;
         }
 
-        if (o.status === "Chờ tiếp nhận") countPending++;
+        if (o.status === "Chờ tiếp nhận" || o.status === "Đã tiếp nhận") countPending++;
         else if (o.status === "Đang xử lý") countProcessing++;
         else if (o.status === "Đã xử lý") countProcessed++;
         else if (o.status === "Đang giao hàng") countShipping++;
-        else if (o.status === "Hoàn tất đơn hàng") countCompleted++;
+        else if (isCompleted) countCompleted++;
         else if (o.status === "Đã hủy") countCancelled++;
 
-        if (o.status !== "Đã hủy" && (o.paymentMethod === "App ngân hàng" || o.paymentMethod === "Ví điện tử" || (o.paymentMethod === "Tiền mặt" && o.status === "Hoàn tất đơn hàng"))) {
-          realRevenue += o.total;
+        if (o.status !== "Đã hủy" && (paymentMethod === "App ngân hàng" || paymentMethod === "Ví điện tử" || (paymentMethod === "Tiền mặt" && isCompleted))) {
+          realRevenue += total;
         }
 
         if (filterStatus !== "ALL" && o.status !== filterStatus) return;
-        if (searchQuery && !o.customerName.toLowerCase().includes(searchQuery) && !o.phone.includes(searchQuery)) return;
+        if (searchQuery && !customerName.toLowerCase().includes(searchQuery) && !String(o.phone || "").includes(searchQuery)) return;
 
         let badgeClass = "badge-pending";
         if (o.status === "Đang xử lý") badgeClass = "badge-processing";
         else if (o.status === "Đã xử lý") badgeClass = "badge-processed";
         else if (o.status === "Đang giao hàng") badgeClass = "badge-shipping";
-        else if (o.status === "Hoàn tất đơn hàng") badgeClass = "badge-completed";
+        else if (isCompleted) badgeClass = "badge-completed";
         else if (o.status === "Đã hủy") badgeClass = "badge-cancelled";
 
-        let isFinalState = (o.status === "Hoàn tất đơn hàng" || o.status === "Đã hủy");
+        let isFinalState = (isCompleted || o.status === "Đã hủy");
         let disabledAttr = isFinalState ? "disabled title=\"Đơn hàng đã hoàn tất hoặc đã hủy, không thể thay đổi trạng thái!\"" : "";
 
         let cancelOptionHtml = isRoot ? `<option value="Đã hủy" ${o.status==='Đã hủy'?'selected':''}>Đã hủy</option>` : '';
@@ -785,19 +802,21 @@
         tbody.innerHTML += `
           <tr>
             <td>${orderIdColumn}</td>
-            <td>${o.customerName}<br><small style="color:#64748b;">${o.phone}</small></td>
-            <td>${o.service}</td>
-            <td><small style="color:#0284c7; font-weight:600;">${o.deliveryService}</small></td>
-            <td><span style="font-weight: 600; font-size: 0.85rem;">${o.paymentMethod}</span></td>
-            <td><strong style="color:var(--primary);">${o.total.toLocaleString()} VNĐ</strong></td>
-            <td><small>${o.time}</small></td>
+            <td>${customerName}<br><small style="color:#64748b;">${o.phone || ""}</small></td>
+            <td>${service}</td>
+            <td><small style="color:#0284c7; font-weight:600;">${deliveryService}</small></td>
+            <td><span style="font-weight: 600; font-size: 0.85rem;">${paymentMethod}</span></td>
+            <td><strong style="color:var(--primary);">${total.toLocaleString()} VNĐ</strong></td>
+            <td><small>${orderTime}</small></td>
             <td><span class="badge ${badgeClass}">${o.status}</span></td>
             <td>
               <select class="select-status" id="statusSelect_${index}" onchange="confirmAndUpdateOrderStatus(${index}, this)" ${disabledAttr}>
                 <option value="Chờ tiếp nhận" ${o.status==='Chờ tiếp nhận'?'selected':''}>Chờ tiếp nhận</option>
+                <option value="Đã tiếp nhận" ${o.status==='Đã tiếp nhận'?'selected':''}>Đã tiếp nhận</option>
                 <option value="Đang xử lý" ${o.status==='Đang xử lý'?'selected':''}>Đang xử lý</option>
                 <option value="Đã xử lý" ${o.status==='Đã xử lý'?'selected':''}>Đã xử lý</option>
                 <option value="Đang giao hàng" ${o.status==='Đang giao hàng'?'selected':''}>Đang giao hàng</option>
+                <option value="Hoàn tất" ${o.status==='Hoàn tất'?'selected':''}>Hoàn tất</option>
                 <option value="Hoàn tất đơn hàng" ${o.status==='Hoàn tất đơn hàng'?'selected':''}>Hoàn tất đơn hàng</option>
                 ${cancelOptionHtml}
               </select>
@@ -820,7 +839,7 @@
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
       let oldStatus = orders[index].id ? orders[index].status : "";
 
-      if (oldStatus === "Hoàn tất đơn hàng" || oldStatus === "Đã hủy") {
+      if (oldStatus === "Hoàn tất" || oldStatus === "Hoàn tất đơn hàng" || oldStatus === "Đã hủy") {
         alert("Đơn hàng này đã ở trạng thái 'Hoàn tất đơn hàng' hoặc 'Đã hủy', không thể đổi lại trạng thái!");
         selectElement.value = oldStatus;
         return;
@@ -1094,7 +1113,7 @@
 
       let customerOrders = orders.filter(o => o.phone === u.phone || o.customerName === u.name);
       let totalOrdersCount = customerOrders.length;
-      let totalMoneySpent = customerOrders.filter(o => o.status !== "Đã hủy").reduce((sum, o) => sum + o.total, 0);
+      let totalMoneySpent = customerOrders.filter(o => o.status !== "Đã hủy").reduce((sum, o) => sum + Number(o.total || 0), 0);
 
       let reviewsHtml = (u.reviews && u.reviews.length > 0) ? u.reviews.map(r => `<li>⭐ ${r.rating}/5 - "${r.comment}" <small>(${r.date})</small></li>`).join('') : '<li>Chưa có đánh giá nào.</li>';
 
@@ -1124,9 +1143,12 @@
 
       let body = document.getElementById('customerDetailBody');
       body.innerHTML = `
-        <p><strong>Họ Tên Khách Hàng:</strong> ${u.name}</p>
-        <p><strong>Số Điện Thoại:</strong> ${u.phone}</p>
-        <p><strong>Địa Chỉ:</strong> ${u.address}</p>
+        <h4 style="color: var(--primary); margin-bottom: 8px;">Cập Nhật Thông Tin Tài Khoản</h4>
+        <div class="form-group"><label>Họ Tên Khách Hàng:</label><input id="editCustomerName" value="${u.name || ''}"></div>
+        <div class="form-group"><label>Số Điện Thoại:</label><input id="editCustomerPhone" value="${u.phone || ''}" maxlength="10"></div>
+        <div class="form-group"><label>Địa Chỉ:</label><input id="editCustomerAddress" value="${u.address || ''}"></div>
+        <button class="btn btn-primary" onclick="updateCustomerInfo(${index})" style="width: 100%; padding: 8px;">Lưu Thông Tin Khách Hàng</button>
+        <p><strong>Điểm Tích Lũy:</strong> <span style="color:var(--success); font-weight:bold;">${u.points || 0} điểm</span></p>
         <p><strong>Điểm Tích Lũy:</strong> <span style="color:var(--success); font-weight:bold;">${u.points || 0} điểm</span></p>
         
         <hr style="margin: 12px 0;">
@@ -1142,6 +1164,48 @@
       `;
       document.getElementById('customerDetailModal').style.display = 'flex';
     }
+
+    function updateCustomerInfo(userIndex) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      let user = users[userIndex];
+      if (!user) return;
+      let oldPhone = user.phone;
+      let name = document.getElementById('editCustomerName').value.trim();
+      let phone = document.getElementById('editCustomerPhone').value.trim();
+      let address = document.getElementById('editCustomerAddress').value.trim();
+      if (!name || !/^0\d{9}$/.test(phone) || address.length < 8) {
+        alert('Vui lòng nhập họ tên, số điện thoại đủ 10 số và địa chỉ rõ ràng.');
+        return;
+      }
+      if (users.some((item, index) => index !== userIndex && item.phone === phone)) {
+        alert('Số điện thoại này đã thuộc tài khoản khác.');
+        return;
+      }
+      user.name = name;
+      user.phone = phone;
+      user.address = address;
+      localStorage.setItem('users', JSON.stringify(users));
+      let savedSession = JSON.parse(localStorage.getItem('4t_local_session') || 'null');
+      if (savedSession && savedSession.phone === oldPhone) localStorage.setItem('4t_local_session', JSON.stringify(user));
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      orders.forEach(order => {
+        if (order.phone === oldPhone || order.memberPhone === oldPhone) {
+          order.name = name;
+          order.customerName = name;
+          order.phone = phone;
+          if (order.memberPhone === oldPhone) order.memberPhone = phone;
+        }
+      });
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      alert('Đã cập nhật thông tin dùng chung cho cả hai website.');
+      closeModal('customerDetailModal');
+      renderUsersTable();
+      renderOrdersTable();
+    }
+
+    window.addEventListener('storage', event => {
+      if (['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog'].includes(event.key) && localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
+    });
 
     function updateCustomerPassword(userIndex) {
       let currentAdminUsername = localStorage.getItem('loggedAdmin');

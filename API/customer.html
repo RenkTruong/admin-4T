@@ -49,6 +49,8 @@
   <div class="toast" id="toast"></div>
   <script>
     const K={users:'users',orders:'orders_v2',session:'4t_local_session',visits:'websiteVisitsCount',chat:'4t_local_chat'};
+    const STORE_ADDRESS='123 Liên khu 4-5, Quận Bình Tân';
+    let distanceTimer=0;
     const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog']);
     const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
     let filter='all',reviewOrderId=null,rating=5;
@@ -97,6 +99,8 @@
       module.id='deliveryModule';module.className='delivery-module';
       module.innerHTML=`<h3>1. Dịch vụ giao–nhận</h3><p>Chọn hình thức phù hợp. Phí giao–nhận được tính theo khoảng cách ước tính từ cửa hàng 4T.</p><div class="delivery-options"><label class="delivery-option"><input type="radio" name="deliveryMode" value="store" checked onchange="updateDeliveryUI()"><b>⌂ Nhận & trả tại cửa hàng</b><small>Khách tự mang đồ đến và nhận lại tại 4T · không có phí ship.</small></label><label class="delivery-option"><input type="radio" name="deliveryMode" value="address" onchange="updateDeliveryUI()"><b>⌁ Nhận & giao theo địa chỉ</b><small>4T nhận và giao theo thông tin khách hàng điền ở trên.</small></label></div><div id="deliveryDistanceWrap" class="delivery-distance"><label class="field"><span>Khoảng cách ước tính từ cửa hàng 4T (km) *</span><input id="deliveryDistance" type="number" min="0" step="0.1" value="0" inputmode="decimal" oninput="calculateTotal()"></label></div><p id="deliveryFeeNote" class="delivery-fee-note"></p>`;
       firstDivider.before(module);
+      const distanceInput=document.getElementById('deliveryDistance');
+      if(distanceInput){distanceInput.readOnly=true;distanceInput.closest('.field').querySelector('span').textContent='Khoảng cách từ cửa hàng (tự động tính theo địa chỉ)';}
       const headings=form.querySelectorAll(':scope > h3');
       if(headings.length>=3){headings[0].textContent='2. Thông tin nhận đồ';headings[1].textContent='3. Chọn dịch vụ';headings[2].textContent='4. Thanh toán'}
       const memberNote=document.createElement('p');memberNote.id='memberFillNote';memberNote.className='member-fill-note';
@@ -105,6 +109,16 @@
       total.insertAdjacentHTML('afterend','<span id="priceBreakdown" class="price-breakdown"></span>');
       updateDeliveryUI();
     }
+    function installStoreAddress(){
+      const intro=document.querySelector('.hero .intro');
+      const contact=document.querySelector('.contact-grid>div:nth-child(2) p');
+      if(intro)intro.innerHTML=`4T chăm sóc từng mẻ giặt với tinh thần <b>Tử tế – Tận tâm – Thơm sạch – Tiện lợi</b>. Đặt lịch trực tuyến, 4T xác nhận và nhận trả tận nơi tại <b>${STORE_ADDRESS}</b>.`;
+      if(contact)contact.innerHTML='123 Liên khu 4-5,<br>Quận Bình Tân';
+    }
+    function scheduleDistanceLookup(){clearTimeout(distanceTimer);distanceTimer=setTimeout(lookupDeliveryDistance,450)}
+    async function geocodeAddress(address){const response=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=vn&q=${encodeURIComponent(address)}`,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('Không thể tìm địa chỉ');const results=await response.json();if(!results[0])throw new Error('Không tìm thấy địa chỉ');return {lat:Number(results[0].lat),lon:Number(results[0].lon)}}
+    function distanceInKm(first,second){const radians=value=>value*Math.PI/180,latDelta=radians(second.lat-first.lat),lonDelta=radians(second.lon-first.lon),a=Math.sin(latDelta/2)**2+Math.cos(radians(first.lat))*Math.cos(radians(second.lat))*Math.sin(lonDelta/2)**2;return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
+    async function lookupDeliveryDistance(){const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value,address=document.getElementById('orderAddress')?.value.trim(),note=document.getElementById('deliveryFeeNote');if(mode!=='address'||address.length<8)return;if(note)note.innerHTML='<b>Đang tính khoảng cách...</b> Vui lòng chờ trong giây lát.';try{const [store,customer]=await Promise.all([geocodeAddress(STORE_ADDRESS),geocodeAddress(address)]),distance=distanceInKm(store,customer);document.getElementById('deliveryDistance').value=distance.toFixed(1);calculateTotal()}catch(error){if(note)note.innerHTML='<b>Chưa xác định được khoảng cách.</b> Vui lòng kiểm tra địa chỉ khách hàng và thử lại.'}}
     function getDeliveryDetails(){
       const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value||'store';
       const kg=Math.max(3,Number(document.getElementById('orderKg')?.value||3));
@@ -120,7 +134,7 @@
       if(!wrap||!note)return;
       wrap.classList.toggle('show',details.mode==='address');
       const address=document.getElementById('orderAddress'),addressTitle=address?.closest('label')?.querySelector('span');
-      if(address){address.required=details.mode==='address';address.placeholder=details.mode==='address'?'Số nhà, đường, phường/xã, ghi chú điểm nhận...':'Không bắt buộc khi khách nhận và trả tại cửa hàng';}
+      if(address){address.required=details.mode==='address';address.placeholder=details.mode==='address'?'Số nhà, đường, phường/xã, ghi chú điểm nhận...':'Không bắt buộc khi khách nhận và trả tại cửa hàng';address.oninput=()=>{calculateTotal();scheduleDistanceLookup()};}
       if(addressTitle)addressTitle.textContent=details.mode==='address'?'Địa chỉ giao–nhận *':'Địa chỉ giao–nhận (không bắt buộc)';
       note.innerHTML=details.mode==='store'?'<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T.':'<b>Chính sách giao–nhận:</b> miễn phí khi đơn trên 10 kg và trong bán kính 5 km. Các trường hợp còn lại tính 2.000đ cho mỗi km, làm tròn lên.';
       calculateTotal();
@@ -169,7 +183,7 @@
       const delivery=o.deliveryLabel||'Nhận & trả tại cửa hàng',ship=Number(o.shippingFee||0),distance=o.deliveryMode==='address'?` · ${o.distanceKm||0} km`:'';
       return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString('vi-VN')} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${esc(delivery)}${distance} · ship ${ship===0?'miễn phí':money(ship)}<br>${o.payment==='cash'?'Tiền mặt':o.payment==='bank'?'App ngân hàng':'Ví điện tử'}</span>${o.status!=='Hoàn tất'?`<button class="text-btn" onclick="completeDemo('${o.id}')">Mô phỏng hoàn tất & tích điểm</button>`:o.review?`<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>`:`<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`}</div></article>`;
     }
-    function init(){installDeliveryModule();const v=Number(read(K.visits,0))+1;write(K.visits,v);renderAll();calculateTotal();renderChat()}
+    function init(){installStoreAddress();installDeliveryModule();const v=Number(read(K.visits,0))+1;write(K.visits,v);renderAll();calculateTotal();renderChat()}
     window.addEventListener('DOMContentLoaded',init);
   </script>
 </body>

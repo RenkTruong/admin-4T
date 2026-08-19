@@ -2695,7 +2695,7 @@
             : "Mã QR: QR kết hợp số tài khoản cửa hàng + mã đơn hàng, giúp khách tải về thanh toán và chủ cửa hàng tra cứu giao dịch dễ dàng.";
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
-          `<div class="help"><b>${esc(pay)}</b></div>${qrHtml}${isMember ? `<p style="font-size:13px;color:#58708d;line-height:1.7">Đơn được gắn với tài khoản của bạn. Hãy vào <a href="#tai-khoan" onclick="closeModal('resultModal')" style="font-weight:800;color:#e9415a">Tài khoản</a> để xem tiến độ. Điểm sẽ được cộng khi đơn chuyển sang “Hoàn tất (mô phỏng)”.</p>` : `<p style="font-size:13px;color:#8d4553;line-height:1.7"><b>Đơn khách vãng lai đã được lưu.</b><br>Để bảo vệ dữ liệu, bạn không xem được tiến độ hoặc tích điểm. Hãy đăng nhập trước khi đặt đơn sau.</p>`}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
+          `<div class="help"><b>${esc(pay)}</b></div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
         document.getElementById("resultModal").classList.add("active");
       }
       function statusClass(status) {
@@ -3301,7 +3301,7 @@
             : `${order.deliveryLabel} · ${order.distanceKm} km · phí ship ${order.shippingFee === 0 ? "miễn phí" : money(order.shippingFee)}.`;
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
-          `<div class="help"><b>${esc(deliveryText)}</b><br>Dịch vụ ${money(order.serviceFee)} · ${esc(paymentText)}</div>${qrHtml}${isMember ? `<p style="font-size:13px;color:#58708d;line-height:1.7">Đơn được gắn với tài khoản của bạn. Hãy vào <a href="#tai-khoan" onclick="closeModal('resultModal')" style="font-weight:800;color:#e9415a">Tài khoản</a> để xem tiến độ. Điểm được cộng khi đơn chuyển sang “Hoàn tất (mô phỏng)”.</p>` : `<p style="font-size:13px;color:#8d4553;line-height:1.7"><b>Đơn khách vãng lai đã được lưu.</b><br>Để bảo vệ dữ liệu, bạn không xem được tiến độ hoặc tích điểm. Hãy đăng nhập trước khi đặt đơn sau.</p>`}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
+          `<div class="help"><b>${esc(deliveryText)}</b><br>Dịch vụ ${money(order.serviceFee)} · ${esc(paymentText)}</div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
         if (order.payment === "bank") {
           const canvas = document.getElementById("paymentQrCanvas");
           if (canvas && window.QRCode) {

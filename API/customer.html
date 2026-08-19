@@ -527,6 +527,24 @@
         font-size: 15px;
         line-height: 1.75;
       }
+      .technology-features span,
+      .technology-features strong {
+        display: inline-block;
+        margin-bottom: 4px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--ink-2);
+      }
+      .technology-features strong {
+        margin-right: 5px;
+        color: var(--coral);
+      }
+      .technology-features em {
+        display: inline;
+        color: var(--muted);
+        font-size: 14px;
+      }
       .service-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -1696,12 +1714,12 @@
           <div>
             <p class="eyebrow">DỊCH VỤ 4T</p>
             <h2>Giặt bằng Công nghệ Nhật.</h2>
-            <p>
-              <b>Giặt sạch sâu</b><br />
-              <b>Sấy khô nhanh</b><br />
-              <b>Thơm lâu</b><br />
-              <b>Diệt khuẩn:</b> Tính năng giúp loại bỏ bụi mịn, giữ quần áo
-              luôn như mới.
+            <p class="technology-features">
+              <span>Giặt sạch sâu</span><br />
+              <span>Sấy khô nhanh</span><br />
+              <span>Thơm lâu</span><br />
+              <strong>Diệt khuẩn:</strong>
+              <em>Tính năng giúp loại bỏ bụi mịn, giữ quần áo luôn như mới.</em>
             </p>
             <a href="#dat-don"
               ><button class="btn btn-ink">Đặt lịch lấy đồ</button></a
@@ -1732,25 +1750,6 @@
               <b>Tiền mặt · QR · Ví</b>
               <p>Chọn phương thức khi tạo đơn</p>
             </article>
-          </div>
-        </div>
-      </section>
-      <section class="section">
-        <div class="container">
-          <div class="notice">
-            <div>
-              <p class="eyebrow">TÀI KHOẢN 4T</p>
-              <h2>
-                Đặt đơn không cần đăng nhập.<br />Đăng nhập để nhận nhiều hơn.
-              </h2>
-            </div>
-            <div>
-              <a href="#dat-don"
-                ><button class="btn btn-coral">Đặt đơn ngay</button></a
-              ><button class="btn btn-outline" onclick="openAuth('register')">
-                Tạo tài khoản
-              </button>
-            </div>
           </div>
         </div>
       </section>

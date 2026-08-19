@@ -1207,6 +1207,7 @@
     window.addEventListener('storage', event => {
       if (['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog'].includes(event.key) && localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
     });
+    setInterval(async () => { if (localStorage.getItem('loggedAdmin')) { await hydrateCloudData(); applyPermissionsAndRender(); } }, 5000);
 
     function updateCustomerPassword(userIndex) {
       let currentAdminUsername = localStorage.getItem('loggedAdmin');

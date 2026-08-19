@@ -7,7 +7,7 @@ const { getPool, getValue, setValue } = require('./db');
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_KEYS = new Set(['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog']);
-const STATIC_FILES = new Set(['customer.html', 'admin.html', '4T.jpg']);
+const STATIC_FILES = new Set(['customer.html', 'admin.html', '4T.jpg', 'favicon.svg']);
 const FALLBACKS = { users: [], orders_v2: [], websiteVisitsCount: 0, websiteVisitsLog: [] };
 
 function sendJson(response, status, body) {
@@ -49,7 +49,7 @@ function serveStatic(response, pathname) {
   const filename = pathname === '/' ? 'customer.html' : pathname.slice(1);
   if (!STATIC_FILES.has(filename)) return sendJson(response, 404, { error: 'Not found' });
   const file = path.join(__dirname, filename);
-  const contentType = filename.endsWith('.html') ? 'text/html; charset=utf-8' : 'image/jpeg';
+  const contentType = filename.endsWith('.html') ? 'text/html; charset=utf-8' : filename.endsWith('.svg') ? 'image/svg+xml' : 'image/jpeg';
   response.writeHead(200, { 'Content-Type': contentType });
   fs.createReadStream(file).pipe(response);
 }

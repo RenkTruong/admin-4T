@@ -108,6 +108,8 @@
       if(distanceInput){distanceInput.readOnly=true;distanceInput.closest('.field').querySelector('span').textContent='Khoảng cách từ cửa hàng (tự động tính theo địa chỉ)';}
       const headings=form.querySelectorAll(':scope > h3');
       if(headings.length>=3){headings[0].textContent='2. Thông tin nhận đồ';headings[1].textContent='3. Chọn dịch vụ';headings[2].textContent='4. Thanh toán'}
+      const address=document.getElementById('orderAddress'),addressLabel=address?.closest('label');
+      if(addressLabel){addressLabel.innerHTML='<span>Địa chỉ gửi hàng *</span><div class="form-row"><input id="addressStreet" placeholder="Số nhà + tên đường"><input id="addressWard" placeholder="Phường"></div><input id="addressCity" style="margin-top:12px" placeholder="Tỉnh / Thành phố"><textarea id="orderAddress" class="hidden"></textarea>';['addressStreet','addressWard','addressCity'].forEach(id=>document.getElementById(id).addEventListener('input',syncAddressParts));}
       const memberNote=document.createElement('p');memberNote.id='memberFillNote';memberNote.className='member-fill-note';
       document.getElementById('orderAddress').closest('label').after(memberNote);
       const total=document.getElementById('orderTotal');
@@ -125,9 +127,11 @@
       if(addressLabel)addressLabel.textContent='Địa chỉ gửi hàng *';
     }
     function scheduleDistanceLookup(){clearTimeout(distanceTimer);distanceTimer=setTimeout(lookupDeliveryDistance,450)}
+    function syncAddressParts(){const parts=['addressStreet','addressWard','addressCity'].map(id=>document.getElementById(id)?.value.trim()).filter(Boolean);const address=document.getElementById('orderAddress');if(address)address.value=parts.join(', ');calculateTotal();scheduleDistanceLookup()}
+    function fillAddressParts(value){const address=String(value||'').trim(),street=document.getElementById('addressStreet'),ward=document.getElementById('addressWard'),city=document.getElementById('addressCity');if(!street||!ward||!city)return;street.value=address;ward.value='';city.value='Hồ Chí Minh';syncAddressParts()}
     async function geocodeAddress(address){const response=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=vn&q=${encodeURIComponent(address)}`,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('Không thể tìm địa chỉ');const results=await response.json();if(!results[0])throw new Error('Không tìm thấy địa chỉ');return {lat:Number(results[0].lat),lon:Number(results[0].lon)}}
     function distanceInKm(first,second){const radians=value=>value*Math.PI/180,latDelta=radians(second.lat-first.lat),lonDelta=radians(second.lon-first.lon),a=Math.sin(latDelta/2)**2+Math.cos(radians(first.lat))*Math.cos(radians(second.lat))*Math.sin(lonDelta/2)**2;return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
-    async function lookupDeliveryDistance(){const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value,address=document.getElementById('orderAddress')?.value.trim(),note=document.getElementById('deliveryFeeNote');if(mode!=='address'||address.length<8)return;if(note)note.innerHTML='<b>Đang tính khoảng cách...</b> Vui lòng chờ trong giây lát.';try{const [store,customer]=await Promise.all([geocodeAddress(STORE_GEOCODE_ADDRESS),geocodeAddress(address)]),distance=distanceInKm(store,customer);document.getElementById('deliveryDistance').value=distance.toFixed(1);calculateTotal()}catch(error){if(note)note.innerHTML='<b>Chưa xác định được khoảng cách.</b> Vui lòng kiểm tra địa chỉ khách hàng và thử lại.'}}
+    async function lookupDeliveryDistance(){const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value,address=document.getElementById('orderAddress')?.value.trim(),note=document.getElementById('deliveryFeeNote');if(mode!=='address'||address.length<12)return;if(note)note.innerHTML='<b>Đang tính khoảng cách...</b> Vui lòng chờ trong giây lát.';try{const [store,customer]=await Promise.all([geocodeAddress(STORE_GEOCODE_ADDRESS),geocodeAddress(address+', Việt Nam')]),distance=distanceInKm(store,customer);document.getElementById('deliveryDistance').value=distance.toFixed(1);calculateTotal()}catch(error){if(note)note.innerHTML='<b>Chưa xác định được khoảng cách.</b> Vui lòng kiểm tra đủ số nhà, tên đường, phường và tỉnh/thành phố.'}}
     function getDeliveryDetails(){
       const mode=document.querySelector('input[name="deliveryMode"]:checked')?.value||'store';
       const kg=Math.max(3,Number(document.getElementById('orderKg')?.value||3));
@@ -143,7 +147,7 @@
       if(!wrap||!note)return;
       wrap.classList.toggle('show',details.mode==='address');
       const address=document.getElementById('orderAddress'),addressTitle=address?.closest('label')?.querySelector('span');
-      if(address){address.required=details.mode==='address';address.placeholder=details.mode==='address'?'Số nhà, đường, phường/xã, ghi chú điểm nhận...':'Không bắt buộc khi khách nhận và trả tại cửa hàng';address.oninput=()=>{calculateTotal();scheduleDistanceLookup()};}
+      if(address)address.required=details.mode==='address';
       if(addressTitle)addressTitle.textContent=details.mode==='address'?'Địa chỉ gửi hàng *':'Địa chỉ gửi hàng (không bắt buộc)';
       note.innerHTML=details.mode==='store'?'<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T.':'<b>Chính sách giao–nhận:</b> miễn phí khi đơn trên 10 kg và trong bán kính 5 km. Các trường hợp còn lại tính 2.000đ cho mỗi km, làm tròn lên.';
       calculateTotal();
@@ -163,7 +167,7 @@
         notice?.classList.add('hidden');
         document.getElementById('orderName').value=s.name;
         document.getElementById('orderPhone').value=s.phone;
-        document.getElementById('orderAddress').value=s.address;
+        fillAddressParts(s.address);
         if(memberNote){memberNote.textContent='✓ Đã tự điền thông tin từ tài khoản 4T. Bạn vẫn có thể sửa bất kỳ trường nào theo nhu cầu.';memberNote.classList.add('show')}
       }else{notice?.classList.remove('hidden');memberNote?.classList.remove('show')}
       updateDeliveryUI();
@@ -172,7 +176,9 @@
       e.preventDefault();
       const s=session(),name=document.getElementById('orderName').value.trim(),phone=document.getElementById('orderPhone').value.trim(),address=document.getElementById('orderAddress').value.trim(),kg=Math.max(3,Number(document.getElementById('orderKg').value||3)),type=document.querySelector('input[name="service"]:checked').value,payment=document.querySelector('input[name="payment"]:checked').value,notes=document.getElementById('orderNotes').value.trim(),delivery=getDeliveryDetails();
       if(!validPhone(phone))return toast('Số điện thoại cần đủ 10 số và bắt đầu bằng 0.');
-      if(delivery.mode==='address'&&address.length<8)return toast('Vui lòng nhập địa chỉ giao–nhận rõ hơn.');
+      if(delivery.mode==='address'&&['addressStreet','addressWard','addressCity'].some(id=>!document.getElementById(id)?.value.trim()))return toast('Vui lòng nhập đủ số nhà + tên đường, phường và tỉnh/thành phố.');
+      syncAddressParts();
+      if(delivery.mode==='address'&&address.length<12)return toast('Vui lòng nhập địa chỉ giao–nhận rõ hơn.');
       if(delivery.mode==='address'&&delivery.distance<=0)return toast('Vui lòng nhập khoảng cách ước tính từ cửa hàng 4T.');
       const serviceFee=kg*(type==='express'?30000:15000),total=serviceFee+delivery.shippingFee;
       const serviceName=type==='express'?'Giặt sấy nhanh':'Giặt sấy tiêu chuẩn';

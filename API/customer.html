@@ -2646,7 +2646,7 @@
           addressLabel = address?.closest("label");
         if (addressLabel) {
           addressLabel.innerHTML =
-            '<span>Địa chỉ gửi hàng *</span><div class="form-row"><input id="addressStreet" placeholder="Số nhà + tên đường"><select id="addressWard" required><option value="">Chọn phường</option></select></div><select id="addressCity" required style="margin-top:12px"><option value="">Chọn tỉnh / thành phố</option></select><textarea id="orderAddress" class="hidden"></textarea>';
+            '<span>Địa chỉ gửi hàng *</span><div class="form-row"><input id="addressStreet" placeholder="Số nhà + tên đường"><select id="addressWard" required disabled><option value="">Chọn tỉnh/thành trước</option></select></div><select id="addressCity" required style="margin-top:12px"><option value="">Chọn tỉnh / thành phố</option></select><textarea id="orderAddress" class="hidden"></textarea>';
           document
             .getElementById("addressStreet")
             .addEventListener("input", syncAddressParts);
@@ -2736,8 +2736,9 @@
           )
             .map((item) => (typeof item === "string" ? item : item.name))
             .filter(Boolean);
+        ward.disabled = !city.value || wards.length === 0;
         ward.innerHTML =
-          '<option value="">Chọn phường</option>' +
+          `<option value="">${city.value ? "Chọn phường/xã" : "Chọn tỉnh/thành trước"}</option>` +
           wards
             .map((name) => `<option value="${esc(name)}">${esc(name)}</option>`)
             .join("");

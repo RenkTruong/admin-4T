@@ -88,7 +88,7 @@
     .card-title { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
 
     /* Table Styling */
-    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.9rem; min-width: 760px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 76, 129, 0.04); }
+    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.9rem; min-width: 760px; table-layout: fixed; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 76, 129, 0.04); }
     .modern-table thead th {
       background: linear-gradient(180deg, #f8fbff 0%, #edf6ff 100%);
       padding: 0.9rem 0.8rem;
@@ -99,6 +99,8 @@
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .modern-table thead th:first-child { border-top-left-radius: 12px; }
     .modern-table thead th:last-child { border-top-right-radius: 12px; }
@@ -661,6 +663,18 @@
 
       <div>
         <table class="modern-table">
+          <colgroup>
+            <col style="width: 9%;">
+            <col style="width: 12%;">
+            <col style="width: 14%;">
+            <col style="width: 11%;">
+            <col style="width: 9%;">
+            <col style="width: 9%;">
+            <col style="width: 10%;">
+            <col style="width: 9%;">
+            <col style="width: 8%;">
+            <col style="width: 9%;">
+          </colgroup>
           <thead>
             <tr>
               <th>Mã Đơn</th>

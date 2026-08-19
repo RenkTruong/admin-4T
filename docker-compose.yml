@@ -1,0 +1,96 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: 4t-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: 4t-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 4000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_SSL: "false"
+      ADMIN_ORIGIN: ${ADMIN_ORIGIN}
+      CUSTOMER_ORIGIN: ${CUSTOMER_ORIGIN}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      SYNC_TOKEN: ${SYNC_TOKEN}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "4000"
+
+  admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+    container_name: 4t-admin
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${API_BASE_URL}
+      VITE_APP_ENV: production
+    expose:
+      - "80"
+
+  customer:
+    build:
+      context: ./apps/customer
+      dockerfile: Dockerfile
+    container_name: 4t-customer
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${API_BASE_URL}
+      VITE_APP_ENV: production
+    expose:
+      - "80"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: 4t-nginx
+    restart: unless-stopped
+    depends_on:
+      - admin
+      - customer
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    command: /bin/sh -c "nginx -g 'daemon off;'"
+
+  certbot:
+    image: certbot/certbot
+    container_name: 4t-certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: /bin/sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${ADMIN_DOMAIN} -d ${CUSTOMER_DOMAIN} -d ${API_DOMAIN} || true"
+
+volumes:
+  pgdata:

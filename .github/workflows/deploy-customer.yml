@@ -1,0 +1,43 @@
+name: Deploy Customer Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/customer/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/customer/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/customer
+        run: npm ci
+
+      - name: Build customer frontend
+        working-directory: apps/customer
+        env:
+          VITE_API_BASE_URL: https://api.4t-laundry.com
+          VITE_APP_ENV: production
+        run: npm run build
+
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          source: 'apps/customer/dist/*'
+          target: '/var/www/customer-prod'
+          strip_components: 2

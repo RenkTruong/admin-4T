@@ -1,0 +1,49 @@
+/* 4T design system: Japanese-tech cleanliness with deep navy trust, active coral and airy sky blue. */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "DM Serif Display", Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+}
+
+:root { --background: #F7FAFF; --foreground: #102D55; --card: #FFFFFF; --card-foreground: #102D55; --popover: #FFFFFF; --popover-foreground: #102D55; --primary: #092C5C; --primary-foreground: #FFFFFF; --secondary: #E8F5FF; --secondary-foreground: #092C5C; --muted: #F1F5FB; --muted-foreground: #61718A; --accent: #FFE7EB; --accent-foreground: #A22940; --destructive: #D83852; --destructive-foreground: #FFFFFF; --border: rgba(9,44,92,.12); --input: rgba(9,44,92,.14); --ring: #1677C7; }
+* { border-color: var(--border); }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:active { transform: scale(.98); }
+.brand-mark { display: inline-flex; height: 40px; min-width: 50px; align-items: center; justify-content: center; border-radius: 14px 14px 14px 4px; background: linear-gradient(135deg, #092C5C, #1677C7); color: #fff; font-size: 21px; font-weight: 800; font-style: italic; letter-spacing: -.08em; box-shadow: inset 0 1px 0 rgba(255,255,255,.22); }
+.eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .17em; color: #1677C7; }
+.form-legend { font-size: 13px; font-weight: 800; color: #092C5C; }
+.form-select { display: block; width: 100%; height: 40px; border: 1px solid rgba(9,44,92,.14); border-radius: 10px; background: white; padding: 0 .75rem; color: #334866; font-size: 14px; outline: none; }
+.form-select:focus { border-color: #1677C7; box-shadow: 0 0 0 3px rgba(22,119,199,.13); }
+.status-pill { display: inline-flex; border-radius: 999px; padding: .42rem .7rem; font-size: 11px; font-weight: 800; }
+.status-requested { background: #FFF2D8; color: #9A6500; }.status-confirmed,.status-pickup { background: #E3F2FF; color: #1263A5; }.status-washing,.status-drying { background: #E8F5FF; color: #1476B9; }.status-ready { background: #E8F0FF; color: #315BC3; }.status-completed { background: #E4F7EC; color: #177648; }.status-cancelled { background: #F9E7EB; color: #B52B46; }
+@media (prefers-reduced-motion: no-preference) { .group, article, button, a { transition-timing-function: cubic-bezier(.23,1,.32,1); } }

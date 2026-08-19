@@ -2310,6 +2310,7 @@
         chat: "4t_local_chat",
       };
       const STORE_BANK_ACCOUNT = "19036623385014";
+      const STORE_BANK_CODE = "TCB";
       const STORE_BANK_NAME = "Techcombank";
       const STORE_BANK_HOLDER = "Tạ Thị Thùy Trinh";
       const STORE_ADDRESS = "123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh";
@@ -2605,16 +2606,20 @@
         document.getElementById("orderNotes").value = "";
       }
       function buildPaymentQrPayload(order) {
-        return `4T|ACCOUNT=${STORE_BANK_ACCOUNT}|ORDER=${order.id}|AMOUNT=${Number(order.total || 0)}|NOTE=Thanh toan don ${order.id}`;
+        const amount = Math.round(Number(order.total || 0));
+        const note = `Thanh toan don ${order.id}`;
+        return `4T|ACCOUNT=${STORE_BANK_ACCOUNT}|ORDER=${order.id}|AMOUNT=${amount}|NOTE=${note}`;
       }
       function renderPaymentQr(order) {
         if (!order || order.payment !== "bank") return "";
-        const payload = encodeURIComponent(buildPaymentQrPayload(order));
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${payload}`;
+        const amount = Math.round(Number(order.total || 0));
+        const note = encodeURIComponent(`Thanh toan don ${order.id}`);
+        const accountName = encodeURIComponent(STORE_BANK_HOLDER);
+        const qrUrl = `https://img.vietqr.io/image/${STORE_BANK_CODE}-${STORE_BANK_ACCOUNT}-compact.png?amount=${amount}&addInfo=${note}&accountName=${accountName}`;
         const qrMarkup = `
           <div class="qr-card">
             <div class="qr-box">
-              <img id="paymentQrImage" src="${qrUrl}" alt="QR thanh toán 4T" />
+              <img id="paymentQrImage" src="${qrUrl}" alt="VietQR thanh toán 4T" />
             </div>
             <div class="qr-meta">
               <div><b>Ngân hàng:</b> ${esc(STORE_BANK_NAME)}</div>
@@ -2623,7 +2628,7 @@
               <div><b>Mã đơn:</b> ${esc(order.id)}</div>
               <div><b>Số tiền:</b> ${esc(money(order.total))}</div>
             </div>
-            <a id="downloadQr" class="btn btn-outline" href="${qrUrl}" target="_blank" rel="noopener" download="4T-${esc(order.id)}-qr.png">Tải QR về</a>
+            <a id="downloadQr" class="btn btn-outline" href="${qrUrl}" target="_blank" rel="noopener" download="4T-${esc(order.id)}-vietqr.png">Tải QR về</a>
           </div>
         `;
         return qrMarkup;

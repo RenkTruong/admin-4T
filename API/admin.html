@@ -521,7 +521,7 @@
     function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}
     Storage.prototype.setItem=function(key,value){nativeSetItem.call(this,key,value);if(!window.__hydratingCloud)cloudPut(key,JSON.parse(value))};
     async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
-    function installStoreAddress(){const card=document.querySelector('#loginScreen .login-card');if(card&&!card.querySelector('.store-address')){const address=document.createElement('p');address.className='store-address';address.textContent='123 Liên khu 4-5, Quận Bình Tân';address.style='text-align:center;color:#64748b;font-size:.85rem;margin:-1rem 0 1.2rem';card.querySelector('h2').after(address)}}
+    function installStoreAddress(){const card=document.querySelector('#loginScreen .login-card');if(card&&!card.querySelector('.store-address')){const address=document.createElement('p');address.className='store-address';address.textContent='123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh';address.style='text-align:center;color:#64748b;font-size:.85rem;margin:-1rem 0 1.2rem';card.querySelector('h2').after(address)}}
     
     function calculateShipping(weight, address) {
         let basePrice = weight * 15000; // Giá ví dụ 15k/kg

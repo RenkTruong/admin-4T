@@ -49,8 +49,8 @@
   <div class="toast" id="toast"></div>
   <script>
     const K={users:'users',orders:'orders_v2',session:'4t_local_session',visits:'websiteVisitsCount',chat:'4t_local_chat'};
-    const STORE_ADDRESS='123 Liên khu 4-5, Quận Bình Tân';
-    const STORE_GEOCODE_ADDRESS='123 Liên khu 4-5, Bình Tân, Thành phố Hồ Chí Minh, Việt Nam';
+    const STORE_ADDRESS='123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh';
+    const STORE_GEOCODE_ADDRESS='123 Liên Khu 4-5, Phường Bình Tân, Thành phố Hồ Chí Minh, Việt Nam';
     let distanceTimer=0;
     const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog']);
     const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
@@ -120,7 +120,7 @@
       const visitLabel=document.querySelector('#statVisits')?.nextElementSibling;
       const addressLabel=document.querySelector('#orderAddress')?.closest('.field')?.querySelector('span');
       if(intro)intro.innerHTML=`4T chăm sóc từng mẻ giặt với tinh thần <b>Tử tế – Tận tâm – Thơm sạch – Tiện lợi</b>. Đặt lịch trực tuyến, 4T xác nhận và nhận trả tận nơi tại <b>${STORE_ADDRESS}</b>.`;
-      if(contact)contact.innerHTML='123 Liên khu 4-5,<br>Quận Bình Tân';
+      if(contact)contact.innerHTML='123 Liên Khu 4-5,<br>Phường Bình Tân, Hồ Chí Minh';
       if(visitLabel)visitLabel.textContent='Lượt truy cập';
       if(addressLabel)addressLabel.textContent='Địa chỉ gửi hàng *';
     }

@@ -38,6 +38,6 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          source: 'apps/admin/dist/*'
+          source: 'apps/admin/dist/**'
           target: '/var/www/admin-prod'
-          strip_components: 2
+          strip_components: 3

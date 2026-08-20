@@ -11,12 +11,12 @@ concurrency:
 
 jobs:
   validate:
-    timeout-minutes: 10
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -26,9 +26,9 @@ jobs:
         working-directory: apps/api
         run: npm ci
 
-      - name: Basic API smoke check
+      - name: Validate API build
         working-directory: apps/api
-        run: node -e "require('./express-api.js'); console.log('API file loaded');" || true
+        run: npm run build
 
   deploy:
     needs: validate

@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "build": "node --check server.js && node --check express-api.js && node --check db.js",
     "start": "node server.js",
     "api": "node express-api.js",
     "dev": "node express-api.js",

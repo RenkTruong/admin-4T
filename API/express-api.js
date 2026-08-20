@@ -79,9 +79,11 @@ function isStatusTransitionAllowed(currentStatus, nextStatus) {
 
 function buildOrderCode() {
   const now = new Date();
-  const yymmdd = now.toISOString().slice(2, 10).replace(/-/g, '');
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = String(now.getFullYear()).slice(-2);
   const random = Math.floor(1000 + Math.random() * 9000);
-  return `4T-${yymmdd}-${random}`;
+  return `4T-${day}${month}${year}-${random}`;
 }
 
 async function getCustomerById(id) {

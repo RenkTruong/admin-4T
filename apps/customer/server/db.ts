@@ -11,7 +11,7 @@ import {
   supportMessages,
   users,
 } from "../drizzle/schema";
-import { calculateOrderPoints, OrderStatus } from "./orderRules";
+import { getNewOrderRewardPoints, getReviewBonusPoints, calculateOrderPoints, canAwardOrderPoints, OrderStatus } from "./orderRules";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -73,17 +73,29 @@ type CreateOrderData = {
 export async function createOrder(data: CreateOrderData) {
   const db = await getDb();
   if (!db) throw new Error("Không thể kết nối dữ liệu đơn hàng.");
+  const newOrderReward = getNewOrderRewardPoints(data.userId);
   await db.insert(laundryOrders).values({
     ...data,
     userId: data.userId ?? null,
     customerEmail: data.customerEmail || null,
     notes: data.notes || null,
     status: "requested",
-    pointsAwarded: 0,
+    pointsAwarded: newOrderReward,
   });
   const order = await db.select().from(laundryOrders).where(eq(laundryOrders.publicCode, data.publicCode)).limit(1);
   if (!order[0]) throw new Error("Không thể lưu đơn hàng.");
   await db.insert(orderStatusHistory).values({ orderId: order[0].id, status: "requested", note: "Đơn đang chờ cửa hàng xác nhận." });
+
+  if (newOrderReward > 0 && data.userId) {
+    await db.insert(loyaltyAccounts).values({ userId: data.userId, currentPoints: newOrderReward, totalEarned: newOrderReward }).onDuplicateKeyUpdate({
+      set: {
+        currentPoints: sql`${loyaltyAccounts.currentPoints} + ${newOrderReward}`,
+        totalEarned: sql`${loyaltyAccounts.totalEarned} + ${newOrderReward}`,
+      },
+    });
+    await db.insert(loyaltyTransactions).values({ userId: data.userId, orderId: order[0].id, kind: "earn", points: newOrderReward, note: `Tích điểm tạo đơn ${order[0].publicCode}` });
+  }
+
   return order[0];
 }
 
@@ -122,7 +134,7 @@ export async function updateOrderStatus(orderId: number, status: OrderStatus, no
   const order = current[0];
   if (!order) throw new Error("Không tìm thấy đơn hàng.");
 
-  const award = status === "completed" && order.userId && order.pointsAwarded === 0
+  const award = canAwardOrderPoints(status, order.userId, order.pointsAwarded)
     ? calculateOrderPoints(order.estimatedTotalVnd)
     : 0;
   await db.update(laundryOrders).set({ status, pointsAwarded: order.pointsAwarded + award }).where(eq(laundryOrders.id, orderId));
@@ -155,7 +167,18 @@ export async function createReview(userId: number, orderId: number, rating: numb
   if (!db) throw new Error("Không thể gửi đánh giá.");
   const order = await db.select().from(laundryOrders).where(and(eq(laundryOrders.id, orderId), eq(laundryOrders.userId, userId))).limit(1);
   if (!order[0] || order[0].status !== "completed") throw new Error("Chỉ đánh giá đơn đã hoàn tất thuộc tài khoản của bạn.");
+  const bonus = getReviewBonusPoints(rating);
   await db.insert(orderReviews).values({ orderId, userId, rating, comment: comment || null });
+
+  if (bonus > 0) {
+    await db.insert(loyaltyAccounts).values({ userId, currentPoints: bonus, totalEarned: bonus }).onDuplicateKeyUpdate({
+      set: {
+        currentPoints: sql`${loyaltyAccounts.currentPoints} + ${bonus}`,
+        totalEarned: sql`${loyaltyAccounts.totalEarned} + ${bonus}`,
+      },
+    });
+    await db.insert(loyaltyTransactions).values({ userId, orderId, kind: "earn", points: bonus, note: `Thưởng đánh giá đơn ${order[0].publicCode}` });
+  }
 }
 
 export async function recordVisit(visitorKey: string) {
@@ -164,13 +187,17 @@ export async function recordVisit(visitorKey: string) {
   await db.insert(siteVisits).values({ visitorKey }).onDuplicateKeyUpdate({ set: { visitorKey } });
 }
 
-export async function getPublicStats() {
+export async function getPublicStats(userId?: number) {
   const db = await getDb();
   if (!db) return { visits: 0, orders: 0 };
+
   const [visitRows, orderRows] = await Promise.all([
     db.select({ value: count() }).from(siteVisits),
-    db.select({ value: count() }).from(laundryOrders),
+    userId
+      ? db.select({ value: count() }).from(laundryOrders).where(eq(laundryOrders.userId, userId))
+      : db.select({ value: count() }).from(laundryOrders),
   ]);
+
   return { visits: Number(visitRows[0]?.value ?? 0), orders: Number(orderRows[0]?.value ?? 0) };
 }
 

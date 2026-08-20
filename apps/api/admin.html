@@ -1189,17 +1189,10 @@
     }
 
 
-    // Khởi tạo dữ liệu mẫu
+    // Khởi tạo dữ liệu rỗng: không tạo tài khoản mẫu hoặc đơn demo nào.
     function initDefaultData() {
-      let sampleAdmins = [
-        { username: "admin4T", password: "123", fullname: "Admin 4T", title: "Quản Trị Hệ Thống", permissions: ["orders", "create_order", "delete_order", "view_order_detail", "view_order_history", "print_bill", "customer_new_password", "customer_chat", "customer_lock", "customer_delete", "export", "manage_admins", "footer_stats"], isLocked: false }
-      ];
       if (!localStorage.getItem('adminAccounts')) {
-        localStorage.setItem('adminAccounts', JSON.stringify(sampleAdmins));
-      } else {
-        let admins = JSON.parse(localStorage.getItem('adminAccounts'));
-        admins.forEach(a => { if(!a.title) a.title = a.username === 'admin4T' ? 'Quản Trị Hệ Thống' : 'Nhân viên'; });
-        localStorage.setItem('adminAccounts', JSON.stringify(admins));
+        localStorage.setItem('adminAccounts', JSON.stringify([]));
       }
 
       if (!localStorage.getItem('orders_v2')) {
@@ -1216,6 +1209,10 @@
 
       if (!localStorage.getItem('websiteVisitsCount')) {
         localStorage.setItem('websiteVisitsCount', '0');
+      }
+
+      if (!localStorage.getItem('loggedAdmin')) {
+        localStorage.removeItem('loggedAdmin');
       }
     }
 

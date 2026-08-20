@@ -1122,10 +1122,19 @@
         padding: 18px;
       }
       .order-code {
+        display: inline-block;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
         font-size: 11px;
         font-weight: 900;
         letter-spacing: 0.1em;
         color: #657892;
+      }
+      .order-code:hover {
+        color: var(--blue);
+        text-decoration: underline;
       }
       .order-name {
         margin: 3px 0 0;
@@ -1302,21 +1311,164 @@
       }
       .toast {
         position: fixed;
-        top: 90px;
+        top: 50%;
         left: 50%;
-        z-index: 99;
+        z-index: 999;
         display: none;
-        max-width: min(500px, calc(100% - 32px));
-        transform: translateX(-50%);
-        border-radius: 14px;
-        background: #17395f;
-        box-shadow: var(--shadow);
-        padding: 12px 17px;
+        width: min(520px, calc(100% - 36px));
+        transform: translate(-50%, -50%) scale(0.92);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 22px;
+        background: linear-gradient(135deg, #123b70 0%, #1769a7 72%, #ef6b65 100%);
+        box-shadow: 0 24px 70px rgba(8, 46, 96, 0.35);
+        padding: 24px 28px 24px 72px;
         color: #fff;
-        font-size: 13px;
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.55;
+        text-align: left;
+        opacity: 0;
       }
       .toast.show {
         display: block;
+        animation: toast-in 0.28s ease forwards;
+      }
+      .toast::before {
+        content: "✓";
+        position: absolute;
+        top: 50%;
+        left: 22px;
+        display: grid;
+        width: 34px;
+        height: 34px;
+        transform: translateY(-50%);
+        place-items: center;
+        border-radius: 50%;
+        background: #fff;
+        color: #1769a7;
+        font-size: 22px;
+        font-weight: 900;
+      }
+      @keyframes toast-in {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -46%) scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      .tracking-modal {
+        width: min(680px, calc(100% - 28px));
+        max-height: min(760px, calc(100vh - 32px));
+        overflow: auto;
+      }
+      .tracking-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .tracking-code {
+        color: var(--navy);
+        font-size: clamp(20px, 4vw, 30px);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+      }
+      .tracking-date {
+        margin-top: 5px;
+        color: #71839a;
+        font-size: 12px;
+      }
+      .tracking-total {
+        color: var(--coral);
+        font-size: 18px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+      .tracking-timeline {
+        position: relative;
+        display: grid;
+        gap: 0;
+        padding: 4px 0 4px 48px;
+      }
+      .tracking-timeline::before {
+        content: "";
+        position: absolute;
+        top: 22px;
+        bottom: 22px;
+        left: 16px;
+        width: 3px;
+        background: #dbe5f0;
+      }
+      .tracking-step {
+        position: relative;
+        min-height: 72px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        color: #8a98a9;
+      }
+      .tracking-step::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: -40px;
+        z-index: 1;
+        width: 24px;
+        height: 24px;
+        border: 3px solid #dbe5f0;
+        border-radius: 50%;
+        background: #fff;
+      }
+      .tracking-step.done,
+      .tracking-step.current {
+        color: var(--navy);
+      }
+      .tracking-step.done {
+        background: #f0faf5;
+      }
+      .tracking-step.current {
+        background: #eef6ff;
+        box-shadow: inset 4px 0 0 var(--blue);
+      }
+      .tracking-step.done::before,
+      .tracking-step.current::before {
+        border-color: var(--blue);
+        background: var(--blue);
+        box-shadow: inset 0 0 0 5px #fff;
+      }
+      .tracking-step strong {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .tracking-step-icon {
+        display: inline-grid;
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+        place-items: center;
+        border-radius: 9px;
+        background: rgba(23, 105, 167, 0.1);
+        font-size: 17px;
+      }
+      .tracking-step strong {
+        font-size: 16px;
+      }
+      .tracking-step small {
+        display: block;
+        margin-top: 4px;
+        color: #71839a;
+      }
+      .tracking-cancelled {
+        margin-top: 16px;
+        border-radius: 14px;
+        background: #fff1f1;
+        padding: 15px;
+        color: #bd3f49;
+        font-weight: 800;
       }
       .nav-links a,
       .text-btn,
@@ -1896,7 +2048,7 @@
         <div class="stat">
           <span class="stat-icon">📦</span
           ><span
-            ><b id="statOrders">0</b><small>ĐƠN HÀNG TRÊN THIẾT BỊ</small></span
+            ><b id="statOrders">0</b><small>ĐƠN HÀNG</small></span
           >
         </div>
         <div class="stat">
@@ -2289,12 +2441,23 @@
         <div class="modal-body" id="resultBody"></div>
       </section>
     </div>
+    <div class="overlay" id="trackingModal">
+      <section class="modal tracking-modal">
+        <div class="modal-head">
+          <div>
+            <h3>Theo dõi đơn hàng</h3>
+            <p>Tiến độ được cập nhật theo trạng thái xử lý của 4T.</p>
+          </div>
+          <button class="close" onclick="closeModal('trackingModal')">×</button>
+        </div>
+        <div class="modal-body" id="trackingBody"></div>
+      </section>
+    </div>
     <div class="overlay" id="reviewModal">
       <section class="modal">
         <div class="modal-head">
           <div>
             <h3>Đánh giá đơn hàng</h3>
-            <p>Góp ý được lưu cục bộ trong trình duyệt này.</p>
           </div>
           <button class="close" onclick="closeModal('reviewModal')">×</button>
         </div>
@@ -2431,14 +2594,15 @@
       };
       const write = (key, value) => {
         localStorage.setItem(key, JSON.stringify(value));
-        if (CLOUD_KEYS.has(key))
-          fetch(`${CLOUD_API}/api/sync`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ [key]: value }),
-          }).catch(() => {});
+        if (location.protocol === "file:" || !CLOUD_KEYS.has(key)) return;
+        fetch(`${CLOUD_API}/api/sync`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [key]: value }),
+        }).catch(() => {});
       };
       async function hydrateCloudData() {
+        if (location.protocol === "file:") return;
         try {
           const response = await fetch(
             `${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(",")}`,
@@ -2466,6 +2630,14 @@
             })[c],
         );
       const money = (value) => Number(value || 0).toLocaleString("vi-VN") + "đ";
+      function createOrderCode(createdAt = Date.now()) {
+        const date = new Date(createdAt);
+        const dateKey = `${String(date.getDate()).padStart(2, "0")}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getFullYear()).slice(-2)}`;
+        const counterKey = `4t_order_sequence_${dateKey}`;
+        const nextNumber = (Number(localStorage.getItem(counterKey) || 0) % 9000) + 1;
+        localStorage.setItem(counterKey, String(nextNumber));
+        return `4T-${dateKey}-${String(nextNumber).padStart(4, "0")}`;
+      }
       const users = () => read(K.users, []);
       const orders = () => read(K.orders, []);
       const session = () => {
@@ -2600,6 +2772,11 @@
         if (password.length < 6)
           return toast("Mật khẩu phải có ít nhất 6 ký tự.");
 
+        const existingUser = users().find((x) => x.phone === phone);
+        if (existingUser) {
+          return toast("Số điện thoại này đã được sử dụng cho một tài khoản 4T.");
+        }
+
         try {
           const user = await apiRequest("/api/customers/register", {
             method: "POST",
@@ -2612,20 +2789,44 @@
             phone: user.phone,
             address,
             password,
-            points: 0,
+            points: 10,
             createdAt: Date.now(),
           };
 
+          const list = users();
+          list.push(localUser);
+          write(K.users, list);
+          write(K.session, localUser);
+          closeModal("authModal");
+          renderAll();
+          location.hash = "tai-khoan";
+          setTimeout(() =>
+            toast(
+              `Đăng ký tài khoản thành công! Tài khoản 4T của ${name} đã được tạo. Bạn nhận được 10 điểm khởi tạo và có thể đặt đơn ngay.`,
+            ),
+          80);
+        } catch (error) {
+          const localUser = {
+            id: "local-" + Date.now(),
+            name,
+            phone,
+            address,
+            password,
+            points: 10,
+            createdAt: Date.now(),
+          };
           const list = users();
           if (!list.some((x) => x.phone === phone)) list.push(localUser);
           write(K.users, list);
           write(K.session, localUser);
           closeModal("authModal");
           renderAll();
-          toast("Đã tạo tài khoản 4T.");
           location.hash = "tai-khoan";
-        } catch (error) {
-          toast(error.message || "Đăng ký thất bại.");
+          setTimeout(() =>
+            toast(
+              `Đăng ký tài khoản thành công! Tài khoản 4T của ${name} đã được tạo. Bạn nhận được 10 điểm khởi tạo và có thể đặt đơn ngay.`,
+            ),
+          80);
         }
       }
       async function login(e) {
@@ -2732,7 +2933,7 @@
           });
 
           const order = {
-            id: payload.order_code || payload.id || "4T-API",
+            id: createOrderCode(),
             name,
             phone,
             address,
@@ -2745,20 +2946,34 @@
             createdAt: payload.created_at || Date.now(),
             memberPhone: s?.phone || null,
             pointsAwarded: false,
+            pointsDelta: 0,
             review: null,
           };
 
           const list = orders();
           list.unshift(order);
+          if (s) {
+            const listUsers = users();
+            const index = listUsers.findIndex((x) => x.phone === s.phone);
+            if (index > -1) {
+              listUsers[index].points = Number(listUsers[index].points || 0) + 3;
+              write(K.users, listUsers);
+              write(K.session, listUsers[index]);
+            }
+          }
           write(K.orders, list);
           renderStats();
           if (s) renderAccount();
+          sendThankYouSms(phone, order.id);
+          toast(
+            `Đơn hàng ${order.id} đã được tạo thành công. Tin nhắn cảm ơn đã được gửi tới số ${phone}.`,
+          );
           showThankYou(order.id);
           showResult(order, Boolean(s));
           document.getElementById("orderNotes").value = "";
         } catch (error) {
           const order = {
-            id: "4T-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+            id: createOrderCode(),
             name,
             phone,
             address,
@@ -2771,13 +2986,27 @@
             createdAt: Date.now(),
             memberPhone: s?.phone || null,
             pointsAwarded: false,
+            pointsDelta: 0,
             review: null,
           };
           const list = orders();
           list.unshift(order);
+          if (s) {
+            const listUsers = users();
+            const index = listUsers.findIndex((x) => x.phone === s.phone);
+            if (index > -1) {
+              listUsers[index].points = Number(listUsers[index].points || 0) + 3;
+              write(K.users, listUsers);
+              write(K.session, listUsers[index]);
+            }
+          }
           write(K.orders, list);
           renderStats();
           if (s) renderAccount();
+          sendThankYouSms(phone, order.id);
+          toast(
+            `Đơn hàng ${order.id} đã được tạo thành công. Tin nhắn cảm ơn đã được gửi tới số ${phone}.`,
+          );
           showThankYou(order.id);
           showResult(order, Boolean(s));
           document.getElementById("orderNotes").value = "";
@@ -2819,11 +3048,54 @@
         document.getElementById("resultModal").classList.add("active");
       }
       function statusClass(status) {
-        return status === "Hoàn tất"
-          ? "done"
-          : status === "Đang xử lý"
-            ? "processing"
-            : "waiting";
+        if (status === "Hoàn tất") return "done";
+        if (["Đang xử lý", "Đã xử lý", "Đang giao hàng"].includes(status))
+          return "processing";
+        if (status === "Đã hủy") return "cancelled";
+        return "waiting";
+      }
+      function openOrderTracking(id) {
+        const customer = session();
+        const order = orders().find(
+          (item) => item.id === id && item.memberPhone === customer?.phone,
+        );
+        if (!order) return toast("Không tìm thấy đơn hàng của tài khoản này.");
+        const statuses = [
+          "Chờ tiếp nhận",
+          "Đã tiếp nhận",
+          "Đang xử lý",
+          "Đã xử lý",
+          "Đang giao hàng",
+          "Hoàn tất",
+        ];
+        const statusIcons = ["📥", "✅", "🧺", "📦", "🚚", "🎉"];
+        const currentIndex = statuses.indexOf(order.status);
+        const steps = statuses.map((status, index) => {
+          const state =
+            currentIndex > -1 && index < currentIndex
+              ? "done"
+              : index === currentIndex
+                ? "current"
+                : "";
+          const detail =
+            state === "current"
+              ? "Đang thực hiện"
+              : state === "done"
+                ? "Đã hoàn thành"
+                : "Chờ thực hiện";
+          return `<div class="tracking-step ${state}"><strong><span class="tracking-step-icon" aria-hidden="true">${statusIcons[index]}</span>${index + 1}. ${status}</strong><small>${detail}</small></div>`;
+        }).join("");
+        const cancelled =
+          order.status === "Đã hủy"
+            ? `<div class="tracking-cancelled">Đơn hàng đã hủy${order.cancelReason ? ` · Lý do: ${esc(order.cancelReason)}` : ""}</div>`
+            : "";
+        document.getElementById("trackingBody").innerHTML = `
+          <div class="tracking-headline">
+            <div><div class="tracking-code">${esc(order.id)}</div><div class="tracking-date">Tạo lúc ${new Date(order.createdAt).toLocaleString("vi-VN")}</div></div>
+            <div class="tracking-total">${money(order.total)}</div>
+          </div>
+          <div class="tracking-timeline">${steps}</div>${cancelled}`;
+        document.getElementById("trackingModal").classList.add("active");
       }
       function renderAccount() {
         const shell = document.getElementById("accountContent"),
@@ -2836,11 +3108,15 @@
         const own = orders().filter((x) => x.memberPhone === user.phone);
         const display =
           filter === "all" ? own : own.filter((x) => x.status === filter);
-        shell.innerHTML = `<div class="account-top"><div><p class="eyebrow">TÀI KHOẢN 4T</p><h1>Chào ${esc(user.name.split(" ")[0])}.</h1><p>Đơn hàng, tiến độ và điểm tích lũy trên thiết bị này.</p></div><a href="#dat-don"><button class="btn btn-coral">⌁ Đặt đơn mới</button></a></div><div class="loyalty-grid"><section class="loyalty"><small>ĐIỂM 4T CỦA BẠN</small><div class="points">${Number(user.points || 0)}<span> điểm</span></div><p>Mỗi 10.000đ giá trị đơn hoàn tất được tích 1 điểm. Đây là mô phỏng cục bộ; hệ thống thật cần được cửa hàng xác nhận đơn hoàn tất.</p></section><section class="ledger"><span style="color:#1679bf;font-size:20px">▤</span><b>${own.length}</b><p>Đơn tạo bằng tài khoản này</p><p style="border-top:1px solid var(--line);padding-top:13px;margin-top:19px">Tích điểm khi hoàn tất đơn.</p></section></div><div class="orders-title"><div><p class="eyebrow">ĐƠN HÀNG CỦA BẠN</p><h2>Tiến độ xử lý</h2></div><span style="font-size:12px;font-weight:800;color:#71839a">${own.length} đơn</span></div><div class="filters">${[
+        shell.innerHTML = `<div class="account-top"><div><p class="eyebrow">TÀI KHOẢN 4T</p><h1>Chào ${esc(user.name.split(" ")[0])}.</h1><p>Đơn hàng, lịch sử và điểm tích lũy trên thiết bị này.</p></div><a href="#dat-don"><button class="btn btn-coral">⌁ Đặt đơn mới</button></a></div><div class="loyalty-grid"><section class="loyalty"><small>ĐIỂM 4T CỦA BẠN</small><div class="points">${Number(user.points || 0)}<span> điểm</span></div><p>Có ngay 3 điểm tích lũy khi tạo đơn hàng mới. Hãy đánh giá dịch vụ để nhận 1 điểm tích lũy.</p></section><section class="ledger"><span style="color:#1679bf;font-size:20px">▤</span><b>${own.length}</b><p>Đơn tạo bằng tài khoản này</p><p style="border-top:1px solid var(--line);padding-top:13px;margin-top:19px">Xem toàn bộ lịch sử đơn hàng.</p></section></div><div class="orders-title"><div><p class="eyebrow">ĐƠN HÀNG CỦA BẠN</p><h2>Lịch sử đơn hàng</h2></div><span style="font-size:12px;font-weight:800;color:#71839a">${own.length} đơn</span></div><div class="filters">${[
           ["all", "Tất cả"],
+          ["Chờ tiếp nhận", "Chờ tiếp nhận"],
           ["Đã tiếp nhận", "Đã tiếp nhận"],
           ["Đang xử lý", "Đang xử lý"],
+          ["Đã xử lý", "Đã xử lý"],
+          ["Đang giao hàng", "Đang giao hàng"],
           ["Hoàn tất", "Hoàn tất"],
+          ["Đã hủy", "Đã hủy"],
         ]
           .map(
             ([key, label]) =>
@@ -2854,23 +3130,23 @@
         const status = o.status === "Hoàn tất" ? "Hoàn tất" : o.status;
         const type =
           o.type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn";
-        return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString("vi-VN")} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử"} · ${esc(o.address)}</span>${o.status !== "Hoàn tất" ? `<button class="text-btn" onclick="completeDemo('${o.id}')">Mô phỏng hoàn tất & tích điểm</button>` : o.review ? `<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>` : `<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`}</div></article>`;
+        const cancelButton =
+          o.status === "Chờ tiếp nhận"
+            ? `<button class="text-btn cancel-order-button" onclick="cancelOrder('${o.id}')">Hủy</button>`
+            : "";
+        return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString("vi-VN")} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử"} · ${esc(o.address)}</span>${cancelButton}${o.status === "Hoàn tất" ? (o.review ? `<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>` : `<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`) : ""}</div></article>`;
       }
       function setFilter(value) {
         filter = value;
         renderAccount();
       }
-      function completeDemo(id) {
-        const s = session();
-        let list = orders(),
-          o = list.find((x) => x.id === id && x.memberPhone === s?.phone);
-        if (!o) return;
-        o.status = "Hoàn tất";
-        write(K.orders, list);
-        renderAll();
-        toast(`Đơn ${id} đã chuyển sang hoàn tất.`);
-      }
       function openReview(id) {
+        const customer = session();
+        const order = orders().find((x) => x.id === id && x.memberPhone === customer?.phone);
+        if (!order) return toast("Bạn chỉ có thể đánh giá đơn hàng của tài khoản đang đăng nhập.");
+        if (order.status !== "Hoàn tất") {
+          return toast("Chỉ được đánh giá khi đơn hàng ở trạng thái Hoàn tất.");
+        }
         reviewOrderId = id;
         rating = 5;
         document.getElementById("reviewComment").value = "";
@@ -2891,13 +3167,16 @@
           o = list.find((x) => x.id === reviewOrderId),
           customer = session();
         if (o) {
+          if (o.status !== "Hoàn tất") {
+            return toast("Chỉ được đánh giá khi đơn hàng ở trạng thái Hoàn tất.");
+          }
           if (o.review) return toast("Đơn hàng này đã được đánh giá.");
           o.review = {
             rating,
             comment: document.getElementById("reviewComment").value.trim(),
             createdAt: Date.now(),
           };
-          if (customer && !o.reviewPointAwarded) {
+          if (customer && !o.reviewPointAwarded && rating >= 4) {
             let listUsers = users(),
               index = listUsers.findIndex((x) => x.phone === customer.phone);
             if (index > -1) {
@@ -2911,7 +3190,11 @@
           write(K.orders, list);
           closeModal("reviewModal");
           renderAccount();
-          toast("Cảm ơn bạn đã đánh giá. Bạn được cộng 1 điểm tích lũy.");
+          toast(
+            rating >= 4
+              ? "Cảm ơn bạn đã đánh giá. Bạn được cộng 1 điểm tích lũy."
+              : "Cảm ơn bạn đã gửi đánh giá.",
+          );
         }
       }
       function cancelOrder(id) {
@@ -2921,20 +3204,53 @@
           order = list.find(
             (item) => item.id === id && item.memberPhone === customer.phone,
           );
-        if (!order || !["Đã tiếp nhận", "Chờ tiếp nhận"].includes(order.status))
-          return toast("Đơn hàng không còn ở trạng thái chờ tiếp nhận.");
-        if (!confirm(`Bạn có chắc muốn hủy đơn ${id}?`)) return;
+        if (!order) return toast("Không tìm thấy đơn hàng của bạn.");
+        if (order.status !== "Chờ tiếp nhận")
+          return toast("Khách hàng chỉ được hủy đơn hàng khi đơn đang ở trạng thái Chờ tiếp nhận.");
+
+        const reasonMap = {
+          "1": "Không còn nhu cầu",
+          "2": "Cập nhật lại thông tin đơn hàng",
+          "3": "Nguyên nhân khác",
+        };
+        const reasonInput = window.prompt(
+          "Lý do hủy đơn hàng:\n1. Không còn nhu cầu\n2. Cập nhật lại thông tin đơn hàng\n3. Nguyên nhân khác\n\nNhập số (1-3) hoặc ghi rõ lý do:",
+          "1",
+        );
+        if (reasonInput === null) return;
+        const rawReason = String(reasonInput).trim();
+        const reason = reasonMap[rawReason] || rawReason || reasonMap["3"];
+
         const oldStatus = order.status;
         order.status = "Đã hủy";
+        order.cancelReason = reason;
         order.history = order.history || [];
         order.history.push({
           action: `Khách hàng hủy đơn: "${oldStatus}" → "Đã hủy"`,
+          reason,
           performer: customer.name,
           time: new Date().toLocaleString("vi-VN"),
         });
+
+        const awardedPoints = Number(order.pointsDelta || (order.pointsAwarded ? 3 : 0) || 0);
+        if (awardedPoints > 0) {
+          const usersList = users();
+          const userIndex = usersList.findIndex((x) => x.phone === customer.phone);
+          if (userIndex >= 0) {
+            usersList[userIndex].points = Math.max(
+              0,
+              Number(usersList[userIndex].points || 0) - awardedPoints,
+            );
+            write(K.users, usersList);
+            write(K.session, usersList[userIndex]);
+          }
+        }
+        order.pointsAwarded = false;
+        order.pointsDelta = 0;
+
         write(K.orders, list);
         renderAll();
-        toast(`Đã hủy đơn ${id}.`);
+        toast(`Đã hủy đơn ${id}. Lý do: ${reason}`);
       }
       function installCustomerCancelButtons() {
         const customer = session();
@@ -2946,7 +3262,7 @@
             );
           if (
             !order ||
-            !["Đã tiếp nhận", "Chờ tiếp nhận"].includes(order.status) ||
+            order.status !== "Chờ tiếp nhận" ||
             card.querySelector(".cancel-order-button")
           )
             return;
@@ -2963,11 +3279,10 @@
         renderAccountBeforeCancel();
         document
           .querySelectorAll(".loyalty p")
-          .forEach(
-            (el) =>
-              (el.textContent =
-                "Tạo đơn hàng mới được cộng 3 điểm. Mỗi đơn chỉ được cộng một lần; đánh giá đơn hoàn tất được cộng thêm 1 điểm."),
-          );
+          .forEach((el) => {
+            el.innerHTML =
+              "Đặt đơn mới được cộng 3 điểm ngay lập tức.<br>Đánh giá dịch vụ để nhận ngay 1 điểm.";
+          });
         installCustomerCancelButtons();
       };
       function toggleChat() {
@@ -3031,7 +3346,7 @@
         const module = document.createElement("section");
         module.id = "deliveryModule";
         module.className = "delivery-module";
-        module.innerHTML = `<h3>1. Dịch vụ giao–nhận</h3><p>Chọn hình thức phù hợp. Phí giao–nhận được tính theo khoảng cách ước tính từ cửa hàng 4T.</p><div class="delivery-options"><label class="delivery-option"><input type="radio" name="deliveryMode" value="store" checked onchange="updateDeliveryUI()"><b>🏪 Nhận & trả tại cửa hàng</b><small>Khách tự mang đồ đến và nhận lại tại 4T · không có phí ship.</small></label><label class="delivery-option"><input type="radio" name="deliveryMode" value="address" onchange="updateDeliveryUI()"><b>🚚 Nhận & giao theo địa chỉ</b><small>4T nhận và giao theo thông tin khách hàng điền ở trên.</small></label></div><div id="deliveryDistanceWrap" class="delivery-distance"><label class="field"><span>Khoảng cách ước tính từ cửa hàng 4T (km) *</span><input id="deliveryDistance" type="number" min="0" step="0.1" value="0" inputmode="decimal" oninput="calculateTotal()"></label></div><p id="deliveryFeeNote" class="delivery-fee-note"></p>`;
+        module.innerHTML = `<h3>1. Dịch vụ giao–nhận</h3><div class="delivery-options"><label class="delivery-option"><input type="radio" name="deliveryMode" value="store" checked onchange="updateDeliveryUI()"><b>🏪 Nhận & trả tại cửa hàng</b></label><label class="delivery-option"><input type="radio" name="deliveryMode" value="address" onchange="updateDeliveryUI()"><b>🚚 Nhận & giao theo địa chỉ</b></label></div><div id="deliveryDistanceWrap" class="delivery-distance"><label class="field"><span>Khoảng cách ước tính từ cửa hàng 4T (km) *</span><input id="deliveryDistance" type="number" min="0" step="0.1" value="0" inputmode="decimal" oninput="calculateTotal()"></label></div><p id="deliveryFeeNote" class="delivery-fee-note"></p>`;
         firstDivider.before(module);
         const distanceInput = document.getElementById("deliveryDistance");
         if (distanceInput) {
@@ -3301,12 +3616,20 @@
       function renderOrderForm() {
         const s = session(),
           notice = document.getElementById("guestNotice"),
-          memberNote = document.getElementById("memberFillNote");
+          memberNote = document.getElementById("memberFillNote"),
+          orderName = document.getElementById("orderName"),
+          orderPhone = document.getElementById("orderPhone"),
+          orderAddress = document.getElementById("orderAddress");
+
         if (s) {
           notice?.classList.add("hidden");
-          document.getElementById("orderName").value = s.name;
-          document.getElementById("orderPhone").value = s.phone;
-          fillAddressParts(s.address);
+          if (orderName) orderName.value = s.name;
+          if (orderPhone) orderPhone.value = s.phone;
+          if (document.getElementById("addressStreet") && document.getElementById("addressWard")) {
+            fillAddressParts(s.address || "");
+          } else if (orderAddress) {
+            orderAddress.value = s.address || "";
+          }
           if (memberNote) {
             memberNote.textContent =
               "✓ Đã tự điền thông tin từ tài khoản 4T. Bạn vẫn có thể sửa bất kỳ trường nào theo nhu cầu.";
@@ -3316,7 +3639,8 @@
           notice?.classList.remove("hidden");
           memberNote?.classList.remove("show");
         }
-        updateDeliveryUI();
+
+        if (typeof updateDeliveryUI === "function") updateDeliveryUI();
       }
       function submitOrder(e) {
         e.preventDefault();
@@ -3361,7 +3685,7 @@
               ? "App ngân hàng"
               : "Ví điện tử";
         const order = {
-          id: "4T-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+          id: createOrderCode(),
           name,
           customerName: name,
           phone,
@@ -3380,11 +3704,12 @@
           deliveryMode: delivery.mode,
           deliveryLabel: delivery.label,
           deliveryService: delivery.label,
-          status: "Đã tiếp nhận",
+          status: "Chờ tiếp nhận",
           time: new Date().toLocaleString("vi-VN"),
           createdAt: Date.now(),
           memberPhone: s?.phone || null,
-          pointsAwarded: s ? 3 : 0,
+          pointsAwarded: false,
+          pointsDelta: 0,
           review: null,
           reviewPointAwarded: false,
           history: [],
@@ -3396,6 +3721,8 @@
             index = listUsers.findIndex((x) => x.phone === s.phone);
           if (index > -1) {
             listUsers[index].points = Number(listUsers[index].points || 0) + 3;
+            order.pointsAwarded = true;
+            order.pointsDelta = 3;
             write(K.users, listUsers);
             write(K.session, listUsers[index]);
           }
@@ -3403,6 +3730,10 @@
         write(K.orders, list);
         renderStats();
         if (s) renderAccount();
+        sendThankYouSms(phone, order.id);
+        toast(
+          `Đơn hàng ${order.id} đã được tạo thành công. Tin nhắn cảm ơn đã được gửi tới số ${phone}.`,
+        );
         showResult(order, Boolean(s));
         document.getElementById("orderNotes").value = "";
       }
@@ -3451,7 +3782,7 @@
           ship = Number(o.shippingFee || 0),
           distance =
             o.deliveryMode === "address" ? ` · ${o.distanceKm || 0} km` : "";
-        return `<article class="order-card"><div class="order-main"><div><div class="order-code">${esc(o.id)}</div><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString("vi-VN")} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${esc(delivery)}${distance} · ship ${ship === 0 ? "miễn phí" : money(ship)}<br>${o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử"}</span>${o.status !== "Hoàn tất" ? `<button class="text-btn" onclick="completeDemo('${o.id}')">Mô phỏng hoàn tất & tích điểm</button>` : o.review ? `<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>` : `<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`}</div></article>`;
+        return `<article class="order-card"><div class="order-main"><div><button class="order-code" onclick="openOrderTracking('${o.id}')" title="Xem chi tiết và theo dõi đơn hàng">${esc(o.id)}</button><div class="order-name">${type} · ${o.kg} kg</div><p class="order-meta">${new Date(o.createdAt).toLocaleString("vi-VN")} · ${money(o.total)}</p></div><span class="badge ${statusClass(status)}">${esc(status)}</span></div><div class="order-foot"><span style="font-size:11px;color:#687b94">${esc(delivery)}${distance} · ship ${ship === 0 ? "miễn phí" : money(ship)}<br>${o.payment === "cash" ? "Tiền mặt" : o.payment === "bank" ? "App ngân hàng" : "Ví điện tử"}</span>${o.status === "Hoàn tất" ? (o.review ? `<span style="font-size:11px;font-weight:800;color:#b77700">★ ${o.review.rating}/5 · Cảm ơn bạn đã đánh giá</span>` : `<button class="text-btn" onclick="openReview('${o.id}')">Đánh giá chất lượng phục vụ</button>`) : ""}</div></article>`;
       }
       async function refreshCustomerFromCloud() {
         await hydrateCloudData();

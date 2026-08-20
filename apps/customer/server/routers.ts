@@ -18,7 +18,7 @@ import {
 import { getSessionCookieOptions } from "./_core/cookies";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { systemRouter } from "./_core/systemRouter";
-import { calculateEstimatedTotal, ORDER_STATUSES } from "./orderRules";
+import { calculateEstimatedTotal, getCustomerDisplayOrderCount, ORDER_STATUSES } from "./orderRules";
 
 const orderInput = z.object({
   customerName: z.string().trim().min(2).max(120),
@@ -43,7 +43,14 @@ export const appRouter = router({
     }),
   }),
   storefront: router({
-    stats: publicProcedure.query(() => getPublicStats()),
+    stats: publicProcedure.query(async ({ ctx }) => {
+      const visits = await getPublicStats();
+      if (ctx.user) {
+        const userStats = await getPublicStats(ctx.user.id);
+        return { visits: visits.visits, orders: userStats.orders };
+      }
+      return { visits: visits.visits, orders: getCustomerDisplayOrderCount(visits.visits, 0, false) };
+    }),
     visit: publicProcedure.input(z.object({ visitorKey: z.string().min(12).max(64) })).mutation(({ input }) => recordVisit(input.visitorKey)),
     createOrder: publicProcedure.input(orderInput).mutation(({ ctx, input }) => {
       const paymentStatus = input.paymentMethod === "cash" ? "cash_on_delivery" : input.paymentMethod === "bank_transfer" ? "awaiting_transfer" : "awaiting_wallet";

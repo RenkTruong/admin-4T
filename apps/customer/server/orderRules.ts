@@ -30,3 +30,19 @@ export function calculateEstimatedTotal(estimatedKg: number, serviceTier: "stand
 export function calculateOrderPoints(totalVnd: number) {
   return Math.floor(totalVnd / 10000);
 }
+
+export function getCustomerDisplayOrderCount(visitCount: number, userOrderCount: number, hasAuthenticatedUser: boolean) {
+  return hasAuthenticatedUser ? userOrderCount : Math.max(0, visitCount * 2);
+}
+
+export function getNewOrderRewardPoints(userId: number | null | undefined) {
+  return userId ? 3 : 0;
+}
+
+export function getReviewBonusPoints(rating: number) {
+  return rating >= 4 ? 1 : 0;
+}
+
+export function canAwardOrderPoints(status: string, userId: number | null | undefined, pointsAwarded: number) {
+  return status === "completed" && Boolean(userId) && pointsAwarded === 0;
+}

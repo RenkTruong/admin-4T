@@ -1167,13 +1167,7 @@
         </div>
         <div class="form-group">
           <label>Dịch vụ:</label>
-          <select id="manualService" class="select-status" style="width: 100%;">
-            <option value="Giặt sấy tiêu chuẩn">Giặt sấy tiêu chuẩn</option>
-            <option value="Giặt sấy nhanh">Giặt sấy nhanh</option>
-            <option value="Giặt khô">Giặt khô</option>
-            <option value="Giặt sấy combo">Giặt sấy combo</option>
-            <option value="Ủi đồ">Ủi đồ</option>
-          </select>
+          <select id="manualService" class="select-status" style="width: 100%;" onchange="updateManualOrderPreview()"></select>
         </div>
         <div class="form-group">
           <label>Khối lượng (kg):</label>
@@ -1505,6 +1499,53 @@
         document.getElementById('newTotalDisplay').innerText = total.toLocaleString() + " VNĐ";
     }
 
+    function getPricingRowsFromStorage() {
+      try {
+        const shared = JSON.parse(localStorage.getItem('4t-service-pricing') || 'null');
+        if (shared && Array.isArray(shared.table) && shared.table.length) return shared.table;
+      } catch (error) {
+        console.warn('Could not parse 4t-service-pricing:', error);
+      }
+
+      try {
+        const legacy = JSON.parse(localStorage.getItem('servicePricingRows') || 'null');
+        if (Array.isArray(legacy) && legacy.length) return legacy;
+      } catch (error) {
+        console.warn('Could not parse servicePricingRows:', error);
+      }
+
+      return [
+        { id: '1', name: 'Giặt sấy tiêu chuẩn', unit: 'Kg', price: 15000 },
+        { id: '2', name: 'Giặt sấy nhanh', unit: 'Kg', price: 30000 },
+      ];
+    }
+
+    function populateManualServiceOptions() {
+      const select = document.getElementById('manualService');
+      if (!select) return;
+
+      const rows = getPricingRowsFromStorage();
+      const currentValue = select.value || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
+      select.innerHTML = rows.map(row => `
+        <option value="${String(row.name || 'Dịch vụ mới')}">${String(row.name || 'Dịch vụ mới')} · ${String(row.unit || 'Kg')} · ${Number(row.price || 0).toLocaleString('vi-VN')}đ</option>
+      `).join('');
+
+      const hasCurrent = rows.some(row => String(row.name) === String(currentValue));
+      select.value = hasCurrent ? String(currentValue) : String(rows[0]?.name || 'Giặt sấy tiêu chuẩn');
+      updateManualOrderPreview();
+    }
+
+    function getSelectedManualServicePrice(weight = 0) {
+      const rows = getPricingRowsFromStorage();
+      const select = document.getElementById('manualService');
+      const selectedName = select?.value || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
+      const selectedRow = rows.find(row => String(row.name) === String(selectedName)) || rows[0] || { name: selectedName, unit: 'Kg', price: 15000 };
+      const unit = String(selectedRow.unit || 'Kg');
+      const unitPrice = Number(selectedRow.price || 0);
+      const total = /kg|kilogram/i.test(unit) ? Number(weight || 0) * unitPrice : unitPrice;
+      return { selectedRow, total, unitPrice };
+    }
+
     function saveOrderChanges(index) {
         let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
         let newService = document.getElementById('editService').value;
@@ -1538,6 +1579,7 @@
     // Khởi tạo dữ liệu rỗng: không tạo tài khoản mẫu hoặc đơn demo nào.
     function initDefaultData() {
       ensureSeedAdminAccount();
+      populateManualServiceOptions();
 
       if (!localStorage.getItem('orders_v2')) {
         localStorage.setItem('orders_v2', JSON.stringify([]));
@@ -1761,7 +1803,9 @@
     function updateManualOrderPreview() {
       let weight = Number(document.getElementById('manualWeight')?.value || 0);
       let address = document.getElementById('manualAddress')?.value || '';
-      let total = calculateShipping(weight, address);
+      const selectedPrice = getSelectedManualServicePrice(weight);
+      const shippingFee = /xa|huyen|quoc lo|ngoai thanh/i.test(String(address || '')) ? 20000 : 0;
+      const total = selectedPrice.total + shippingFee;
       document.getElementById('manualOrderTotalPreview').value = total.toLocaleString() + ' VNĐ';
     }
 
@@ -1778,6 +1822,7 @@
       document.getElementById('manualWeight').value = '5';
       document.getElementById('manualPaymentMethod').value = 'Tiền mặt';
       document.getElementById('manualDeliveryService').value = 'Nhận tại cửa hàng';
+      populateManualServiceOptions();
       updateManualOrderPreview();
       document.getElementById('manualOrderModal').style.display = 'flex';
     }
@@ -1814,7 +1859,8 @@
       let today = new Date();
       let now = today.toLocaleString('vi-VN');
       let orderId = `4T-${String(today.getFullYear()).slice(-2)}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${String(orders.length + 1).padStart(4,'0')}`;
-      let total = calculateShipping(weight, address);
+      const pricing = getSelectedManualServicePrice(weight);
+      let total = pricing.total + (/xa|huyen|quoc lo|ngoai thanh/i.test(String(address || '')) ? 20000 : 0);
       let newOrder = {
         id: orderId,
         customerName: name,
@@ -1822,6 +1868,7 @@
         phone: phone,
         service: service,
         weight: weight,
+        serviceName: service,
         address: address,
         total: total,
         paymentMethod: paymentMethod,

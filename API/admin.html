@@ -977,12 +977,12 @@
           <table class="pricing-table" id="pricingTable">
             <thead>
               <tr>
-                <th style="width: 22%;">Tên dịch vụ</th>
+                <th style="width: 28%;">Tên dịch vụ</th>
                 <th style="width: 14%;">Đơn vị tính</th>
                 <th style="width: 14%;">Giá</th>
                 <th style="width: 22%;">Ghi chú</th>
                 <th style="width: 12%;">Thời gian</th>
-                <th style="width: 8%;">Thay đổi</th>
+                <th style="width: 10%;">Thay đổi</th>
               </tr>
             </thead>
             <tbody id="pricingTableBody"></tbody>
@@ -3326,10 +3326,10 @@
     }
 
     const DEFAULT_SERVICE_PRICING_ROWS = [
-      { name: 'Giặt sấy nhanh', unit: 'Kg', price: 15000, note: 'Giặt rửa nhanh, sấy khô trong 3h', updatedAt: new Date().toISOString() },
-      {  name: 'Giặt sấy tiết kiệm', unit: 'Kg', price: 8000, note: 'Giặt rửa từng khúc', updatedAt: new Date().toISOString() },
-      { name: 'Giặt hấp áo vest', unit: 'Lần', price: 12000, note: 'Sử dụng hóa chất chuyên dụng', updatedAt: new Date().toISOString() },
-      { name: 'Giặt giày thể thao', unit: 'Đôi', price: 6000, note: 'Vệ sinh bền đẹp', updatedAt: new Date().toISOString() }
+      { id: '1', name: 'Giặt sấy nhanh', unit: 'Kg', price: 15000, note: 'Giặt rửa nhanh, sấy khô trong 3h', updatedAt: new Date().toISOString() },
+      { id: '2', name: 'Giặt sấy tiết kiệm', unit: 'Kg', price: 8000, note: 'Giặt rửa từng khúc', updatedAt: new Date().toISOString() },
+      { id: '3', name: 'Giặt hấp áo vest', unit: 'Lần', price: 12000, note: 'Sử dụng hóa chất chuyên dụng', updatedAt: new Date().toISOString() },
+      { id: '4', name: 'Giặt giày thể thao', unit: 'Đôi', price: 6000, note: 'Vệ sinh bền đẹp', updatedAt: new Date().toISOString() }
     ];
 
     function getServicePricingRows() {
@@ -3389,7 +3389,6 @@
 
       tbody.innerHTML = displayRows.map(row => `
         <tr>
-          <td>${row.id}</td>
           <td>${row.name || '-'}</td>
           <td>${row.unit || 'Lần'}</td>
           <td>${formatServicePrice(row.price || 0)}</td>
@@ -3418,7 +3417,6 @@
       const rowIndex = rows.findIndex(item => item.id === rowId);
       const html = `
         <tr>
-          <td>${row.id}</td>
           <td>
             <input type="text" minlength="3" value="${(row.name || '').replace(/"/g, '&quot;')}" data-field="name" placeholder="Tên dịch vụ" required>
           </td>
@@ -3450,7 +3448,6 @@
 
       tbody.innerHTML = displayRows.map((item, index) => item.id === rowId ? html : `
         <tr>
-          <td>${item.id}</td>
           <td>${item.name || '-'}</td>
           <td>${item.unit || 'Lần'}</td>
           <td>${formatServicePrice(item.price || 0)}</td>

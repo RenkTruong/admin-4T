@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { BarChart3, Clock3, MessageCircleMore, PackageCheck, Star, UsersRound } from "lucide-react";
+import { DEFAULT_SERVICE_PRICING, formatServicePrice, readServicePricing, writeServicePricing } from "@/../shared/servicePricing";
 import { useMemo, useState } from "react";
 
 const labels: Record<string, string> = { requested: "Đã tiếp nhận", confirmed: "Đã xác nhận", pickup: "Đang lấy đồ", washing: "Đang giặt", drying: "Đang sấy", ready: "Sẵn sàng giao trả", completed: "Hoàn tất", cancelled: "Đã hủy" };
@@ -16,18 +17,33 @@ export default function AdminPage() {
 }
 
 function AdminWorkspace() {
+  const { user } = useAuth();
   const metrics = trpc.admin.metrics.useQuery();
   const orders = trpc.admin.orders.useQuery();
   const support = trpc.admin.support.useQuery();
   const utils = trpc.useUtils();
   const [selectedThread, setSelectedThread] = useState("");
   const [reply, setReply] = useState("");
+  const [pricing, setPricing] = useState(readServicePricing);
+  const [savedNotice, setSavedNotice] = useState("");
+  const canManagePricing = user?.role === "admin" || (Array.isArray((user as any)?.permissions) && (user as any).permissions.includes("manage_service_pricing"));
   const update = trpc.admin.updateOrder.useMutation({ onSuccess: () => { utils.admin.orders.invalidate(); utils.admin.metrics.invalidate(); } });
   const replySupport = trpc.admin.replySupport.useMutation({ onSuccess: () => { setReply(""); utils.admin.support.invalidate(); } });
   const threads = useMemo(() => Object.values((support.data ?? []).reduce<Record<string, { threadKey: string; body: string; visitorName: string | null; contact: string | null; createdAt: Date }>>((all, message) => { if (!all[message.threadKey] || all[message.threadKey].createdAt < message.createdAt) all[message.threadKey] = message; return all; }, {})).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()), [support.data]);
   const messages = (support.data ?? []).filter(item => item.threadKey === selectedThread);
   const customers = useMemo(() => Object.values((orders.data ?? []).reduce<Record<string, { name: string; phone: string; orderCount: number; total: number }>>((all, order) => { const key = order.customerPhone; if (!all[key]) all[key] = { name: order.customerName, phone: order.customerPhone, orderCount: 0, total: 0 }; all[key].orderCount += 1; all[key].total += order.estimatedTotalVnd; return all; }, {})).sort((a, b) => b.total - a.total), [orders.data]);
   const reviews = useMemo(() => (orders.data ?? []).flatMap(order => order.review ? [{ ...order.review, publicCode: order.publicCode, customerName: order.customerName }] : []), [orders.data]);
+
+  const handlePricingChange = (tier: "standard" | "express", value: number) => {
+    const next = {
+      ...pricing,
+      [tier]: { ...pricing[tier], unitPrice: Number(value) || 0 },
+    };
+    writeServicePricing(next);
+    setPricing(next);
+    setSavedNotice("Đã lưu giá dịch vụ. Trang khách hàng sẽ cập nhật theo giá mới.");
+    window.dispatchEvent(new StorageEvent("storage", { key: "4t-service-pricing", newValue: JSON.stringify(next) }));
+  };
 
   return <div className="mx-auto max-w-7xl space-y-8 p-2 sm:p-5">
     <div><p className="eyebrow">BẢNG ĐIỀU HÀNH 4T</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#092C5C]">Vận hành hôm nay</h1></div>

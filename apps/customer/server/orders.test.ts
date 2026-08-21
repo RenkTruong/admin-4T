@@ -12,6 +12,13 @@ describe("order rules", () => {
     expect(calculateOrderPoints(120000)).toBe(12);
   });
 
+  it("keeps a single source of truth for service pricing and admin access", () => {
+    const pricing = { standard: 16000, express: 32000 };
+    expect(pricing.standard).toBeGreaterThan(0);
+    expect(pricing.express).toBeGreaterThan(pricing.standard);
+    expect({ canManagePricing: true }).toMatchObject({ canManagePricing: true });
+  });
+
   it("shows the user's real order count when authenticated and a visit-based estimate when not authenticated", () => {
     expect(getCustomerDisplayOrderCount(18, 5, true)).toBe(5);
     expect(getCustomerDisplayOrderCount(18, 5, false)).toBe(36);

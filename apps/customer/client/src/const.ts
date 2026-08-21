@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { OAUTH_STATE_COOKIE, encodeOAuthState } from "@shared/const";
 
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
@@ -17,11 +18,19 @@ export const startLogin = () => {
   const appId = import.meta.env.VITE_APP_ID;
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
+  if (!oauthPortalUrl || !appId) {
+    toast.error("Thiết lập OAuth chưa hoàn tất", {
+      description: "Vui lòng cấu hình VITE_OAUTH_PORTAL_URL và VITE_APP_ID để đăng nhập hoạt động trên môi trường local.",
+      duration: 5000,
+    });
+    return;
+  }
+
   const nonce = crypto.randomUUID();
   document.cookie = `${OAUTH_STATE_COOKIE}=${nonce}; Path=/; Max-Age=600; SameSite=None; Secure`;
   const state = encodeOAuthState({ redirectUri, nonce });
 
-  const url = new URL(`${oauthPortalUrl}/app-auth`);
+  const url = new URL(`${oauthPortalUrl.replace(/\/$/, "")}/app-auth`);
   url.searchParams.set("appId", appId);
   url.searchParams.set("redirectUri", redirectUri);
   url.searchParams.set("state", state);

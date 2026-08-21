@@ -1,3 +1,5 @@
+import { getServiceTierPrice, readServicePricing, type ServiceTier } from "../shared/servicePricing";
+
 export const ORDER_STATUSES = [
   "requested",
   "confirmed",
@@ -22,9 +24,12 @@ export const statusLabels: Record<OrderStatus, string> = {
   cancelled: "Đã hủy",
 };
 
-export function calculateEstimatedTotal(estimatedKg: number, serviceTier: "standard" | "express") {
-  const unitPrice = serviceTier === "express" ? 30000 : 15000;
-  return Math.max(3, estimatedKg) * unitPrice;
+export function getServicePricingSnapshot() {
+  return readServicePricing();
+}
+
+export function calculateEstimatedTotal(estimatedKg: number, serviceTier: ServiceTier) {
+  return getServiceTierPrice(serviceTier, estimatedKg);
 }
 
 export function calculateOrderPoints(totalVnd: number) {

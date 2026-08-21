@@ -45,6 +45,16 @@ async function readKeys(keys) {
   return result;
 }
 
+const DEFAULT_ADMIN = {
+  id: 1,
+  username: 'admin4T',
+  full_name: 'Quản trị hệ thống',
+  fullname: 'Quản trị hệ thống',
+  title: 'Super Admin',
+  is_locked: false,
+  permissions: ['manage_admins','orders','create_order','view_order_history','customer_chat','customer_new_password','customer_lock','customer_delete','footer_stats','export']
+};
+
 function formatCurrency(value) {
   const number = Number(value || 0);
   return `${number.toLocaleString('vi-VN')} VNĐ`;
@@ -172,6 +182,52 @@ const server = http.createServer(async (request, response) => {
       const payload = await readBody(request);
       for (const [key, value] of Object.entries(payload)) if (PUBLIC_KEYS.has(key)) await setValue(key, value);
       return sendJson(response, 200, { ok: true });
+    }
+
+    if (url.pathname === '/api/admin/login' && request.method === 'POST') {
+      const payload = await readBody(request).catch(() => ({}));
+      const { username, password } = payload;
+      if (!username || !password) return sendJson(response, 400, { message: 'Thiếu username hoặc password' });
+      if (username !== DEFAULT_ADMIN.username || password !== 'admin123') {
+        return sendJson(response, 401, { message: 'Sai username hoặc password' });
+      }
+      return sendJson(response, 200, {
+        id: DEFAULT_ADMIN.id,
+        username: DEFAULT_ADMIN.username,
+        full_name: DEFAULT_ADMIN.full_name,
+        title: DEFAULT_ADMIN.title,
+        permissions: DEFAULT_ADMIN.permissions,
+      });
+    }
+
+    if (url.pathname === '/api/admins' && request.method === 'GET') {
+      return sendJson(response, 200, [DEFAULT_ADMIN]);
+    }
+
+    if (url.pathname === '/api/admins' && request.method === 'POST') {
+      const payload = await readBody(request).catch(() => ({}));
+      const username = String(payload.username || '').trim();
+      const password = String(payload.password || '').trim();
+      const full_name = String(payload.full_name || payload.fullname || '').trim();
+      if (!username || !password || !full_name) return sendJson(response, 400, { message: 'Thiếu thông tin admin' });
+      const created = { ...DEFAULT_ADMIN, id: Date.now(), username, full_name, fullname: full_name, title: payload.title || 'Nhân viên', permissions: Array.isArray(payload.permissions) ? payload.permissions : [] };
+      return sendJson(response, 201, created);
+    }
+
+    if (url.pathname.startsWith('/api/admins/') && request.method === 'PATCH') {
+      const payload = await readBody(request).catch(() => ({}));
+      const username = String(payload.username || '').trim();
+      const full_name = String(payload.full_name || payload.fullname || '').trim();
+      const updated = {
+        ...DEFAULT_ADMIN,
+        id: Number(url.pathname.split('/').pop()) || DEFAULT_ADMIN.id,
+        username: username || DEFAULT_ADMIN.username,
+        full_name: full_name || DEFAULT_ADMIN.full_name,
+        fullname: full_name || DEFAULT_ADMIN.full_name,
+        title: payload.title || DEFAULT_ADMIN.title,
+        permissions: Array.isArray(payload.permissions) ? payload.permissions : DEFAULT_ADMIN.permissions,
+      };
+      return sendJson(response, 200, updated);
     }
 
     if (url.pathname === '/api/invoice/preview' && (request.method === 'GET' || request.method === 'POST')) {

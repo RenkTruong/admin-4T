@@ -1061,7 +1061,38 @@
   <script>
     const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog']);
     const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
-    const API_BASE = window.APP_API_BASE || localStorage.getItem('APP_API_BASE') || 'http://localhost:4000';
+    const API_BASE = window.APP_API_BASE || localStorage.getItem('APP_API_BASE') || (
+      location.origin.includes('8787') || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        ? location.origin
+        : 'http://localhost:8787'
+    );
+    const DEFAULT_ADMIN_ACCOUNT = {
+      username: 'admin4T',
+      fullname: 'Quản trị hệ thống',
+      title: 'Super Admin',
+      permissions: ['manage_admins','orders','create_order','view_order_history','customer_chat','customer_new_password','customer_lock','customer_delete','footer_stats','export'],
+      isLocked: false,
+      password: '123'
+    };
+
+    function getLocalAdminAccounts() {
+      try {
+        return JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function ensureSeedAdminAccount() {
+      let admins = getLocalAdminAccounts();
+      let existing = admins.find(a => a.username === DEFAULT_ADMIN_ACCOUNT.username);
+      if (!existing) {
+        admins.unshift({ ...DEFAULT_ADMIN_ACCOUNT });
+        localStorage.setItem('adminAccounts', JSON.stringify(admins));
+      }
+      localStorage.setItem('APP_API_BASE', API_BASE);
+    }
+
     async function apiRequest(path, options={}) {
       const method = options.method || 'GET';
       const headers = {'Content-Type': 'application/json', ...(options.headers || {})};
@@ -1191,9 +1222,7 @@
 
     // Khởi tạo dữ liệu rỗng: không tạo tài khoản mẫu hoặc đơn demo nào.
     function initDefaultData() {
-      if (!localStorage.getItem('adminAccounts')) {
-        localStorage.setItem('adminAccounts', JSON.stringify([]));
-      }
+      ensureSeedAdminAccount();
 
       if (!localStorage.getItem('orders_v2')) {
         localStorage.setItem('orders_v2', JSON.stringify([]));
@@ -1257,9 +1286,24 @@
       let u = document.getElementById('loginUsername').value.trim();
       let p = document.getElementById('loginPassword').value.trim();
 
+      const localAdmins = getLocalAdminAccounts();
+      const localAdmin = localAdmins.find(a => a.username === u && a.password === p);
+      if (localAdmin) {
+        if (localAdmin.isLocked) {
+          alert("Tài khoản của bạn đã bị khóa!");
+          return;
+        }
+        localStorage.setItem('loggedAdmin', u);
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginScreen').style.display = 'none';
+        applyPermissionsAndRender();
+        return;
+      }
+
       try {
         const profile = await apiRequest('/api/admin/login', { method: 'POST', body: { username: u, password: p } });
-        let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        let admins = getLocalAdminAccounts();
         const merged = {
           username: profile.username,
           fullname: profile.full_name,
@@ -1278,7 +1322,7 @@
         document.getElementById('loginScreen').style.display = 'none';
         applyPermissionsAndRender();
       } catch (error) {
-        let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        let admins = getLocalAdminAccounts();
         let admin = admins.find(a => a.username === u && a.password === p);
 
         if (!admin) {
@@ -2188,20 +2232,37 @@
       calculateFooterStats();
     }
 
-    function showAppNotice(message) {
+    function showAppNotice(message, title = 'Thông báo') {
       const body = document.getElementById('appNoticeBody');
-      if (!body) {
-        alert(message);
+      const modal = document.getElementById('appNoticeModal');
+      const header = document.getElementById('appNoticeTitle');
+      if (header) header.textContent = title;
+      if (!body || !modal) {
+        window.__fallbackAlert?.(String(message));
         return;
       }
-      body.innerHTML = `<div style="display:flex; align-items:flex-start;"><span class="notice-icon">⚠</span><div>${message}</div></div>`;
-      document.getElementById('appNoticeModal').style.display = 'flex';
+      body.innerHTML = `
+        <div style="display:flex; align-items:flex-start; gap:12px; background:linear-gradient(135deg,#fff7ed 0%,#fff 100%); border:1px solid #fed7aa; border-radius:14px; padding:14px 16px; box-shadow:0 10px 24px rgba(251,146,60,0.08);">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#ffedd5 0%,#fed7aa 100%); color:#b45309; font-size:1.5rem; flex-shrink:0;">⚠</span>
+          <div>
+            <div style="font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:800; color:#b45309; margin-bottom:6px;">Cảnh báo</div>
+            <div style="font-size:0.96rem; font-weight:700; color:#334155; line-height:1.6;">${message}</div>
+          </div>
+        </div>
+      `;
+      modal.style.display = 'flex';
     }
 
     function closeNoticeModal() {
       const modal = document.getElementById('appNoticeModal');
       if (modal) modal.style.display = 'none';
     }
+
+    window.__fallbackAlert = window.alert.bind(window);
+    window.alert = function(message) {
+      const text = typeof message === 'string' ? message : String(message ?? '');
+      showAppNotice(text, 'Thông báo');
+    };
 
     function openDeleteOrderConfirm(index) {
       let currentAdminUsername = localStorage.getItem('loggedAdmin');

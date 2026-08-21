@@ -963,12 +963,7 @@
       </div>
     </div>
 
-<div class="pricing-red-title">
-        <span class="pricing-icon">📋</span>
-        <span>Bảng giá dịch vụ</span>
-      </div>
-
-      <div class="card pricing-card" style="margin-top: 0; margin-bottom: 0;">
+      <div class="card pricing-card" id="sectionPricingTable" style="margin-top: 0; margin-bottom: 0;">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <span class="card-title">📋 Bảng giá dịch vụ</span>
           <button class="btn btn-primary" onclick="addPricingRow()">+ Thêm dòng</button>
@@ -1325,6 +1320,7 @@
             <label><input type="checkbox" class="perm-checkbox" value="customer_lock"> Khóa khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="customer_delete"> Xóa khách hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="export"> Xuất dữ liệu Excel</label>
+            <label><input type="checkbox" class="perm-checkbox" value="manage_service_pricing"> Quản lý Bảng giá dịch vụ</label>
             <label><input type="checkbox" class="perm-checkbox" value="manage_admins"> Quản lý tài khoản Admin</label>
             <label><input type="checkbox" class="perm-checkbox" value="footer_stats"> Xem Thống Kê</label>
           </div>
@@ -1367,7 +1363,7 @@
       username: 'admin4T',
       fullname: 'Quản trị hệ thống',
       title: 'Super Admin',
-      permissions: ['manage_admins','orders','create_order','view_order_history','customer_chat','customer_new_password','customer_lock','customer_delete','footer_stats','export'],
+      permissions: ['manage_admins','orders','create_order','view_order_history','customer_chat','customer_new_password','customer_lock','customer_delete','footer_stats','export','manage_service_pricing'],
       isLocked: false,
       password: '123'
     };
@@ -1709,6 +1705,10 @@
 
       document.getElementById('sectionAdmins').style.display = (isRoot || perms.includes('manage_admins')) ? 'block' : 'none';
 
+      let canManagePricing = isRoot || perms.includes('manage_service_pricing');
+      const pricingSection = document.getElementById('sectionPricingTable');
+      if (pricingSection) pricingSection.style.display = canManagePricing ? 'block' : 'none';
+
       let canViewFooterStats = isRoot || perms.includes('footer_stats');
       document.getElementById('sectionFooterStats').style.display = canViewFooterStats ? 'block' : 'none';
       
@@ -1731,6 +1731,7 @@
       if (canChat) renderChatList();
       if (hasAnyUserPerm) renderUsersTable();
       if (isRoot || perms.includes('manage_admins')) renderAdminTable();
+      if (canManagePricing) renderPricingTable();
       if (canViewFooterStats) calculateFooterStats();
     }
 

@@ -309,6 +309,11 @@
       color: white;
     }
 
+    .pricing-btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
     .pricing-btn-ghost {
       background: white;
       color: #2d476d;
@@ -1327,6 +1332,23 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 0.95rem;">Lưu Tài Khoản</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Xác nhận thao tác Bảng giá -->
+  <div class="modal" id="pricingConfirmModal">
+    <div class="modal-content" style="width: 420px;">
+      <div class="modal-header">
+        <h3 id="pricingConfirmTitle">Xác nhận thao tác</h3>
+        <span class="close-modal" onclick="closeModal('pricingConfirmModal')">&times;</span>
+      </div>
+      <div style="padding: 18px 18px 8px; color: #334155; line-height: 1.6;">
+        <p id="pricingConfirmMessage" style="font-size: 0.96rem; margin: 0;">Bạn có chắc chắn muốn tiếp tục?</p>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 16px 18px 18px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('pricingConfirmModal')" style="padding: 10px 16px;">Hủy</button>
+        <button type="button" class="btn btn-primary" id="pricingConfirmActionBtn" style="padding: 10px 16px;">Xác nhận</button>
+      </div>
     </div>
   </div>
 
@@ -3285,6 +3307,20 @@
       return `${numeric.toLocaleString('vi-VN')}đ`;
     }
 
+    function openPricingConfirmModal({ title, message, confirmText, onConfirm }) {
+      const modal = document.getElementById('pricingConfirmModal');
+      if (!modal) return;
+      document.getElementById('pricingConfirmTitle').textContent = title;
+      document.getElementById('pricingConfirmMessage').textContent = message;
+      const confirmBtn = document.getElementById('pricingConfirmActionBtn');
+      confirmBtn.textContent = confirmText;
+      confirmBtn.onclick = () => {
+        closeModal('pricingConfirmModal');
+        onConfirm();
+      };
+      modal.style.display = 'flex';
+    }
+
     function renderPricingTable() {
       const tbody = document.getElementById('pricingTableBody');
       if (!tbody) return;
@@ -3310,7 +3346,10 @@
           <td>${row.note || '-'}</td>
           <td>${row.updatedAt ? new Date(row.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
           <td>
-            <button class="pricing-btn-ghost" onclick="startEditPricingRow('${row.id}')">Update</button>
+            <div style="display:flex; gap:6px; flex-wrap: wrap;">
+              <button class="pricing-btn-ghost" onclick="startEditPricingRow('${row.id}')">Update</button>
+              <button class="pricing-btn-danger" onclick="confirmDeletePricingRow('${row.id}')">Xóa</button>
+            </div>
           </td>
         </tr>
       `).join('');
@@ -3346,7 +3385,7 @@
           <td>${row.updatedAt ? new Date(row.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
           <td>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <button class="pricing-btn-success" onclick="saveEditedPricingRow('${row.id}', ${rowIndex})">Lưu</button>
+              <button class="pricing-btn-success" onclick="requestSaveEditedPricingRow('${row.id}', ${rowIndex})">Lưu</button>
               <button class="pricing-btn-ghost" onclick="renderPricingTable()">Hủy</button>
             </div>
           </td>
@@ -3362,10 +3401,48 @@
           <td>${item.note || '-'}</td>
           <td>${item.updatedAt ? new Date(item.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
           <td>
-            <button class="pricing-btn-ghost" onclick="startEditPricingRow('${item.id}')">Update</button>
+            <div style="display:flex; gap:6px; flex-wrap: wrap;">
+              <button class="pricing-btn-ghost" onclick="startEditPricingRow('${item.id}')">Update</button>
+              <button class="pricing-btn-danger" onclick="confirmDeletePricingRow('${item.id}')">Xóa</button>
+            </div>
           </td>
         </tr>
       `).join('');
+    }
+
+    function requestSaveEditedPricingRow(rowId, rowIndex) {
+      const rowNode = document.querySelector(`#pricingTableBody tr:nth-child(${rowIndex + 1})`);
+      if (!rowNode) return;
+
+      const name = rowNode.querySelector('[data-field="name"]').value.trim();
+      if (!name || name.length < 3) {
+        alert('Tên dịch vụ phải có ít nhất 3 ký tự.');
+        return;
+      }
+
+      openPricingConfirmModal({
+        title: 'Xác nhận điều chỉnh',
+        message: `Bạn có chắc chắn muốn lưu thay đổi cho dịch vụ "${name}"?`,
+        confirmText: 'Xác nhận',
+        onConfirm: () => saveEditedPricingRow(rowId, rowIndex)
+      });
+    }
+
+    function confirmDeletePricingRow(rowId) {
+      const rows = getServicePricingRows();
+      const row = rows.find(item => item.id === rowId);
+      if (!row) return;
+
+      openPricingConfirmModal({
+        title: 'Xác nhận xóa dịch vụ',
+        message: `Bạn có chắc chắn muốn xóa dịch vụ "${row.name}" khỏi bảng giá?`,
+        confirmText: 'Xóa dịch vụ',
+        onConfirm: () => {
+          const nextRows = rows.filter(item => item.id !== rowId);
+          saveServicePricingRows(nextRows);
+          renderPricingTable();
+        }
+      });
     }
 
     function saveEditedPricingRow(rowId, rowIndex) {

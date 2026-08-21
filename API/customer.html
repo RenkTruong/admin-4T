@@ -2214,24 +2214,10 @@
                 <hr class="divider" />
                 <h3>2. Chọn dịch vụ</h3>
                 <div class="choice-grid" style="margin-top: 14px">
-                  <label class="choice"
-                    ><input
-                      type="radio"
-                      name="service"
-                      value="standard"
-                      checked
-                      onchange="calculateTotal()"
-                    /><b>Tiêu chuẩn · 15.000đ/kg</b
-                    ><small>Tối thiểu 3 kg · dự kiến 24 giờ</small></label
-                  ><label class="choice"
-                    ><input
-                      type="radio"
-                      name="service"
-                      value="express"
-                      onchange="calculateTotal()"
-                    /><b>Nhanh · 30.000đ/kg</b
-                    ><small>Ưu tiên xử lý · dự kiến 4–8 giờ</small></label
-                  >
+                  <label class="field" style="width: 100%">
+                    <span>Dịch vụ *</span>
+                    <select id="serviceSelect" onchange="calculateTotal()"></select>
+                  </label>
                 </div>
                 <hr class="divider" />
                 <h3>3. Thanh toán</h3>
@@ -2688,13 +2674,63 @@
         const log = read("websiteVisitsLog", []);
         log.push({ time: new Date().toLocaleString("vi-VN") });
         write("websiteVisitsLog", log);
+        window.addEventListener("storage", () => {
+          renderServiceSelector();
+          calculateTotal();
+        });
         renderAll();
         calculateTotal();
         renderChat();
       }
+      function readPricingRows() {
+        try {
+          const shared = JSON.parse(localStorage.getItem("4t-service-pricing") || "null");
+          if (shared && Array.isArray(shared.table) && shared.table.length) return shared.table;
+        } catch (error) {
+          console.warn("Could not read 4t-service-pricing:", error);
+        }
+
+        try {
+          const legacy = JSON.parse(localStorage.getItem("servicePricingRows") || "null");
+          if (Array.isArray(legacy) && legacy.length) return legacy;
+        } catch (error) {
+          console.warn("Could not read servicePricingRows:", error);
+        }
+
+        return [
+          { id: "1", name: "Giặt sấy tiêu chuẩn", unit: "Kg", price: 15000 },
+          { id: "2", name: "Giặt sấy nhanh", unit: "Kg", price: 30000 },
+        ];
+      }
+
+      function renderServiceSelector() {
+        const select = document.getElementById("serviceSelect");
+        if (!select) return;
+
+        const rows = readPricingRows();
+        const current = select.value || rows[0]?.id || "";
+        select.innerHTML = rows
+          .map(
+            (row) =>
+              `<option value="${String(row.id)}">${esc(row.name || "Dịch vụ mới")} · ${esc(row.unit || "Kg")} · ${money(Number(row.price || 0))}</option>`,
+          )
+          .join("");
+
+        const hasCurrent = rows.some((row) => String(row.id) === String(current));
+        select.value = hasCurrent ? String(current) : String(rows[0]?.id || "");
+      }
+
+      function getSelectedPricingRow() {
+        const rows = readPricingRows();
+        const select = document.getElementById("serviceSelect");
+        const selectedId = select ? select.value : "";
+        return rows.find((row) => String(row.id) === String(selectedId)) || rows[0] || null;
+      }
+
       function renderAll() {
         renderNav();
         renderStats();
+        renderServiceSelector();
         renderOrderForm();
         renderAccount();
       }
@@ -2730,12 +2766,12 @@
           3,
           Number(document.getElementById("orderKg")?.value || 3),
         );
-        const type =
-          document.querySelector('input[name="service"]:checked')?.value ||
-          "standard";
-        document.getElementById("orderTotal").textContent = money(
-          kg * (type === "express" ? 30000 : 15000),
-        );
+        const selected = getSelectedPricingRow();
+        const pricePerUnit = Number(selected?.price || 0);
+        const unit = String(selected?.unit || "Kg");
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        document.getElementById("orderTotal").textContent = money(total);
       }
       function openAuth(tab) {
         document.getElementById("authModal").classList.add("active");
@@ -2904,7 +2940,9 @@
             3,
             Number(document.getElementById("orderKg").value || 3),
           ),
-          type = document.querySelector('input[name="service"]:checked').value,
+          selected = getSelectedPricingRow(),
+          pricePerUnit = Number(selected?.price || 0),
+          unit = String(selected?.unit || "Kg"),
           payment = document.querySelector(
             'input[name="payment"]:checked',
           ).value,
@@ -2914,7 +2952,9 @@
         if (address.length < 8)
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
 
-        const total = kg * (type === "express" ? 30000 : 15000);
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
 
         try {
           const payload = await apiRequest("/api/orders", {
@@ -3601,11 +3641,12 @@
           3,
           Number(document.getElementById("orderKg")?.value || 3),
         );
-        const type =
-          document.querySelector('input[name="service"]:checked')?.value ||
-          "standard";
-        const serviceFee = kg * (type === "express" ? 30000 : 15000),
-          delivery = getDeliveryDetails(),
+        const selected = getSelectedPricingRow();
+        const pricePerUnit = Number(selected?.price || 0);
+        const unit = String(selected?.unit || "Kg");
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails(),
           total = serviceFee + delivery.shippingFee;
         const totalNode = document.getElementById("orderTotal"),
           breakdown = document.getElementById("priceBreakdown");
@@ -3652,7 +3693,9 @@
             3,
             Number(document.getElementById("orderKg").value || 3),
           ),
-          type = document.querySelector('input[name="service"]:checked').value,
+          selected = getSelectedPricingRow(),
+          pricePerUnit = Number(selected?.price || 0),
+          unit = String(selected?.unit || "Kg"),
           payment = document.querySelector(
             'input[name="payment"]:checked',
           ).value,
@@ -3674,8 +3717,10 @@
           return toast("Vui lòng nhập địa chỉ giao–nhận rõ hơn.");
         if (delivery.mode === "address" && delivery.distance <= 0)
           return toast("Vui lòng nhập khoảng cách ước tính từ cửa hàng 4T.");
-        const serviceFee = kg * (type === "express" ? 30000 : 15000),
-          total = serviceFee + delivery.shippingFee;
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const total = serviceFee + delivery.shippingFee;
+        const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
         const serviceName =
           type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn";
         const paymentName =

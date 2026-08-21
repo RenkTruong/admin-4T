@@ -2904,7 +2904,9 @@
             3,
             Number(document.getElementById("orderKg").value || 3),
           ),
-          type = document.querySelector('input[name="service"]:checked').value,
+          selected = getSelectedPricingRow(),
+          pricePerUnit = Number(selected?.price || 0),
+          unit = String(selected?.unit || "Kg"),
           payment = document.querySelector(
             'input[name="payment"]:checked',
           ).value,
@@ -2914,7 +2916,9 @@
         if (address.length < 8)
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
 
-        const total = kg * (type === "express" ? 30000 : 15000);
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
 
         try {
           const payload = await apiRequest("/api/orders", {
@@ -3601,11 +3605,12 @@
           3,
           Number(document.getElementById("orderKg")?.value || 3),
         );
-        const type =
-          document.querySelector('input[name="service"]:checked')?.value ||
-          "standard";
-        const serviceFee = kg * (type === "express" ? 30000 : 15000),
-          delivery = getDeliveryDetails(),
+        const selected = getSelectedPricingRow();
+        const pricePerUnit = Number(selected?.price || 0);
+        const unit = String(selected?.unit || "Kg");
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails(),
           total = serviceFee + delivery.shippingFee;
         const totalNode = document.getElementById("orderTotal"),
           breakdown = document.getElementById("priceBreakdown");
@@ -3652,7 +3657,9 @@
             3,
             Number(document.getElementById("orderKg").value || 3),
           ),
-          type = document.querySelector('input[name="service"]:checked').value,
+          selected = getSelectedPricingRow(),
+          pricePerUnit = Number(selected?.price || 0),
+          unit = String(selected?.unit || "Kg"),
           payment = document.querySelector(
             'input[name="payment"]:checked',
           ).value,
@@ -3674,8 +3681,10 @@
           return toast("Vui lòng nhập địa chỉ giao–nhận rõ hơn.");
         if (delivery.mode === "address" && delivery.distance <= 0)
           return toast("Vui lòng nhập khoảng cách ước tính từ cửa hàng 4T.");
-        const serviceFee = kg * (type === "express" ? 30000 : 15000),
-          total = serviceFee + delivery.shippingFee;
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const total = serviceFee + delivery.shippingFee;
+        const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
         const serviceName =
           type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn";
         const paymentName =

@@ -79,6 +79,39 @@ function AdminWorkspace() {
             </div>
           ))}
         </div>
+
+        <div className="mt-6 rounded-2xl border border-[#092C5C]/10 bg-[#F8FBFF] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-base font-extrabold text-[#092C5C]">Bảng giá</p>
+            <span className="text-xs font-medium text-[#60718A]">Cập nhật: {pricing.updatedAt ? new Date(pricing.updatedAt).toLocaleString("vi-VN") : "Chưa cập nhật"}</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-white text-[10px] font-extrabold uppercase tracking-[.12em] text-[#71809A]">
+                <tr>
+                  <th className="px-3 py-2">ID</th>
+                  <th className="px-3 py-2">Tên dịch vụ</th>
+                  <th className="px-3 py-2">Đơn vị tính</th>
+                  <th className="px-3 py-2">Giá</th>
+                  <th className="px-3 py-2">Ghi chú</th>
+                  <th className="px-3 py-2">Thời gian</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pricing.table.map((row) => (
+                  <tr key={`${row.id}-${row.name}`} className="border-t border-[#092C5C]/8">
+                    <td className="px-3 py-3 font-bold text-[#092C5C]">{row.id}</td>
+                    <td className="px-3 py-3 text-[#334866]">{row.name}</td>
+                    <td className="px-3 py-3 text-[#334866]">{row.unit}</td>
+                    <td className="px-3 py-3 font-extrabold text-[#E7425A]">{formatServicePrice(row.price)}</td>
+                    <td className="px-3 py-3 text-[#4C5F7E]">{row.note || "-"}</td>
+                    <td className="px-3 py-3 text-[#4C5F7E]">{pricing.updatedAt ? new Date(pricing.updatedAt).toLocaleString("vi-VN") : "Chưa cập nhật"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     )}
     <section className="rounded-2xl border border-[#092C5C]/10 bg-white"><div className="flex items-center justify-between border-b border-[#092C5C]/8 p-5"><div><p className="text-base font-extrabold text-[#092C5C]">Đơn hàng mới nhất</p><p className="mt-1 text-sm text-[#6D7F9B]">Đổi trạng thái để cập nhật tiến độ và tự động tích điểm cho đơn thành viên khi hoàn tất.</p></div><BarChart3 className="h-5 w-5 text-[#1677C7]" /></div><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left"><thead className="bg-[#F6F9FF] text-[10px] font-extrabold uppercase tracking-[.1em] text-[#71809A]"><tr><th className="px-5 py-3">Mã đơn</th><th className="px-5 py-3">Khách hàng</th><th className="px-5 py-3">Dịch vụ</th><th className="px-5 py-3">Thanh toán</th><th className="px-5 py-3">Trạng thái</th></tr></thead><tbody>{orders.data?.map(order => <tr key={order.id} className="border-t border-[#092C5C]/7"><td className="px-5 py-4 text-xs font-extrabold text-[#092C5C]">{order.publicCode}<span className="mt-1 block font-normal text-[#71809A]">{new Date(order.createdAt).toLocaleString("vi-VN")}</span></td><td className="px-5 py-4 text-sm"><b className="block text-[#334866]">{order.customerName}</b><span className="text-[#71809A]">{order.customerPhone}</span></td><td className="px-5 py-4 text-sm text-[#61718A]">{order.estimatedKg} kg · {order.serviceTier === "express" ? "Nhanh" : "Tiêu chuẩn"}<b className="mt-1 block text-[#092C5C]">{order.estimatedTotalVnd.toLocaleString("vi-VN")}đ</b></td><td className="px-5 py-4 text-sm text-[#61718A]">{order.paymentMethod === "cash" ? "Tiền mặt" : order.paymentMethod === "bank_transfer" ? "App ngân hàng" : "Ví điện tử"}<span className="mt-1 block text-xs">{order.paymentStatus}</span></td><td className="px-5 py-4"><select value={order.status} onChange={e => update.mutate({ orderId: order.id, status: e.target.value as typeof statusOptions[number], note: labels[e.target.value] })} className="rounded-lg border border-[#092C5C]/12 bg-white px-3 py-2 text-xs font-bold text-[#334866]">{statusOptions.map(value => <option key={value} value={value}>{labels[value]}</option>)}</select></td></tr>)}{!orders.data?.length && <tr><td colSpan={5} className="px-5 py-12 text-center text-sm text-[#71809A]">Chưa có đơn hàng nào từ website.</td></tr>}</tbody></table></div></section>

@@ -35,8 +35,22 @@ jobs:
           VITE_APP_ENV: production
         run: npm run build
 
+      - name: Check deployment credentials
+        shell: bash
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          if [ -n "$PROD_HOST" ] && [ -n "$PROD_USER" ] && [ -n "$PROD_SSH_KEY" ]; then
+            echo "DEPLOY_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_READY=false" >> "$GITHUB_ENV"
+            echo "Missing deployment secrets; skipping SSH deploy."
+          fi
+
       - name: Deploy via SSH
-        if: ${{ secrets.PROD_HOST != '' && secrets.PROD_USER != '' && secrets.PROD_SSH_KEY != '' }}
+        if: ${{ env.DEPLOY_READY == 'true' }}
         uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.PROD_HOST }}

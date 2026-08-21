@@ -164,6 +164,9 @@
     }
 
     .pricing-red-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       padding: 18px 20px 8px;
       font-size: clamp(2.5rem, 3vw, 3.8rem);
       font-weight: 900;
@@ -171,6 +174,20 @@
       color: #ef3c3c;
       letter-spacing: -0.04em;
       background: #edf4fb;
+    }
+
+    .pricing-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(239, 60, 60, 0.10);
+      color: #ef3c3c;
+      font-size: 1.7rem;
+      line-height: 1;
+      flex-shrink: 0;
     }
 
     .pricing-card {
@@ -216,6 +233,86 @@
 
     .pricing-grid .grid-col:last-child {
       border-right: none;
+    }
+
+    .pricing-table-wrap {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(148, 163, 184, 0.36);
+      border-top: none;
+      overflow: auto;
+    }
+
+    .pricing-table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+      background: rgba(255,255,255,0.2);
+      font-size: 0.96rem;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+      border-right: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .pricing-table th {
+      background: #f8fbff;
+      color: #3a5a7c;
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pricing-table td {
+      background: rgba(255,255,255,0.2);
+      color: #2d476d;
+    }
+
+    .pricing-table input,
+    .pricing-table select {
+      width: 100%;
+      min-width: 110px;
+      padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      border-radius: 8px;
+      background: white;
+      color: #2d476d;
+      font-size: 0.92rem;
+    }
+
+    .pricing-table input[type="number"] {
+      min-width: 120px;
+    }
+
+    .pricing-table button {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .pricing-btn-primary {
+      background: #0f74d5;
+      color: white;
+    }
+
+    .pricing-btn-success {
+      background: #1fae63;
+      color: white;
+    }
+
+    .pricing-btn-ghost {
+      background: white;
+      color: #2d476d;
+      border: 1px solid rgba(148, 163, 184, 0.45);
     }
 
     .pricing-empty {
@@ -866,7 +963,33 @@
       </div>
     </div>
 
-    <div class="pricing-red-title">Bảng giá dịch vụ</div>
+<div class="pricing-red-title">
+        <span class="pricing-icon">📋</span>
+        <span>Bảng giá dịch vụ</span>
+      </div>
+
+      <div class="card pricing-card" style="margin-top: 0; margin-bottom: 0;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <span class="card-title">📋 Bảng giá dịch vụ</span>
+          <button class="btn btn-primary" onclick="addPricingRow()">+ Thêm dòng</button>
+        </div>
+        <div class="pricing-table-wrap">
+          <table class="pricing-table" id="pricingTable">
+            <thead>
+              <tr>
+                <th style="width: 8%;">ID</th>
+                <th style="width: 22%;">Tên dịch vụ</th>
+                <th style="width: 14%;">Đơn vị tính</th>
+                <th style="width: 14%;">Giá</th>
+                <th style="width: 22%;">Ghi chú</th>
+                <th style="width: 12%;">Thời gian</th>
+                <th style="width: 8%;">Update</th>
+              </tr>
+            </thead>
+            <tbody id="pricingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
 
     <!-- ORDER ACTION HISTORY LOG SECTION -->
     <div class="card" id="sectionOrderLogs">
@@ -3132,6 +3255,170 @@
       localStorage.setItem('adminAccounts', JSON.stringify(admins));
       renderAdminTable();
     }
+
+    const DEFAULT_SERVICE_PRICING_ROWS = [
+      { id: '1', name: 'Giặt sấy nhanh', unit: 'Kg', price: 15000, note: 'Giặt rửa nhanh, sấy khô trong 3h', updatedAt: new Date().toISOString() },
+      { id: '2', name: 'Giặt sấy tiết kiệm', unit: 'Kg', price: 8000, note: 'Giặt rửa từng khúc', updatedAt: new Date().toISOString() },
+      { id: '3', name: 'Giặt hấp áo vest', unit: 'Lần', price: 12000, note: 'Sử dụng hóa chất chuyên dụng', updatedAt: new Date().toISOString() },
+      { id: '4', name: 'Giặt giày thể thao', unit: 'Đôi', price: 6000, note: 'Vệ sinh bền đẹp', updatedAt: new Date().toISOString() }
+    ];
+
+    function getServicePricingRows() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('servicePricingRows') || 'null');
+        if (Array.isArray(saved) && saved.length) return saved;
+      } catch (error) {
+        console.warn('Could not parse servicePricingRows:', error);
+      }
+      localStorage.setItem('servicePricingRows', JSON.stringify(DEFAULT_SERVICE_PRICING_ROWS));
+      return DEFAULT_SERVICE_PRICING_ROWS;
+    }
+
+    function saveServicePricingRows(rows) {
+      localStorage.setItem('servicePricingRows', JSON.stringify(rows));
+      return rows;
+    }
+
+    function formatServicePrice(value) {
+      const numeric = Number(value) || 0;
+      return `${numeric.toLocaleString('vi-VN')}đ`;
+    }
+
+    function renderPricingTable() {
+      const tbody = document.getElementById('pricingTableBody');
+      if (!tbody) return;
+
+      const rows = getServicePricingRows();
+      if (!rows.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="pricing-empty">Chưa có dữ liệu bảng giá. Nhấn “Thêm dòng” để tạo dịch vụ mới.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.id}</td>
+          <td>${row.name || '-'}</td>
+          <td>${row.unit || 'Lần'}</td>
+          <td>${formatServicePrice(row.price || 0)}</td>
+          <td>${row.note || '-'}</td>
+          <td>${row.updatedAt ? new Date(row.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
+          <td>
+            <button class="pricing-btn-ghost" onclick="startEditPricingRow('${row.id}')">Update</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function startEditPricingRow(rowId) {
+      const rows = getServicePricingRows();
+      const row = rows.find(item => item.id === rowId);
+      if (!row) return;
+
+      const tbody = document.getElementById('pricingTableBody');
+      if (!tbody) return;
+
+      const rowIndex = rows.findIndex(item => item.id === rowId);
+      const html = `
+        <tr>
+          <td>${row.id}</td>
+          <td>
+            <input type="text" minlength="3" value="${(row.name || '').replace(/"/g, '&quot;')}" data-field="name" placeholder="Tên dịch vụ" required>
+          </td>
+          <td>
+            <select data-field="unit">
+              <option value="Lần" ${row.unit === 'Lần' ? 'selected' : ''}>Lần</option>
+              <option value="Kg" ${row.unit === 'Kg' ? 'selected' : ''}>Kg</option>
+            </select>
+          </td>
+          <td>
+            <input type="number" min="0" step="1000" value="${Number(row.price || 0)}" data-field="price" placeholder="Giá">
+          </td>
+          <td>
+            <input type="text" value="${(row.note || '').replace(/"/g, '&quot;')}" data-field="note" placeholder="Ghi chú">
+          </td>
+          <td>${row.updatedAt ? new Date(row.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="pricing-btn-success" onclick="saveEditedPricingRow('${row.id}', ${rowIndex})">Lưu</button>
+              <button class="pricing-btn-ghost" onclick="renderPricingTable()">Hủy</button>
+            </div>
+          </td>
+        </tr>
+      `;
+
+      tbody.innerHTML = rows.map((item, index) => index === rowIndex ? html : `
+        <tr>
+          <td>${item.id}</td>
+          <td>${item.name || '-'}</td>
+          <td>${item.unit || 'Lần'}</td>
+          <td>${formatServicePrice(item.price || 0)}</td>
+          <td>${item.note || '-'}</td>
+          <td>${item.updatedAt ? new Date(item.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}</td>
+          <td>
+            <button class="pricing-btn-ghost" onclick="startEditPricingRow('${item.id}')">Update</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function saveEditedPricingRow(rowId, rowIndex) {
+      const rows = getServicePricingRows();
+      const row = rows[rowIndex];
+      if (!row) return;
+
+      const rowNode = document.querySelector(`#pricingTableBody tr:nth-child(${rowIndex + 1})`);
+      if (!rowNode) return;
+
+      const name = rowNode.querySelector('[data-field="name"]').value.trim();
+      const unit = rowNode.querySelector('[data-field="unit"]').value || 'Lần';
+      const price = Number(rowNode.querySelector('[data-field="price"]').value || 0);
+      const note = rowNode.querySelector('[data-field="note"]').value.trim();
+
+      if (!name || name.length < 3) {
+        alert('Tên dịch vụ phải có ít nhất 3 ký tự.');
+        return;
+      }
+
+      rows[rowIndex] = {
+        ...row,
+        name,
+        unit,
+        price,
+        note,
+        updatedAt: new Date().toISOString()
+      };
+
+      saveServicePricingRows(rows);
+      renderPricingTable();
+    }
+
+    function addPricingRow() {
+      const rows = getServicePricingRows();
+      const nextId = String(rows.length + 1);
+      const newRow = {
+        id: nextId,
+        name: 'Dịch vụ mới',
+        unit: 'Lần',
+        price: 0,
+        note: '',
+        updatedAt: new Date().toISOString()
+      };
+
+      const nextRows = [...rows, newRow];
+      saveServicePricingRows(nextRows);
+      renderPricingTable();
+      startEditPricingRow(nextId);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      renderPricingTable();
+    });
 
     // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN (CẬP NHẬT CHUẨN WEBSITE 4T) ---
     function getDateOnly(value) {

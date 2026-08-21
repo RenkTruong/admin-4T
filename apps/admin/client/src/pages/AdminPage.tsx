@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { BarChart3, Clock3, MessageCircleMore, PackageCheck, Star, UsersRound } from "lucide-react";
-import { DEFAULT_SERVICE_PRICING, formatServicePrice, readServicePricing, writeServicePricing } from "@/../shared/servicePricing";
+import { DEFAULT_SERVICE_PRICING, formatServicePrice, readServicePricing, writeServicePricing } from "@shared/servicePricing";
 import { useMemo, useState } from "react";
 
 const labels: Record<string, string> = { requested: "Đã tiếp nhận", confirmed: "Đã xác nhận", pickup: "Đang lấy đồ", washing: "Đang giặt", drying: "Đang sấy", ready: "Sẵn sàng giao trả", completed: "Hoàn tất", cancelled: "Đã hủy" };

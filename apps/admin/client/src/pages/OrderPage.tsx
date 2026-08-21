@@ -8,7 +8,7 @@ import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { STORE } from "@/lib/store";
 import { AlertCircle, ArrowRight, CheckCircle2, CircleDollarSign, CreditCard, Loader2, MapPin, Navigation, Sparkles, Store, Truck, WalletCards } from "lucide-react";
-import { formatServicePrice, getServiceTierPrice, readServicePricing, type ServiceTier } from "@/../shared/servicePricing";
+import { formatServicePrice, getServiceTierPrice, readServicePricing, type ServiceTier } from "@shared/servicePricing";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 

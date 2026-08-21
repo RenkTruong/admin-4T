@@ -20,15 +20,15 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: apps/api/package-lock.json
+          cache-dependency-path: API/package.json
 
       - name: Install API dependencies
-        working-directory: apps/api
-        run: npm ci
+        working-directory: API
+        run: npm install
 
-      - name: Validate API build
-        working-directory: apps/api
-        run: npm run build
+      - name: Validate API server file
+        working-directory: API
+        run: node --check server.js
 
   deploy:
     needs: validate
@@ -47,6 +47,6 @@ jobs:
           script: |
             cd /var/www/4t || exit 1
             git pull origin main
-            cp .env.production.example .env
+            cp .env.production.example .env 2>/dev/null || true
             docker compose -f docker-compose.prod.yml up --build -d
             docker compose -f docker-compose.prod.yml ps

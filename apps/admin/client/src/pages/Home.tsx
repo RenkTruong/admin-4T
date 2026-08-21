@@ -5,7 +5,7 @@ import { StorefrontHeader } from "@/components/StorefrontHeader";
 import { trpc } from "@/lib/trpc";
 import { STORE } from "@/lib/store";
 import { ArrowRight, BadgeCheck, Clock3, MapPin, PackageCheck, ShieldCheck, Sparkles, Star, Truck, WalletCards } from "lucide-react";
-import { formatServicePrice, readServicePricing } from "@/../shared/servicePricing";
+import { formatServicePrice, readServicePricing } from "@shared/servicePricing";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 

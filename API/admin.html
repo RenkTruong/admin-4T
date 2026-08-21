@@ -58,6 +58,174 @@
     /* Layout Main */
     .container { max-width: 1400px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 2rem; }
 
+    .screen-shell {
+      background: rgba(255, 255, 255, 0.42);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(15, 76, 129, 0.06);
+    }
+
+    .page-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 16px 18px;
+      background: rgba(240, 246, 255, 0.85);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+      flex-wrap: wrap;
+    }
+
+    .page-toolbar-title {
+      color: #0d5ea8;
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .page-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .soft-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 0.96rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      box-shadow: 0 2px 8px rgba(15, 76, 129, 0.12);
+    }
+
+    .soft-btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+
+    .soft-btn.primary {
+      background: linear-gradient(135deg, #0d6ccf, #0a5ca5);
+      color: white;
+    }
+
+    .soft-btn.success {
+      background: linear-gradient(135deg, #14a44d, #0d8a5e);
+      color: white;
+    }
+
+    .soft-btn.ghost {
+      background: rgba(255, 255, 255, 0.7);
+      color: #1e3a5f;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: none;
+    }
+
+    .toolbar-input {
+      min-width: 220px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 0.96rem;
+      color: #4b5d7a;
+    }
+
+    .status-tabs {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(120px, 1fr));
+      gap: 0;
+      padding: 14px 18px 0;
+      background: rgba(240, 246, 255, 0.5);
+    }
+
+    .status-tab {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-bottom: none;
+      background: rgba(255, 255, 255, 0.46);
+      color: #1f3a5f;
+      padding: 14px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .status-tab:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    .status-tab:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    .pricing-red-title {
+      padding: 18px 20px 10px;
+      font-size: clamp(2.2rem, 3vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      color: #ee3a3a;
+      letter-spacing: -0.04em;
+      background: rgba(240, 246, 255, 0.5);
+    }
+
+    .pricing-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 18px;
+      margin: 0 18px 18px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+    }
+
+    .pricing-card-header {
+      padding: 18px 20px;
+      background: rgba(240, 246, 255, 0.85);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0e3f79;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      background: rgba(255,255,255,0.35);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .pricing-grid .grid-col {
+      padding: 16px 20px;
+      border-right: 1px solid rgba(148, 163, 184, 0.18);
+      color: #28496d;
+      font-weight: 700;
+      background: rgba(255,255,255,0.2);
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .pricing-grid .grid-col:last-child {
+      border-right: none;
+    }
+
+    .pricing-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+      font-size: 1.05rem;
+      color: #576c86;
+      background: rgba(255,255,255,0.25);
+      text-align: center;
+      padding: 18px;
+    }
+
     /* Stats Overview */
     .stats-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.2rem; }
     .stat-card { background: white; padding: 1.2rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); display: flex; flex-direction: column; justify-content: center; }
@@ -601,6 +769,43 @@
   </div>
 
   <div class="container">
+
+    <div class="screen-shell">
+      <div class="page-toolbar">
+        <div class="page-toolbar-title">Quản Lý Theo Dõi Đơn Hàng</div>
+        <div class="page-toolbar-actions">
+          <button class="soft-btn primary">+ Tạo Đơn Hàng</button>
+          <button class="soft-btn success">📥 Xuất Excel Đơn Hàng</button>
+          <input class="toolbar-input" placeholder="🔍 Tìm tên hoặc SĐT..." />
+          <button class="soft-btn ghost">Tất cả đơn hàng ▾</button>
+        </div>
+      </div>
+
+      <div class="status-tabs">
+        <div class="status-tab">Mã đơn</div>
+        <div class="status-tab">Khách hàng</div>
+        <div class="status-tab">Dịch vụ &amp; khối lượng</div>
+        <div class="status-tab">Dịch vụ giao nhận</div>
+        <div class="status-tab">Thanh toán</div>
+        <div class="status-tab">Tổng tiền</div>
+        <div class="status-tab">Thời gian</div>
+        <div class="status-tab">Doanh thu</div>
+        <div class="status-tab">Trạng thái</div>
+      </div>
+
+      <div class="pricing-red-title">Bảng giá dịch vụ</div>
+
+      <div class="pricing-card">
+        <div class="pricing-card-header">Nhật Ký Thao Tác Hệ Thống (Tổng Hợp)</div>
+        <div class="pricing-grid">
+          <div class="grid-col">Mã đơn</div>
+          <div class="grid-col">Hành động / thay đổi</div>
+          <div class="grid-col">Nhân viên / tài khoản thực hiện</div>
+          <div class="grid-col">Thời gian thay đổi</div>
+        </div>
+        <div class="pricing-empty">Chưa có lịch sử sửa đổi thẻ nào được ghi nhận.</div>
+      </div>
+    </div>
 
     <!-- Stats Overview & Revenue -->
     <div class="stats-grid" id="statsGridSection">

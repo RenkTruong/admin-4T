@@ -36,6 +36,7 @@ jobs:
         run: npm run build
 
       - name: Deploy via SSH
+        if: ${{ secrets.PROD_HOST != '' && secrets.PROD_USER != '' && secrets.PROD_SSH_KEY != '' }}
         uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.PROD_HOST }}

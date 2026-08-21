@@ -34,9 +34,9 @@ jobs:
     needs: validate
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && secrets.PROD_HOST != '' && secrets.PROD_USER != '' && secrets.PROD_SSH_KEY != ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Deploy to production server
         uses: appleboy/ssh-action@v1.0.1

@@ -15,6 +15,7 @@ export type PricingTableRow = {
   unit: string;
   price: number;
   note: string;
+  updatedAt: string | null;
 };
 
 export type ServicePricing = {
@@ -27,16 +28,16 @@ export type ServicePricing = {
 export const SERVICE_PRICING_STORAGE_KEY = "4t-service-pricing";
 
 export const DEFAULT_TABLE_ROWS: PricingTableRow[] = [
-  { id: "1", group: "Giặt Sấy Theo Kg", name: "Giặt sấy nhanh (dưới 5kg)", unit: "Kg", price: 15000, note: "Giặt rửa nhanh, sấy khô trong 3h" },
-  { id: "2", group: "Giặt Sấy Theo Kg", name: "Giặt sấy tiết kiệm (5-10kg)", unit: "Kg", price: 8000, note: "Giặt rửa từng khúc" },
-  { id: "3", group: "Giặt Sấy Theo Kg", name: "Giặt sấy công nghiệp (>10kg)", unit: "Kg", price: 15000, note: "Dành cho khối lượng lớn" },
-  { id: "4", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp áo vest / áo dài", unit: "Bộ/Chiếc", price: 12000, note: "Sử dụng hóa chất chuyên dụng" },
-  { id: "5", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp giày thể thao", unit: "Đôi", price: 6000, note: "Vệ sinh khu mũi" },
-  { id: "6", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp gấu bông", unit: "Chiếc", price: 4000, note: "Giặt sấy diet khuẩn" },
-  { id: "7", group: "Chăn Ga Gối Nệm", name: "Giặt nệm lò xo / bông ép", unit: "Chiếc", price: 25000, note: "Vệ sinh tai nha hoa các tiêm" },
-  { id: "8", group: "Chăn Ga Gối Nệm", name: "Giặt chăn bông dày", unit: "Chiếc", price: 7000, note: "Sấy kho diet khuẩn" },
-  { id: "9", group: "Chăn Ga Gối Nệm", name: "Giặt rem cửa", unit: "Kg", price: 25000, note: "Tịnh theo kg thực tế" },
-  { id: "#", group: "Dịch Vụ Khác", name: "Tẩy vết bẩn cứng đầu", unit: "Chiếc", price: 3000, note: "Giá thay đổi tùy vết bẩn" },
+  { id: "1", group: "Giặt Sấy Theo Kg", name: "Giặt sấy nhanh (dưới 5kg)", unit: "Kg", price: 15000, note: "Giặt rửa nhanh, sấy khô trong 3h", updatedAt: null },
+  { id: "2", group: "Giặt Sấy Theo Kg", name: "Giặt sấy tiết kiệm (5-10kg)", unit: "Kg", price: 8000, note: "Giặt rửa từng khúc", updatedAt: null },
+  { id: "3", group: "Giặt Sấy Theo Kg", name: "Giặt sấy công nghiệp (>10kg)", unit: "Kg", price: 15000, note: "Dành cho khối lượng lớn", updatedAt: null },
+  { id: "4", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp áo vest / áo dài", unit: "Bộ/Chiếc", price: 12000, note: "Sử dụng hóa chất chuyên dụng", updatedAt: null },
+  { id: "5", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp giày thể thao", unit: "Đôi", price: 6000, note: "Vệ sinh khu mũi", updatedAt: null },
+  { id: "6", group: "Giặt Hấp / Giặt Khô", name: "Giặt hấp gấu bông", unit: "Chiếc", price: 4000, note: "Giặt sấy diet khuẩn", updatedAt: null },
+  { id: "7", group: "Chăn Ga Gối Nệm", name: "Giặt nệm lò xo / bông ép", unit: "Chiếc", price: 25000, note: "Vệ sinh tai nha hoa các tiêm", updatedAt: null },
+  { id: "8", group: "Chăn Ga Gối Nệm", name: "Giặt chăn bông dày", unit: "Chiếc", price: 7000, note: "Sấy kho diet khuẩn", updatedAt: null },
+  { id: "9", group: "Chăn Ga Gối Nệm", name: "Giặt rem cửa", unit: "Kg", price: 25000, note: "Tịnh theo kg thực tế", updatedAt: null },
+  { id: "#", group: "Dịch Vụ Khác", name: "Tẩy vết bẩn cứng đầu", unit: "Chiếc", price: 3000, note: "Giá thay đổi tùy vết bẩn", updatedAt: null },
 ];
 
 export const DEFAULT_SERVICE_PRICING: ServicePricing = {
@@ -86,6 +87,8 @@ export function parsePricingTableRows(rows: Array<Record<string, unknown>>): Pri
       const unit = String(getHeaderValue(row, ["donvitinh", "donvi", "unit", "unitname"]) || "Kg").trim() || "Kg";
       const price = parseMoney(getHeaderValue(row, ["giadichvu", "gia", "price", "unitprice", "giamiemyet", "gianiemyet", "giatrenhang"]));
       const note = String(getHeaderValue(row, ["ghichu", "note", "description", "mota", "ghichudichvu"]) || "").trim();
+      const updatedAtValue = getHeaderValue(row, ["thoigian", "time", "updatedat", "capnhat", "lastupdated", "updatedtime"]);
+      const updatedAt = updatedAtValue ? new Date(String(updatedAtValue)).toISOString() : null;
 
       if (!name && !group) return null;
 
@@ -96,9 +99,39 @@ export function parsePricingTableRows(rows: Array<Record<string, unknown>>): Pri
         unit: unit || "Kg",
         price: Math.max(0, price),
         note: note || "",
+        updatedAt: updatedAt && !Number.isNaN(Date.parse(String(updatedAtValue))) ? updatedAt : null,
       };
     })
     .filter((row): row is PricingTableRow => Boolean(row));
+}
+
+export function addPricingTableRow(rows: PricingTableRow[], draft: Partial<PricingTableRow>) {
+  const nextId = String(rows.length + 1);
+  const newRow: PricingTableRow = {
+    id: String(draft.id ?? nextId),
+    group: draft.group || "Khác",
+    name: draft.name || "Dịch vụ mới",
+    unit: draft.unit || "Lần",
+    price: Number(draft.price) || 0,
+    note: draft.note || "",
+    updatedAt: draft.updatedAt ?? new Date().toISOString(),
+  };
+
+  return [...rows, newRow];
+}
+
+export function updatePricingTableRow(rows: PricingTableRow[], rowId: string, patch: Partial<PricingTableRow>) {
+  const nextUpdatedAt = patch.updatedAt ?? new Date().toISOString();
+
+  return rows.map(row => row.id !== rowId ? row : {
+    ...row,
+    group: patch.group ?? row.group,
+    name: patch.name ?? row.name,
+    unit: patch.unit ?? row.unit,
+    price: typeof patch.price === "number" ? patch.price : row.price,
+    note: patch.note ?? row.note,
+    updatedAt: nextUpdatedAt,
+  });
 }
 
 export function deriveTierPricesFromTable(rows: PricingTableRow[] = DEFAULT_TABLE_ROWS) {
@@ -163,8 +196,17 @@ export function readServicePricing(): ServicePricing {
 
 export function writeServicePricing(next: Partial<ServicePricing>): ServicePricing {
   const existing = readServicePricing();
-  const nextTable = Array.isArray(next.table) ? parsePricingTableRows(next.table as Array<Record<string, unknown>>) : existing.table;
+  const nextTable = Array.isArray(next.table)
+    ? next.table.map(row => ({
+        ...row,
+        updatedAt: row.updatedAt ?? existing.updatedAt ?? new Date().toISOString(),
+      }))
+    : existing.table;
   const tierPrices = deriveTierPricesFromTable(nextTable);
+  const latestRowTimestamp = nextTable.reduce((latest, row) => {
+    if (!row.updatedAt) return latest;
+    return new Date(row.updatedAt).getTime() > latest ? new Date(row.updatedAt).getTime() : latest;
+  }, existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0);
   const merged: ServicePricing = {
     standard: {
       ...DEFAULT_SERVICE_PRICING.standard,
@@ -179,7 +221,7 @@ export function writeServicePricing(next: Partial<ServicePricing>): ServicePrici
       unitPrice: Number(next.express?.unitPrice ?? tierPrices.express) || existing.express.unitPrice,
     },
     table: nextTable,
-    updatedAt: next.updatedAt ?? existing.updatedAt ?? new Date().toISOString(),
+    updatedAt: next.updatedAt ?? (latestRowTimestamp ? new Date(latestRowTimestamp).toISOString() : existing.updatedAt ?? new Date().toISOString()),
   };
 
   if (typeof window !== "undefined") {

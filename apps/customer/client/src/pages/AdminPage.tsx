@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { BarChart3, Clock3, MessageCircleMore, PackageCheck, Star, UsersRound } from "lucide-react";
 import * as XLSX from "xlsx";
-import { canManageServicePricing, formatServicePrice, importServicePricingRows, readServicePricing, writeServicePricing } from "@shared/servicePricing";
+import { addPricingTableRow, canManageServicePricing, formatServicePrice, importServicePricingRows, readServicePricing, updatePricingTableRow, writeServicePricing, type PricingTableRow } from "@shared/servicePricing";
 import { useMemo, useState } from "react";
 
 const PRICING_TEMPLATE_HEADERS = [
@@ -95,6 +95,68 @@ function AdminWorkspace() {
 
   const updatedTime = pricing.updatedAt ? new Date(pricing.updatedAt).toLocaleString("vi-VN") : "Chưa cập nhật";
 
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [rowDraft, setRowDraft] = useState<Partial<PricingTableRow>>({});
+
+  const persistTableRows = (nextRows: PricingTableRow[]) => {
+    const next = {
+      ...pricing,
+      table: nextRows,
+      updatedAt: new Date().toISOString(),
+    };
+    writeServicePricing(next);
+    setPricing(next);
+    setSavedNotice("Đã cập nhật bảng giá dịch vụ. Thời gian cập nhật mới đã được lưu.");
+    window.dispatchEvent(new StorageEvent("storage", { key: "4t-service-pricing", newValue: JSON.stringify(next) }));
+  };
+
+  const handleRowUpdate = (rowId: string) => {
+    if (!rowDraft.name) return;
+    const nextRows = updatePricingTableRow(pricing.table, rowId, {
+      ...rowDraft,
+      price: Number(rowDraft.price ?? 0),
+      updatedAt: new Date().toISOString(),
+    });
+    persistTableRows(nextRows);
+    setEditingRowId(null);
+    setRowDraft({});
+  };
+
+  const handleRowAdd = () => {
+    const nextRows = addPricingTableRow(pricing.table, {
+      group: "Khác",
+      name: "Dịch vụ mới",
+      unit: "Lần",
+      price: 0,
+      note: "",
+    });
+    const added = nextRows[nextRows.length - 1];
+    setEditingRowId(added.id);
+    setRowDraft({
+      id: added.id,
+      group: added.group,
+      name: added.name,
+      unit: added.unit,
+      price: added.price,
+      note: added.note,
+      updatedAt: added.updatedAt,
+    });
+    persistTableRows(nextRows);
+  };
+
+  const beginEditRow = (row: PricingTableRow) => {
+    setEditingRowId(row.id);
+    setRowDraft({
+      id: row.id,
+      group: row.group,
+      name: row.name,
+      unit: row.unit,
+      price: row.price,
+      note: row.note,
+      updatedAt: row.updatedAt,
+    });
+  };
+
   return <div className="mx-auto max-w-7xl space-y-8 p-2 sm:p-5">
     <div><p className="eyebrow">BẢNG ĐIỀU HÀNH 4T</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#092C5C]">Vận hành hôm nay</h1></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><AdminMetric icon={<UsersRound />} value={String(metrics.data?.visits ?? 0)} label="Lượt truy cập" /><AdminMetric icon={<PackageCheck />} value={String(metrics.data?.orders ?? 0)} label="Tổng số đơn hàng" /><AdminMetric icon={<Clock3 />} value={String(metrics.data?.pending ?? 0)} label="Đơn chờ xác nhận" /><AdminMetric icon={<Star />} value={(metrics.data?.averageRating ?? 0).toFixed(1)} label="Đánh giá trung bình" /></div>
@@ -146,31 +208,82 @@ function AdminWorkspace() {
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-xl border border-[#092C5C]/10">
+        <div className="mt-6 flex justify-end">
+          <button type="button" onClick={handleRowAdd} className="rounded-full bg-[#092C5C] px-4 py-2 text-xs font-extrabold text-white hover:bg-[#123D75]">
+            + Thêm dòng
+          </button>
+        </div>
+
+        <div className="mt-4 overflow-x-auto rounded-xl border border-[#092C5C]/10">
           <table className="min-w-full border-collapse text-left text-sm">
             <thead className="bg-[#F6F9FF] text-[10px] font-extrabold uppercase tracking-[.12em] text-[#6D7F9B]">
               <tr>
                 <th className="px-3 py-3">ID</th>
-                <th className="px-3 py-3">Nhóm dịch vụ</th>
                 <th className="px-3 py-3">Tên dịch vụ</th>
-                <th className="px-3 py-3">Đơn vị</th>
+                <th className="px-3 py-3">Đơn vị tính</th>
                 <th className="px-3 py-3">Giá</th>
                 <th className="px-3 py-3">Ghi chú</th>
-                <th className="px-3 py-3">Cập nhật</th>
+                <th className="px-3 py-3">Thời gian</th>
+                <th className="px-3 py-3">Update</th>
               </tr>
             </thead>
             <tbody>
-              {pricing.table.map(row => (
-                <tr key={`${row.id}-${row.name}`} className="border-t border-[#092C5C]/8 align-top">
-                  <td className="px-3 py-3 font-bold text-[#092C5C]">{row.id}</td>
-                  <td className="px-3 py-3 text-[#334866]">{row.group}</td>
-                  <td className="px-3 py-3 text-[#334866]">{row.name}</td>
-                  <td className="px-3 py-3 text-[#334866]">{row.unit}</td>
-                  <td className="px-3 py-3 font-extrabold text-[#E7425A]">{formatServicePrice(row.price)}</td>
-                  <td className="px-3 py-3 text-[#4C5F7E]">{row.note || "-"}</td>
-                  <td className="px-3 py-3 text-[#4C5F7E]">{updatedTime}</td>
-                </tr>
-              ))}
+              {pricing.table.map(row => {
+                const isEditing = editingRowId === row.id;
+                return (
+                  <tr key={`${row.id}-${row.name}`} className="border-t border-[#092C5C]/8 align-top">
+                    <td className="px-3 py-3 font-bold text-[#092C5C]">{row.id}</td>
+                    <td className="px-3 py-3 text-[#334866]">
+                      {isEditing ? (
+                        <Input value={rowDraft.name ?? ""} onChange={e => setRowDraft({ ...rowDraft, name: e.target.value })} className="min-w-[180px] bg-white text-sm" />
+                      ) : (
+                        <span className="min-w-[180px] text-base font-semibold text-[#334866]">{row.name}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-[#334866]">
+                      {isEditing ? (
+                        <select value={rowDraft.unit ?? "Kg"} onChange={e => setRowDraft({ ...rowDraft, unit: e.target.value })} className="rounded-lg border border-[#092C5C]/15 bg-white px-2 py-2 text-sm text-[#334866]">
+                          <option value="Lần">Lần</option>
+                          <option value="Kg">Kg</option>
+                        </select>
+                      ) : (
+                        row.unit
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-[#334866]">
+                      {isEditing ? (
+                        <Input type="number" min={0} value={String(rowDraft.price ?? 0)} onChange={e => setRowDraft({ ...rowDraft, price: Number(e.target.value) || 0 })} className="min-w-[120px] bg-white text-sm" />
+                      ) : (
+                        <span className="font-extrabold text-[#E7425A]">{formatServicePrice(row.price)}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-[#4C5F7E]">
+                      {isEditing ? (
+                        <Input value={rowDraft.note ?? ""} onChange={e => setRowDraft({ ...rowDraft, note: e.target.value })} className="min-w-[180px] bg-white text-sm" />
+                      ) : (
+                        row.note || "-"
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-[#4C5F7E]">{row.updatedAt ? new Date(row.updatedAt).toLocaleString("vi-VN") : "Chưa cập nhật"}</td>
+                    <td className="px-3 py-3 text-[#4C5F7E]">
+                      {isEditing ? (
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => handleRowUpdate(row.id)} className="rounded-full bg-[#0D8B5A] px-3 py-1.5 text-[11px] font-extrabold text-white hover:bg-[#0B734B]">
+                            Lưu
+                          </button>
+                          <button type="button" onClick={() => { setEditingRowId(null); setRowDraft({}); }} className="rounded-full border border-[#092C5C]/10 bg-white px-3 py-1.5 text-[11px] font-extrabold text-[#092C5C] hover:bg-[#F8FBFF]">
+                            Hủy
+                          </button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => beginEditRow(row)} className="rounded-full border border-[#092C5C]/10 bg-white px-3 py-1.5 text-[11px] font-extrabold text-[#092C5C] hover:bg-[#F8FBFF]">
+                          Update
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

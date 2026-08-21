@@ -3302,6 +3302,8 @@
       return rows;
     }
 
+    let currentDraftPricingRow = null;
+
     function formatServicePrice(value) {
       const numeric = Number(value) || 0;
       return `${numeric.toLocaleString('vi-VN')}đ`;
@@ -3326,7 +3328,9 @@
       if (!tbody) return;
 
       const rows = getServicePricingRows();
-      if (!rows.length) {
+      const displayRows = currentDraftPricingRow ? [currentDraftPricingRow, ...rows.filter(item => item.id !== currentDraftPricingRow.id)] : rows;
+
+      if (!displayRows.length) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7">
@@ -3337,7 +3341,7 @@
         return;
       }
 
-      tbody.innerHTML = rows.map(row => `
+      tbody.innerHTML = displayRows.map(row => `
         <tr>
           <td>${row.id}</td>
           <td>${row.name || '-'}</td>
@@ -3357,7 +3361,9 @@
 
     function startEditPricingRow(rowId) {
       const rows = getServicePricingRows();
-      const row = rows.find(item => item.id === rowId);
+      const row = currentDraftPricingRow && currentDraftPricingRow.id === rowId
+        ? currentDraftPricingRow
+        : rows.find(item => item.id === rowId);
       if (!row) return;
 
       const tbody = document.getElementById('pricingTableBody');
@@ -3392,7 +3398,11 @@
         </tr>
       `;
 
-      tbody.innerHTML = rows.map((item, index) => index === rowIndex ? html : `
+      const displayRows = currentDraftPricingRow && currentDraftPricingRow.id === rowId
+        ? [currentDraftPricingRow, ...rows.filter(item => item.id !== rowId)]
+        : rows;
+
+      tbody.innerHTML = displayRows.map((item, index) => item.id === rowId ? html : `
         <tr>
           <td>${item.id}</td>
           <td>${item.name || '-'}</td>
@@ -3447,7 +3457,9 @@
 
     function saveEditedPricingRow(rowId, rowIndex) {
       const rows = getServicePricingRows();
-      const row = rows[rowIndex];
+      const row = currentDraftPricingRow && currentDraftPricingRow.id === rowId
+        ? currentDraftPricingRow
+        : rows[rowIndex];
       if (!row) return;
 
       const rowNode = document.querySelector(`#pricingTableBody tr:nth-child(${rowIndex + 1})`);
@@ -3463,7 +3475,7 @@
         return;
       }
 
-      rows[rowIndex] = {
+      const nextRow = {
         ...row,
         name,
         unit,
@@ -3472,24 +3484,31 @@
         updatedAt: new Date().toISOString()
       };
 
-      saveServicePricingRows(rows);
+      if (currentDraftPricingRow && currentDraftPricingRow.id === rowId) {
+        const existingRows = getServicePricingRows();
+        const nextRows = [...existingRows, nextRow];
+        saveServicePricingRows(nextRows);
+        currentDraftPricingRow = null;
+      } else {
+        rows[rowIndex] = nextRow;
+        saveServicePricingRows(rows);
+      }
+
       renderPricingTable();
     }
 
     function addPricingRow() {
       const rows = getServicePricingRows();
-      const nextId = String(rows.length + 1);
-      const newRow = {
+      const nextId = String(Math.max(...rows.map(item => Number(item.id) || 0), 0) + 1);
+      currentDraftPricingRow = {
         id: nextId,
         name: 'Dịch vụ mới',
         unit: 'Lần',
         price: 0,
         note: '',
-        updatedAt: new Date().toISOString()
+        updatedAt: null
       };
 
-      const nextRows = [...rows, newRow];
-      saveServicePricingRows(nextRows);
       renderPricingTable();
       startEditPricingRow(nextId);
     }

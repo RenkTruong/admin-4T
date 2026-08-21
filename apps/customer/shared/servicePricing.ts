@@ -105,9 +105,10 @@ export function parsePricingTableRows(rows: Array<Record<string, unknown>>): Pri
     .filter((row): row is PricingTableRow => Boolean(row));
 }
 
-export function addPricingTableRow(rows: PricingTableRow[], draft: Partial<PricingTableRow>) {
-  const nextId = String(rows.length + 1);
-  const newRow: PricingTableRow = {
+export function createPricingTableDraftRow(rows: PricingTableRow[], draft: Partial<PricingTableRow>) {
+  const nextId = String((Number(rows.at(-1)?.id ?? 0) || rows.length) + 1);
+
+  return {
     id: String(draft.id ?? nextId),
     group: draft.group || "Khác",
     name: draft.name || "Dịch vụ mới",
@@ -115,8 +116,11 @@ export function addPricingTableRow(rows: PricingTableRow[], draft: Partial<Prici
     price: Number(draft.price) || 0,
     note: draft.note || "",
     updatedAt: draft.updatedAt ?? new Date().toISOString(),
-  };
+  } satisfies PricingTableRow;
+}
 
+export function addPricingTableRow(rows: PricingTableRow[], draft: Partial<PricingTableRow>) {
+  const newRow = createPricingTableDraftRow(rows, draft);
   return [...rows, newRow];
 }
 

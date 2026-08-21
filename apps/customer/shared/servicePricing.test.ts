@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addPricingTableRow, canManageServicePricing, parsePricingTableRows, updatePricingTableRow } from "./servicePricing";
+import { addPricingTableRow, canManageServicePricing, createPricingTableDraftRow, parsePricingTableRows, updatePricingTableRow } from "./servicePricing";
 
 describe("service pricing permissions", () => {
   it("allows a user when permission is provided as a string or array", () => {
@@ -33,7 +33,7 @@ describe("service pricing excel template", () => {
     ]);
   });
 
-  it("adds a new pricing row and updates the timestamp on edit", () => {
+  it("keeps a newly added row as a draft until it is explicitly saved", () => {
     const initial = [{
       id: "1",
       group: "Giặt Sấy Theo Kg",
@@ -43,6 +43,18 @@ describe("service pricing excel template", () => {
       note: "",
       updatedAt: "2024-01-01T00:00:00.000Z",
     }];
+
+    const draft = createPricingTableDraftRow(initial, {
+      group: "Khác",
+      name: "Giặt khô áo sơ mi",
+      unit: "Lần",
+      price: 20000,
+      note: "Mỗi lần",
+    });
+
+    expect(draft.id).toBe("2");
+    expect(draft.name).toBe("Giặt khô áo sơ mi");
+    expect(initial).toHaveLength(1);
 
     const appended = addPricingTableRow(initial, {
       group: "Khác",

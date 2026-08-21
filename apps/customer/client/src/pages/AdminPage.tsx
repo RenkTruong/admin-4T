@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { BarChart3, Clock3, MessageCircleMore, PackageCheck, Star, UsersRound } from "lucide-react";
 import * as XLSX from "xlsx";
-import { addPricingTableRow, canManageServicePricing, formatServicePrice, importServicePricingRows, readServicePricing, updatePricingTableRow, writeServicePricing, type PricingTableRow } from "@shared/servicePricing";
+import { addPricingTableRow, canManageServicePricing, createPricingTableDraftRow, formatServicePrice, importServicePricingRows, readServicePricing, updatePricingTableRow, writeServicePricing, type PricingTableRow } from "@shared/servicePricing";
 import { useMemo, useState } from "react";
 
 const PRICING_TEMPLATE_HEADERS = [
@@ -112,36 +112,49 @@ function AdminWorkspace() {
 
   const handleRowUpdate = (rowId: string) => {
     if (!rowDraft.name) return;
-    const nextRows = updatePricingTableRow(pricing.table, rowId, {
-      ...rowDraft,
-      price: Number(rowDraft.price ?? 0),
-      updatedAt: new Date().toISOString(),
-    });
+
+    const isNewDraftRow = !pricing.table.some(row => row.id === rowId);
+    const nextRows = isNewDraftRow
+      ? [...pricing.table, {
+          ...rowDraft,
+          id: rowId,
+          group: rowDraft.group || "Khác",
+          name: rowDraft.name,
+          unit: rowDraft.unit || "Lần",
+          price: Number(rowDraft.price ?? 0),
+          note: rowDraft.note || "",
+          updatedAt: new Date().toISOString(),
+        }]
+      : updatePricingTableRow(pricing.table, rowId, {
+          ...rowDraft,
+          price: Number(rowDraft.price ?? 0),
+          updatedAt: new Date().toISOString(),
+        });
+
     persistTableRows(nextRows);
     setEditingRowId(null);
     setRowDraft({});
   };
 
   const handleRowAdd = () => {
-    const nextRows = addPricingTableRow(pricing.table, {
+    const draftRow = createPricingTableDraftRow(pricing.table, {
       group: "Khác",
       name: "Dịch vụ mới",
       unit: "Lần",
       price: 0,
       note: "",
     });
-    const added = nextRows[nextRows.length - 1];
-    setEditingRowId(added.id);
+
+    setEditingRowId(draftRow.id);
     setRowDraft({
-      id: added.id,
-      group: added.group,
-      name: added.name,
-      unit: added.unit,
-      price: added.price,
-      note: added.note,
-      updatedAt: added.updatedAt,
+      id: draftRow.id,
+      group: draftRow.group,
+      name: draftRow.name,
+      unit: draftRow.unit,
+      price: draftRow.price,
+      note: draftRow.note,
+      updatedAt: draftRow.updatedAt,
     });
-    persistTableRows(nextRows);
   };
 
   const beginEditRow = (row: PricingTableRow) => {

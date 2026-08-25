@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import { z } from "zod";
 import { COOKIE_NAME } from "../shared/const";
 import {
@@ -34,6 +33,15 @@ const orderInput = z.object({
   paymentMethod: z.enum(["cash", "bank_transfer", "ewallet"]),
 });
 
+function generateOrderCode() {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = String(now.getFullYear()).slice(-2);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `4T-${day}${month}${year}-${random}`;
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -56,7 +64,7 @@ export const appRouter = router({
         userId: ctx.user?.id,
         customerEmail: input.customerEmail || undefined,
         pickupAddress: quote.resolvedPickupAddress ?? quote.storeAddress,
-        publicCode: `LK45-${nanoid(7).toUpperCase()}`,
+        publicCode: generateOrderCode(),
         paymentStatus,
         routeDistanceMeters: quote.routeDistanceMeters,
         shippingFeeVnd: quote.shippingFeeVnd,

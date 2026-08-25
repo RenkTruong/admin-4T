@@ -88,19 +88,21 @@
     .card-title { color: var(--primary); font-size: 1.2rem; font-weight: bold; }
 
     /* Table Styling */
-    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.9rem; min-width: 760px; table-layout: fixed; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 76, 129, 0.04); }
+    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.9rem; min-width: 1200px; table-layout: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 76, 129, 0.04); }
     .modern-table thead th {
       background: linear-gradient(180deg, #f8fbff 0%, #edf6ff 100%);
       padding: 0.9rem 0.8rem;
       color: #1e3a5f;
       font-weight: 700;
       border-bottom: 1px solid #dfeaf5;
-      white-space: nowrap;
+      white-space: normal;
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible;
+      text-overflow: unset;
+      line-height: 1.35;
+      vertical-align: middle;
     }
     .modern-table thead th:first-child { border-top-left-radius: 12px; }
     .modern-table thead th:last-child { border-top-right-radius: 12px; }
@@ -109,6 +111,8 @@
       border-bottom: 1px solid #edf2f7;
       vertical-align: middle;
       background: #fff;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .modern-table tbody tr:last-child td { border-bottom: none; }
     .modern-table tbody tr:hover td {

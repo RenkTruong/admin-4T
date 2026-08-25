@@ -946,11 +946,11 @@
     </div>
   </div>
 
-  <!-- MODAL: Xem trước & in hóa đơn -->
+  <!-- MODAL: Xem trước & in hóa đơn / tem -->
   <div class="modal" id="billPreviewModal">
     <div class="modal-content" style="width: 820px; max-width: 94vw;">
       <div class="modal-header">
-        <h3>🧾 Xem Trước Hóa Đơn</h3>
+        <h3 id="billPreviewTitle">🧾 Xem Trước Hóa Đơn</h3>
         <span class="close-modal" onclick="closeModal('billPreviewModal')">&times;</span>
       </div>
       <div id="billPreviewBody" style="padding: 8px 0; text-align: center;"></div>
@@ -1823,6 +1823,53 @@
       </div>`;
     }
 
+    function buildLabelHtml(order) {
+      const customerName = order.customerName || order.name || 'Khách vãng lai';
+      const revenueStatus = normalizeRevenueStatus(order) === 'Đã thu' ? 'Đã thu' : 'Chưa thu';
+      const orderId = order.id || '—';
+
+      return `
+        <div style="width: 6in; height: 8in; box-sizing: border-box; padding: 22px 18px 16px; border: 2px solid #0f172a; border-radius: 18px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); font-family: Arial, sans-serif; color: #111827; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);">
+          <div style="font-size: 18px; font-weight: 900; letter-spacing: 0.18em; color: #0f172a; text-transform: uppercase;">4T Laundry</div>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <div style="width: 86px; height: 86px; border-radius: 50%; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 3px solid #0f172a; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900; color: #0f172a;">4T</div>
+          </div>
+          <div style="text-align: left; font-size: 18px; line-height: 2; border-top: 2px dashed #cbd5e1; border-bottom: 2px dashed #cbd5e1; padding: 12px 0;">
+            <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="font-weight: 700;">Tên khách:</span><span style="font-weight: 600; text-align: right;">${customerName}</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="font-weight: 700;">Mã đơn hàng:</span><span style="font-weight: 600; text-align: right;">${orderId}</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="font-weight: 700;">Doanh thu:</span><span style="font-weight: 700; color: ${revenueStatus === 'Đã thu' ? '#15803d' : '#b45309'}; text-align: right;">${revenueStatus}</span></div>
+          </div>
+          <div style="font-size: 12px; letter-spacing: 0.14em; color: #475569; text-transform: uppercase; font-weight: 700;">4T • Dịch vụ giặt sấy</div>
+        </div>
+      `;
+    }
+
+    async function previewLabelByOrder(orderIndex) {
+      let currentAdminUsername = localStorage.getItem('loggedAdmin');
+      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let adminObj = admins.find(a => a.username === currentAdminUsername);
+      let isRoot = currentAdminUsername === 'admin4T';
+      if (!isRoot && (!adminObj || !adminObj.permissions || !adminObj.permissions.includes('print_bill'))) {
+        alert('Bạn không có quyền in tem!');
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      let order = orders[orderIndex];
+      if (!order) return;
+
+      const previewBody = document.getElementById('billPreviewBody');
+      const title = document.getElementById('billPreviewTitle');
+      const modal = document.getElementById('billPreviewModal');
+      if (!previewBody || !title || !modal) return;
+
+      previewBody.dataset.orderIndex = String(orderIndex);
+      previewBody.innerHTML = buildLabelHtml(order);
+      modal.dataset.mode = 'label';
+      title.textContent = '🏷️ Xem Trước Tem Đơn Hàng';
+      modal.style.display = 'flex';
+    }
+
     async function previewBillByOrder(orderIndex, forcedTemplate = null) {
       let currentAdminUsername = localStorage.getItem('loggedAdmin');
       let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
@@ -1862,27 +1909,33 @@
       }
 
       const previewBody = document.getElementById('billPreviewBody');
+      const title = document.getElementById('billPreviewTitle');
+      const modal = document.getElementById('billPreviewModal');
       if (previewBody) {
         previewBody.dataset.orderIndex = String(orderIndex);
         previewBody.innerHTML = billHtml;
       }
+      if (title) title.textContent = '🧾 Xem Trước Hóa Đơn';
+      if (modal) modal.dataset.mode = 'bill';
       document.getElementById('billPreviewModal').style.display = 'flex';
     }
 
     function printCurrentBill() {
       const billContent = document.getElementById('billPreviewBody').innerHTML;
-      const printFormat = getBillPrintFormat();
+      const modal = document.getElementById('billPreviewModal');
+      const printMode = modal && modal.dataset.mode === 'label' ? 'label' : 'bill';
       const printWindow = window.open('', '_blank', 'width=900,height=800');
       if (!printWindow) {
-        alert('Trình duyệt đang chặn cửa sổ in. Vui lòng cho phép popup để in hóa đơn.');
+        alert('Trình duyệt đang chặn cửa sổ in. Vui lòng cho phép popup để in hóa đơn hoặc tem.');
         return;
       }
 
-      const printCss = printFormat === 'receipt'
-        ? '@page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; background: #fff; } .receipt-wrap { width: 80mm; margin: 0 auto; } }'
+      const printCss = printMode === 'label'
+        ? '@page { size: 6in 8in; margin: 0; } body { margin: 0; padding: 0; background: #fff; } .print-shell { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 100vh; }'
         : '@page { size: A4 portrait; margin: 10mm; } body { margin: 0; padding: 0; background: #fff; }';
 
-      printWindow.document.write('<html><head><title>Hóa Đơn 4T</title><style>' + printCss + 'body{font-family:Arial,sans-serif;padding:20px;background:#fff}.print-shell{display:flex;justify-content:center}.receipt-wrap{max-width:80mm;}.page-break{page-break-after:always;}</style></head><body><div class="print-shell">' + billContent + '</div></body></html>');
+      const title = printMode === 'label' ? 'Tem 4T' : 'Hóa Đơn 4T';
+      printWindow.document.write('<html><head><title>' + title + '</title><style>' + printCss + 'body{font-family:Arial,sans-serif;padding:20px;background:#fff}.print-shell{display:flex;justify-content:center;align-items:center}.receipt-wrap{max-width:80mm;}.page-break{page-break-after:always;}</style></head><body><div class="print-shell">' + billContent + '</div></body></html>');
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
@@ -2091,6 +2144,7 @@
               <div class="action-box" style="min-height: 72px; justify-content: center;">
                 <div class="action-buttons-row" style="width: 100%;">
                   ${canPrintBill ? `<button class="btn btn-success" onclick="previewBillByOrder(${index})">🧾 In đơn</button>` : ''}
+                  ${canPrintBill ? `<button class="btn btn-primary" onclick="previewLabelByOrder(${index})">🏷️ In tem</button>` : ''}
                   ${canDeleteOrder ? `<button class="btn btn-lock" style="background:#ef4444;" onclick="openDeleteOrderConfirm(${index})">🗑️ Xóa</button>` : ''}
                 </div>
               </div>

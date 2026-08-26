@@ -1174,7 +1174,7 @@
         </div>
         <div class="form-group">
           <label>Khối lượng (kg):</label>
-          <input type="number" id="manualWeight" required min="1" step="0.5" value="5" oninput="updateManualOrderPreview()">
+          <input type="number" id="manualWeight" required min="1" step="0.5" value="5" inputmode="decimal" placeholder="Nhập số lượng (kg)" oninvalid="this.setCustomValidity('Vui lòng nhập số lượng lớn hơn 0')" oninput="this.setCustomValidity(''); updateManualOrderPreview();">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao nhận:</label>
@@ -1487,7 +1487,9 @@
       const incoming = (() => { try { return JSON.parse(String(value)); } catch { return String(value); } })();
       const current = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return localStorage.getItem(key); } })();
       const merged = window.__hydratingCloud || !CLOUD_KEYS.has(key) ? incoming : mergeSharedValue(key, incoming, current);
-      nativeSetItem.call(this,key,String(JSON.stringify(merged)));
+
+      const normalizedValue = typeof merged === 'string' || typeof merged === 'number' || typeof merged === 'boolean' ? String(merged) : JSON.stringify(merged);
+      nativeSetItem.call(this, key, normalizedValue);
       if(window.__hydratingCloud || !CLOUD_KEYS.has(key)) return;
       cloudPut(key, merged);
     };
@@ -2103,15 +2105,21 @@
       let name = document.getElementById('manualCustomerName').value.trim();
       let phone = document.getElementById('manualCustomerPhone').value.trim();
       let service = document.getElementById('manualService').value;
-      let weight = Number(document.getElementById('manualWeight').value || 0);
+      const weightInput = document.getElementById('manualWeight');
+      const weightValue = weightInput.value.trim();
+      let weight = Number(weightValue || 0);
       let address = document.getElementById('manualAddress').value.trim();
       let paymentMethod = document.getElementById('manualPaymentMethod').value;
       let deliveryService = document.getElementById('manualDeliveryService').value;
 
-      if (!name || !phone || !address || weight <= 0) {
-        alert('Vui lòng nhập đầy đủ thông tin đơn hàng.');
+      if (!name || !phone || !address || weightValue === '' || Number.isNaN(weight) || weight <= 0) {
+        alert('Vui lòng nhập số lượng lớn hơn 0 trước khi lưu đơn hàng.');
+        weightInput.focus();
+        weightInput.setCustomValidity('Vui lòng nhập số lượng lớn hơn 0');
+        weightInput.reportValidity();
         return;
       }
+      weightInput.setCustomValidity('');
       if (!/^0\d{9}$/.test(phone)) {
         alert('Số điện thoại không hợp lệ! Vui lòng nhập 10 số bắt đầu bằng 0.');
         return;

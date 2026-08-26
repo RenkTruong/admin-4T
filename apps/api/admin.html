@@ -878,7 +878,7 @@
         </div>
         <div class="form-group">
           <label>Khối lượng (kg):</label>
-          <input type="number" id="manualWeight" required min="1" step="0.5" value="5" oninput="updateManualOrderPreview()">
+          <input type="number" id="manualWeight" required min="1" step="0.5" value="5" inputmode="decimal" placeholder="Nhập số lượng (kg)" oninvalid="this.setCustomValidity('Vui lòng nhập số lượng lớn hơn 0')" oninput="this.setCustomValidity(''); updateManualOrderPreview();">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao nhận:</label>
@@ -1103,18 +1103,56 @@
       throw lastError || new Error('Request failed');
     }
     const nativeSetItem=Storage.prototype.setItem;
+    function mergeSharedValue(key, incomingValue, currentValue) {
+      if (key === 'users' || key === 'orders_v2') {
+        const incoming = Array.isArray(incomingValue) ? incomingValue : [];
+        const current = Array.isArray(currentValue) ? currentValue : [];
+        const merged = new Map();
+        [...incoming, ...current].forEach((item) => {
+          if (!item || typeof item !== 'object') return;
+          const id = item.id || item.phone || item.customer_id || item.order_code || item.orderCode || item.username || JSON.stringify(item);
+          merged.set(String(id), { ...(merged.get(String(id)) || {}), ...item });
+        });
+        return [...merged.values()];
+      }
+
+      if (key === 'websiteVisitsCount') {
+        return Math.max(Number(incomingValue ?? currentValue ?? 0), Number(currentValue ?? 0));
+      }
+
+      if (key === 'websiteVisitsLog' || key === '4t_local_chat') {
+        const incoming = Array.isArray(incomingValue) ? incomingValue : [];
+        const current = Array.isArray(currentValue) ? currentValue : [];
+        const joined = [...current, ...incoming];
+        const deduped = new Map();
+        joined.forEach((entry) => {
+          const id = entry && typeof entry === 'object' && (entry.id || entry.time || entry.text)
+            ? JSON.stringify({ id: entry.id, time: entry.time, text: entry.text })
+            : JSON.stringify(entry);
+          if (!deduped.has(id)) deduped.set(id, entry);
+        });
+        return [...deduped.values()];
+      }
+
+      if (key === 'adminChats' && currentValue && typeof currentValue === 'object' && !Array.isArray(currentValue)) {
+        return { ...(currentValue || {}), ...((incomingValue && typeof incomingValue === 'object') ? incomingValue : {}) };
+      }
+
+      if (incomingValue !== undefined) return incomingValue;
+      return currentValue;
+    }
     function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}
     Storage.prototype.setItem=function(key,value){
-      nativeSetItem.call(this,key,String(value));
+      const incoming = (() => { try { return JSON.parse(String(value)); } catch { return String(value); } })();
+      const current = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return localStorage.getItem(key); } })();
+      const merged = window.__hydratingCloud || !CLOUD_KEYS.has(key) ? incoming : mergeSharedValue(key, incoming, current);
+
+      const normalizedValue = typeof merged === 'string' || typeof merged === 'number' || typeof merged === 'boolean' ? String(merged) : JSON.stringify(merged);
+      nativeSetItem.call(this, key, normalizedValue);
       if(window.__hydratingCloud || !CLOUD_KEYS.has(key)) return;
-      try {
-        const parsed = JSON.parse(String(value));
-        cloudPut(key, parsed);
-      } catch (error) {
-        cloudPut(key, String(value));
-      }
+      cloudPut(key, merged);
     };
-    async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
+    async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined){const current=(()=>{try{return JSON.parse(localStorage.getItem(key) || 'null');}catch{return localStorage.getItem(key);}})();const merged=mergeSharedValue(key,value,current);nativeSetItem.call(localStorage,key,JSON.stringify(merged))}})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
     function persistOrdersList(orders) {
       const nextOrders = Array.isArray(orders) ? orders : [];
       localStorage.setItem('orders_v2', JSON.stringify(nextOrders));
@@ -1685,15 +1723,21 @@
       let name = document.getElementById('manualCustomerName').value.trim();
       let phone = document.getElementById('manualCustomerPhone').value.trim();
       let service = document.getElementById('manualService').value;
-      let weight = Number(document.getElementById('manualWeight').value || 0);
+      const weightInput = document.getElementById('manualWeight');
+      const weightValue = weightInput.value.trim();
+      let weight = Number(weightValue || 0);
       let address = document.getElementById('manualAddress').value.trim();
       let paymentMethod = document.getElementById('manualPaymentMethod').value;
       let deliveryService = document.getElementById('manualDeliveryService').value;
 
-      if (!name || !phone || !address || weight <= 0) {
-        alert('Vui lòng nhập đầy đủ thông tin đơn hàng.');
+      if (!name || !phone || !address || weightValue === '' || Number.isNaN(weight) || weight <= 0) {
+        alert('Vui lòng nhập số lượng lớn hơn 0 trước khi lưu đơn hàng.');
+        weightInput.focus();
+        weightInput.setCustomValidity('Vui lòng nhập số lượng lớn hơn 0');
+        weightInput.reportValidity();
         return;
       }
+      weightInput.setCustomValidity('');
       if (!/^0\d{9}$/.test(phone)) {
         alert('Số điện thoại không hợp lệ! Vui lòng nhập 10 số bắt đầu bằng 0.');
         return;

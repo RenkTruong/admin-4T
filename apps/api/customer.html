@@ -3051,17 +3051,10 @@
       function renderPaymentQr(order) {
         if (!order || order.payment !== "bank") return "";
         const qrUrl = buildPaymentQrImageUrl(order);
-        const note = `Thanh toan don hang ${order.id}`;
         const qrMarkup = `
           <div class="qr-card">
             <div class="qr-box">
               <img id="paymentQrImage" src="${qrUrl}" alt="Mã QR VietQR thanh toán 4T" />
-            </div>
-            <div class="qr-meta">
-              <strong>Ngân hàng: ${esc(STORE_BANK_CODE)}</strong><br>
-              <strong>Chủ tài khoản: ${esc(STORE_BANK_HOLDER)}</strong><br>
-              <strong>Số tài khoản: ${esc(STORE_BANK_ACCOUNT)}</strong><br>
-              <strong>Nội dung chuyển khoản: ${esc(note)}</strong>
             </div>
             <a id="downloadQr" class="btn btn-outline" href="${qrUrl}" target="_blank" rel="noopener" download="4T-${esc(order.id)}-vietqr.png">Tải QR về</a>
           </div>
@@ -3073,13 +3066,13 @@
           "4T đã nhận lịch lấy đồ";
         document.getElementById("resultSubtitle").textContent =
           `Mã đơn ${order.id} · Tạm tính ${money(order.total)}`;
-        let pay =
-          order.payment === "cash"
-            ? "Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ."
-            : `Thanh toán bằng app ngân hàng với QR tài khoản 4T. Nội dung chuyển khoản mặc định: Thanh toan don hang ${order.id}.`;
+        const deliveryText =
+          order.deliveryMode === "store"
+            ? "Khách nhận & trả tại cửa hàng 4T."
+            : `${order.deliveryLabel} · ${order.distanceKm} km · phí ship ${order.shippingFee === 0 ? "miễn phí" : money(order.shippingFee)}.`;
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
-          `<div class="help"><b>${esc(pay)}</b></div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
+          `<div class="help"><b>${esc(deliveryText)}</b></div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
         document.getElementById("resultModal").classList.add("active");
       }
       function statusClass(status) {
@@ -3822,17 +3815,13 @@
           "4T đã nhận lịch lấy đồ";
         document.getElementById("resultSubtitle").textContent =
           `Mã đơn ${order.id} · Tạm tính ${money(order.total)}`;
-        const paymentText =
-          order.payment === "cash"
-            ? "Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ."
-            : `Thanh toán bằng app ngân hàng. Nội dung chuyển khoản mặc định: Thanh toan don hang ${order.id}.`;
         const deliveryText =
           order.deliveryMode === "store"
             ? "Khách nhận & trả tại cửa hàng 4T."
             : `${order.deliveryLabel} · ${order.distanceKm} km · phí ship ${order.shippingFee === 0 ? "miễn phí" : money(order.shippingFee)}.`;
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
-          `<div class="help"><b>${esc(deliveryText)}</b><br>Dịch vụ ${money(order.serviceFee)} · ${esc(paymentText)}</div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
+          `<div class="help"><b>${esc(deliveryText)}</b></div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
         document.getElementById("resultModal").classList.add("active");
       }
       function orderCard(o) {

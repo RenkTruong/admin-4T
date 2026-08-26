@@ -2590,6 +2590,7 @@
         "adminChats",
         "4t_local_chat",
       ]);
+      const ORDER_SYNC_CHANNEL = "4t_order_sync";
       const CLOUD_API =
         location.protocol === "file:"
           ? "http://localhost:8787"
@@ -2782,7 +2783,8 @@
         await hydrateCloudData();
         migrateSharedData();
         bumpVisitCounter();
-        window.addEventListener("storage", () => {
+        window.addEventListener("storage", (event) => {
+          if (!event.key || !["servicePricingRows", "4t-service-pricing"].includes(event.key)) return;
           renderServiceSelector();
           calculateTotal();
           renderChat();
@@ -2804,27 +2806,48 @@
           return [...rows].sort((a, b) => rank(a.name) - rank(b.name));
         };
 
+        const normalizeItem = (row, index) => ({
+          id: String(row?.id ?? index + 1),
+          name: String(row?.name || `Dịch vụ ${index + 1}`),
+          unit: String(row?.unit || "Kg"),
+          price: Number(row?.price || 0),
+          note: String(row?.note || ""),
+          updatedAt: row?.updatedAt || new Date().toISOString(),
+        });
+
         try {
           const shared = JSON.parse(localStorage.getItem("4t-service-pricing") || "null");
-          const sharedRows = normalizeRows(shared?.table);
-          if (sharedRows.length) return sharedRows;
+          const sharedRows = normalizeRows(Array.isArray(shared?.table) ? shared.table : []);
+          if (sharedRows.length) {
+            const normalized = sharedRows.map(normalizeItem);
+            localStorage.setItem("servicePricingRows", JSON.stringify(normalized));
+            localStorage.setItem("4t-service-pricing", JSON.stringify({ table: normalized, updatedAt: new Date().toISOString() }));
+            return normalized;
+          }
         } catch (error) {
           console.warn("Could not read 4t-service-pricing:", error);
         }
 
         try {
           const legacy = JSON.parse(localStorage.getItem("servicePricingRows") || "null");
-          const legacyRows = normalizeRows(legacy);
-          if (legacyRows.length) return legacyRows;
+          const legacyRows = normalizeRows(Array.isArray(legacy) ? legacy : []);
+          if (legacyRows.length) {
+            const normalized = legacyRows.map(normalizeItem);
+            localStorage.setItem("4t-service-pricing", JSON.stringify({ table: normalized, updatedAt: new Date().toISOString() }));
+            return normalized;
+          }
         } catch (error) {
           console.warn("Could not read servicePricingRows:", error);
         }
 
-        return normalizeRows([
+        const fallbackRows = normalizeRows([
           { id: "1", name: "Giặt sấy tiêu chuẩn", unit: "Kg", price: 15000 },
           { id: "2", name: "Giặt sấy tiết kiệm", unit: "Kg", price: 8000 },
           { id: "3", name: "Giặt sấy nhanh", unit: "Kg", price: 30000 },
         ]);
+        localStorage.setItem("servicePricingRows", JSON.stringify(fallbackRows));
+        localStorage.setItem("4t-service-pricing", JSON.stringify({ table: fallbackRows, updatedAt: new Date().toISOString() }));
+        return fallbackRows;
       }
 
       function renderServiceSelector() {
@@ -3617,6 +3640,25 @@
           renderChat();
         }
       });
+      window.addEventListener("orders_v2_updated", () => {
+        renderAll();
+        calculateTotal();
+        renderChat();
+      });
+      if ("BroadcastChannel" in window) {
+        try {
+          const channel = new BroadcastChannel(ORDER_SYNC_CHANNEL);
+          channel.onmessage = (event) => {
+            if (event.data && event.data.key === "orders_v2") {
+              renderAll();
+              calculateTotal();
+              renderChat();
+            }
+          };
+        } catch (error) {
+          console.warn("Customer order sync channel unavailable", error);
+        }
+      }
 
       /* --- Giao–nhận và phí ship: các hàm phía dưới thay thế logic tính tổng ban đầu. --- */
       function installDeliveryModule() {

@@ -1084,6 +1084,20 @@
       }
     };
     async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
+    function persistOrdersList(orders) {
+      const nextOrders = Array.isArray(orders) ? orders : [];
+      localStorage.setItem('orders_v2', JSON.stringify(nextOrders));
+      try {
+        if ('BroadcastChannel' in window) {
+          const channel = new BroadcastChannel('4t_order_sync');
+          channel.postMessage({ key: 'orders_v2', value: nextOrders });
+          channel.close();
+        }
+      } catch (error) {
+        console.warn('Broadcast order sync unavailable', error);
+      }
+      window.dispatchEvent(new CustomEvent('orders_v2_updated', { detail: nextOrders }));
+    }
     function bumpVisitCounter() {
       if (sessionStorage.getItem('4t_admin_visit_logged')) return Number(localStorage.getItem('websiteVisitsCount') || '0');
       const next = Number(localStorage.getItem('websiteVisitsCount') || '0') + 1;
@@ -1170,15 +1184,12 @@
     }
 
     function updateTotalUI() {
-      const weight = Number(document.getElementById('editWeight')?.value || 0);
+      const weight = Math.max(1, Number(document.getElementById('editWeight')?.value || 1));
       const service = document.getElementById('editService')?.value || 'Giặt sấy tiêu chuẩn';
-      const address = document.getElementById('editAddress')?.value || '';
       const selectedRow = getOrderServicePriceRow(service);
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const shippingFee = calculateShipping(weight, address, service);
-      const serviceFee = /kg|kilogram/i.test(unit) ? weight * unitPrice : unitPrice;
-      const total = serviceFee + shippingFee;
+      const total = weight * unitPrice;
 
       const unitNode = document.getElementById('editUnitDisplay');
       const priceNode = document.getElementById('editPriceDisplay');
@@ -1244,12 +1255,12 @@
       const weightInput = document.getElementById('editWeight');
       const addressInput = document.getElementById('editAddress');
       const newService = serviceSelect ? serviceSelect.value : (orders[index].service || 'Giặt sấy tiêu chuẩn');
-      const newWeight = Number(weightInput?.value || orders[index].weight || 0);
+      const newWeight = Math.max(1, Number(weightInput?.value || orders[index].weight || 1));
       const newAddress = addressInput ? addressInput.value : (orders[index].address || '');
       const selectedRow = getOrderServicePriceRow(newService);
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const serviceFee = /kg|kilogram/i.test(unit) ? newWeight * unitPrice : unitPrice;
+      const serviceFee = newWeight * unitPrice;
       const shippingFee = calculateShipping(newWeight, newAddress, newService);
       const total = serviceFee + shippingFee;
 
@@ -2052,15 +2063,15 @@
         </div>
         <div class="form-group">
           <label>Đơn vị tính:</label>
-          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Đơn giá:</label>
-          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Số lượng:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
@@ -2351,7 +2362,7 @@
         performer: `${adminFullName} (${currentAdminUsername})`,
         time: timeString
       });
-      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      persistOrdersList(orders);
       logOrderAction(orders[payload.index].id, oldStatus, newStatus, currentAdminUsername);
       renderOrdersTable();
       renderOrderLogsTable();
@@ -2438,14 +2449,26 @@
       }
 
       const revenueStatus = normalizeRevenueStatus(order);
-      if (revenueStatus !== 'Chờ thu') {
+      const currentAdminUsername = localStorage.getItem('loggedAdmin');
+      const admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      const adminObj = admins.find(a => a.username === currentAdminUsername);
+      const isRoot = currentAdminUsername === 'admin4T';
+      const canDelete = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('delete_order'));
+
+      if (!canDelete) {
         closeModal('deleteOrderConfirmModal');
-        showAppNotice('Chỉ được hủy đơn hàng khi Doanh thu ở điều kiện Chờ thu.');
+        showAppNotice('Bạn không có quyền xóa đơn hàng.');
+        return;
+      }
+
+      if (revenueStatus !== 'Chờ thu' && !isRoot) {
+        closeModal('deleteOrderConfirmModal');
+        showAppNotice('Chỉ quản trị viên cao nhất được xóa đơn hàng đã thu tiền.');
         return;
       }
 
       orders.splice(index, 1);
-      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      persistOrdersList(orders);
       closeModal('deleteOrderConfirmModal');
       renderOrdersTable();
       renderOrderLogsTable();
@@ -2630,15 +2653,15 @@
         </div>
         <div class="form-group">
           <label>Đơn vị tính:</label>
-          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Đơn giá:</label>
-          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Số lượng:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
@@ -2884,6 +2907,23 @@
     window.addEventListener('storage', event => {
       if (['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog'].includes(event.key) && localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
     });
+    window.addEventListener('orders_v2_updated', () => {
+      if (localStorage.getItem('loggedAdmin')) {
+        applyPermissionsAndRender();
+      }
+    });
+    if ('BroadcastChannel' in window) {
+      try {
+        const channel = new BroadcastChannel('4t_order_sync');
+        channel.onmessage = (event) => {
+          if (event.data && event.data.key === 'orders_v2' && localStorage.getItem('loggedAdmin')) {
+            applyPermissionsAndRender();
+          }
+        };
+      } catch (error) {
+        console.warn('Order sync channel unavailable', error);
+      }
+    }
     setInterval(async () => { if (localStorage.getItem('loggedAdmin')) { await hydrateCloudData(); applyPermissionsAndRender(); } }, 5000);
 
     function updateCustomerPassword(userIndex) {

@@ -1465,6 +1465,20 @@
       cloudPut(key, merged);
     };
     async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined){const current=(()=>{try{return JSON.parse(localStorage.getItem(key) || 'null');}catch{return localStorage.getItem(key);}})();const merged=mergeSharedValue(key,value,current);nativeSetItem.call(localStorage,key,JSON.stringify(merged))}})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
+    function persistOrdersList(orders) {
+      const nextOrders = Array.isArray(orders) ? orders : [];
+      localStorage.setItem('orders_v2', JSON.stringify(nextOrders));
+      try {
+        if ('BroadcastChannel' in window) {
+          const channel = new BroadcastChannel('4t_order_sync');
+          channel.postMessage({ key: 'orders_v2', value: nextOrders });
+          channel.close();
+        }
+      } catch (error) {
+        console.warn('Broadcast order sync unavailable', error);
+      }
+      window.dispatchEvent(new CustomEvent('orders_v2_updated', { detail: nextOrders }));
+    }
     function bumpVisitCounter() {
       if (sessionStorage.getItem('4t_admin_visit_logged')) return Number(localStorage.getItem('websiteVisitsCount') || '0');
       const next = Number(localStorage.getItem('websiteVisitsCount') || '0') + 1;
@@ -1551,15 +1565,12 @@
     }
 
     function updateTotalUI() {
-      const weight = Number(document.getElementById('editWeight')?.value || 0);
+      const weight = Math.max(1, Number(document.getElementById('editWeight')?.value || 1));
       const service = document.getElementById('editService')?.value || 'Giặt sấy tiêu chuẩn';
-      const address = document.getElementById('editAddress')?.value || '';
       const selectedRow = getOrderServicePriceRow(service);
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const shippingFee = calculateShipping(weight, address, service);
-      const serviceFee = /kg|kilogram/i.test(unit) ? weight * unitPrice : unitPrice;
-      const total = serviceFee + shippingFee;
+      const total = weight * unitPrice;
 
       const unitNode = document.getElementById('editUnitDisplay');
       const priceNode = document.getElementById('editPriceDisplay');
@@ -1642,12 +1653,12 @@
       const weightInput = document.getElementById('editWeight');
       const addressInput = document.getElementById('editAddress');
       const newService = serviceSelect ? serviceSelect.value : (orders[index].service || 'Giặt sấy tiêu chuẩn');
-      const newWeight = Number(weightInput?.value || orders[index].weight || 0);
+      const newWeight = Math.max(1, Number(weightInput?.value || orders[index].weight || 1));
       const newAddress = addressInput ? addressInput.value : (orders[index].address || '');
       const selectedRow = getOrderServicePriceRow(newService);
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const serviceFee = /kg|kilogram/i.test(unit) ? newWeight * unitPrice : unitPrice;
+      const serviceFee = newWeight * unitPrice;
       const shippingFee = calculateShipping(newWeight, newAddress, newService);
       const total = serviceFee + shippingFee;
 
@@ -2472,15 +2483,15 @@
         </div>
         <div class="form-group">
           <label>Đơn vị tính:</label>
-          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Đơn giá:</label>
-          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Số lượng:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
@@ -2771,7 +2782,7 @@
         performer: `${adminFullName} (${currentAdminUsername})`,
         time: timeString
       });
-      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      persistOrdersList(orders);
       logOrderAction(orders[payload.index].id, oldStatus, newStatus, currentAdminUsername);
       renderOrdersTable();
       renderOrderLogsTable();
@@ -2828,7 +2839,12 @@
       const body = document.getElementById('deleteOrderConfirmBody');
       const deleteConfirmBtn = modal.querySelector('.btn-danger');
       const revenueStatus = normalizeRevenueStatus(order);
-      const canDelete = revenueStatus === 'Chờ thu';
+      const currentAdminUsername = localStorage.getItem('loggedAdmin');
+      const admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      const adminObj = admins.find(a => a.username === currentAdminUsername);
+      const isRoot = currentAdminUsername === 'admin4T';
+      const hasDeletePermission = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('delete_order'));
+      const canDelete = hasDeletePermission && (revenueStatus === 'Chờ thu' || isRoot);
       modal.dataset.orderIndex = String(index);
       body.innerHTML = `
         <div class="confirm-card">
@@ -2851,7 +2867,7 @@
         <p style="margin: 0; color: ${canDelete ? '#475569' : '#991b1b'}; font-size: 0.92rem; line-height: 1.7; background: ${canDelete ? '#f8fafc' : '#fff1f2'}; border: 1px solid ${canDelete ? '#e2e8f0' : '#fecaca'}; border-radius: 10px; padding: 12px 14px;">
           ${canDelete
             ? 'Bạn có chắc chắn muốn xóa đơn hàng này khỏi hệ thống không? Tất cả lịch sử, thông tin liên quan và dữ liệu gắn với đơn hàng này sẽ bị loại bỏ khỏi giao diện quản lý.'
-            : 'Chỉ được hủy đơn hàng khi doanh thu đang ở trạng thái Chờ thu. Hiện đơn này đang ở trạng thái Đã thu, nên không thể xóa khỏi hệ thống.'}
+            : 'Bạn không có quyền xóa đơn hàng này. Với tài khoản thường, chỉ được xóa đơn đang ở trạng thái Chờ thu; với tài khoản quản trị viên chính, có thể xóa đơn đã thu tiền.'}
         </p>
       `;
       if (deleteConfirmBtn) {
@@ -2875,14 +2891,26 @@
       }
 
       const revenueStatus = normalizeRevenueStatus(order);
-      if (revenueStatus !== 'Chờ thu') {
+      const currentAdminUsername = localStorage.getItem('loggedAdmin');
+      const admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      const adminObj = admins.find(a => a.username === currentAdminUsername);
+      const isRoot = currentAdminUsername === 'admin4T';
+      const canDelete = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('delete_order'));
+
+      if (!canDelete) {
         closeModal('deleteOrderConfirmModal');
-        showAppNotice('Chỉ được hủy đơn hàng khi Doanh thu ở điều kiện Chờ thu.');
+        showAppNotice('Bạn không có quyền xóa đơn hàng.');
+        return;
+      }
+
+      if (revenueStatus !== 'Chờ thu' && !isRoot) {
+        closeModal('deleteOrderConfirmModal');
+        showAppNotice('Chỉ quản trị viên cao nhất được xóa đơn hàng đã thu tiền.');
         return;
       }
 
       orders.splice(index, 1);
-      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      persistOrdersList(orders);
       closeModal('deleteOrderConfirmModal');
       renderOrdersTable();
       renderOrderLogsTable();
@@ -3067,15 +3095,15 @@
         </div>
         <div class="form-group">
           <label>Đơn vị tính:</label>
-          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Đơn giá:</label>
-          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Số lượng:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" readonly tabindex="-1" onfocus="this.blur()" style="pointer-events:none; user-select:none;">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
@@ -3321,6 +3349,23 @@
     window.addEventListener('storage', event => {
       if (['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog'].includes(event.key) && localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
     });
+    window.addEventListener('orders_v2_updated', () => {
+      if (localStorage.getItem('loggedAdmin')) {
+        applyPermissionsAndRender();
+      }
+    });
+    if ('BroadcastChannel' in window) {
+      try {
+        const channel = new BroadcastChannel('4t_order_sync');
+        channel.onmessage = (event) => {
+          if (event.data && event.data.key === 'orders_v2' && localStorage.getItem('loggedAdmin')) {
+            applyPermissionsAndRender();
+          }
+        };
+      } catch (error) {
+        console.warn('Order sync channel unavailable', error);
+      }
+    }
     setInterval(async () => { if (localStorage.getItem('loggedAdmin')) { await hydrateCloudData(); applyPermissionsAndRender(); } }, 5000);
 
     function updateCustomerPassword(userIndex) {
@@ -3557,20 +3602,57 @@
       { id: '4', name: 'Giặt giày thể thao', unit: 'Đôi', price: 6000, note: 'Vệ sinh bền đẹp', updatedAt: new Date().toISOString() }
     ];
 
+    function normalizeServicePricingRows(rows) {
+      if (!Array.isArray(rows)) return [];
+      return rows.map((row, index) => ({
+        id: String(row?.id ?? index + 1),
+        name: String(row?.name || `Dịch vụ ${index + 1}`),
+        unit: String(row?.unit || 'Lần'),
+        price: Number(row?.price || 0),
+        note: String(row?.note || ''),
+        updatedAt: row?.updatedAt || new Date().toISOString(),
+      }));
+    }
+
     function getServicePricingRows() {
-      try {
-        const saved = JSON.parse(localStorage.getItem('servicePricingRows') || 'null');
-        if (Array.isArray(saved) && saved.length) return saved;
-      } catch (error) {
-        console.warn('Could not parse servicePricingRows:', error);
+      const sharedRows = (() => {
+        try {
+          const raw = JSON.parse(localStorage.getItem('4t-service-pricing') || 'null');
+          return Array.isArray(raw?.table) ? raw.table : [];
+        } catch (error) {
+          console.warn('Could not parse 4t-service-pricing:', error);
+          return [];
+        }
+      })();
+
+      const legacyRows = (() => {
+        try {
+          const raw = JSON.parse(localStorage.getItem('servicePricingRows') || 'null');
+          return Array.isArray(raw) ? raw : [];
+        } catch (error) {
+          console.warn('Could not parse servicePricingRows:', error);
+          return [];
+        }
+      })();
+
+      const nextRows = normalizeServicePricingRows(sharedRows.length ? sharedRows : legacyRows);
+      if (nextRows.length) {
+        localStorage.setItem('servicePricingRows', JSON.stringify(nextRows));
+        localStorage.setItem('4t-service-pricing', JSON.stringify({ table: nextRows, updatedAt: new Date().toISOString() }));
+        return nextRows;
       }
+
       localStorage.setItem('servicePricingRows', JSON.stringify(DEFAULT_SERVICE_PRICING_ROWS));
+      localStorage.setItem('4t-service-pricing', JSON.stringify({ table: DEFAULT_SERVICE_PRICING_ROWS, updatedAt: new Date().toISOString() }));
       return DEFAULT_SERVICE_PRICING_ROWS;
     }
 
     function saveServicePricingRows(rows) {
-      localStorage.setItem('servicePricingRows', JSON.stringify(rows));
-      return rows;
+      const normalizedRows = normalizeServicePricingRows(rows);
+      localStorage.setItem('servicePricingRows', JSON.stringify(normalizedRows));
+      localStorage.setItem('4t-service-pricing', JSON.stringify({ table: normalizedRows, updatedAt: new Date().toISOString() }));
+      window.dispatchEvent(new CustomEvent('service_pricing_updated', { detail: normalizedRows }));
+      return normalizedRows;
     }
 
     let currentDraftPricingRow = null;
@@ -3783,6 +3865,13 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       renderPricingTable();
+    });
+
+    window.addEventListener('storage', (event) => {
+      if (!event.key || !['servicePricingRows', '4t-service-pricing'].includes(event.key)) return;
+      if (typeof populateManualServiceOptions === 'function') populateManualServiceOptions();
+      if (typeof renderPricingTable === 'function') renderPricingTable();
+      if (typeof updateManualOrderPreview === 'function') updateManualOrderPreview();
     });
 
     // --- PHẦN THỐNG KÊ TÁCH BIỆT Ở CUỐI WEB THEO THỜI GIAN (CẬP NHẬT CHUẨN WEBSITE 4T) ---

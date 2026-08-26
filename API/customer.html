@@ -2192,7 +2192,7 @@
                   ></textarea>
                 </label>
                 <div class="form-row">
-                  <label class="field"
+                  <label class="field" style="width: 100%"
                     ><span>Khung giờ mong muốn *</span
                     ><select id="pickupWindow">
                       <option>Sáng 08:00–11:00</option>
@@ -2200,16 +2200,7 @@
                       <option>Chiều 14:00–17:00</option>
                       <option>Tối 17:00–20:00</option>
                     </select></label
-                  ><label class="field"
-                    ><span>Khối lượng ước tính *</span
-                    ><input
-                      id="orderKg"
-                      type="number"
-                      min="1"
-                      max="100"
-                      value="3"
-                      oninput="calculateTotal()"
-                  /></label>
+                  >
                 </div>
                 <hr class="divider" />
                 <h3>2. Chọn dịch vụ</h3>
@@ -2876,21 +2867,21 @@
         const unitNode = document.getElementById("serviceUnitDisplay");
         const priceNode = document.getElementById("servicePriceDisplay");
         const quantityNode = document.getElementById("serviceQuantity");
-        const orderKg = document.getElementById("orderKg");
 
         if (unitNode) unitNode.value = String(selected?.unit || "Kg");
         if (priceNode) priceNode.value = money(Number(selected?.price || 0));
         if (quantityNode) {
           const current = Number(quantityNode.value || 0);
-          quantityNode.value = current > 0 ? current : 3;
+          quantityNode.value = current > 0 ? current : 1;
         }
-        if (orderKg && quantityNode) orderKg.value = quantityNode.value;
       }
 
       function syncServiceQuantity() {
         const quantityNode = document.getElementById("serviceQuantity");
-        const orderKg = document.getElementById("orderKg");
-        if (quantityNode && orderKg) orderKg.value = quantityNode.value;
+        if (quantityNode) {
+          const current = Number(quantityNode.value || 0);
+          quantityNode.value = current > 0 ? current : 1;
+        }
       }
 
       function getSelectedPricingRow() {
@@ -2941,19 +2932,17 @@
       }
       function calculateTotal() {
         const quantityNode = document.getElementById("serviceQuantity");
-        const orderKgNode = document.getElementById("orderKg");
-        const kg = Math.max(
-          1,
-          Number((quantityNode && quantityNode.value) || (orderKgNode && orderKgNode.value) || 3),
-        );
+        const quantity = Math.max(1, Number((quantityNode && quantityNode.value) || 1));
         const selected = getSelectedPricingRow();
         const pricePerUnit = Number(selected?.price || 0);
         const unit = String(selected?.unit || "Kg");
-        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = quantity * pricePerUnit;
         const delivery = getDeliveryDetails();
         const total = serviceFee + delivery.shippingFee;
-        document.getElementById("orderTotal").textContent = money(total);
+        const totalNode = document.getElementById("orderTotal");
+        if (totalNode) totalNode.textContent = money(total);
+        const unitNode = document.getElementById("serviceUnitDisplay");
+        if (unitNode) unitNode.value = unit;
       }
       function openAuth(tab) {
         document.getElementById("authModal").classList.add("active");

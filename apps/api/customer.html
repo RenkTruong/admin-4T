@@ -2665,6 +2665,10 @@
           panel.classList.remove("show");
         }, 2600);
       }
+      function sendThankYouSms(phone, orderId) {
+        console.info("SMS thank-you skipped (not configured)", { phone, orderId });
+        return false;
+      }
       function migrateSharedData() {
         if (
           !localStorage.getItem(K.users) &&

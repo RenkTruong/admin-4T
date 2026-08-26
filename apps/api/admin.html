@@ -1100,10 +1100,18 @@
     const STORE_BANK_CODE = "TCB";
     const STORE_BANK_HOLDER = "Tạ Thị Thùy Trinh";
 
-    function calculateShipping(weight, address) {
-        let basePrice = weight * 15000; // Giá ví dụ 15k/kg
-        let extraFee = address.toLowerCase().includes("xa") ? 20000 : 0;
-        return basePrice + extraFee;
+    function getOrderServicePriceRow(serviceName = 'Giặt sấy tiêu chuẩn') {
+      const rows = getPricingRowsFromStorage();
+      return rows.find((row) => String(row.name) === String(serviceName)) || rows[0] || { name: serviceName, unit: 'Kg', price: 0 };
+    }
+
+    function calculateShipping(weight, address, serviceName = 'Giặt sấy tiêu chuẩn') {
+      const selectedRow = getOrderServicePriceRow(serviceName);
+      const unit = String(selectedRow.unit || 'Kg');
+      const unitPrice = Number(selectedRow.price || 0);
+      const serviceFee = /kg|kilogram/i.test(unit) ? Number(weight || 0) * unitPrice : unitPrice;
+      const extraFee = String(address || '').toLowerCase().includes('xa') ? 20000 : 0;
+      return serviceFee + extraFee;
     }
 
     function normalizePaymentMethod(value) {
@@ -1554,9 +1562,11 @@
 
     function getServicePricing(order) {
       const weight = Number(order.weight || 0);
-      const unitPrice = 15000;
-      const baseAmount = weight * unitPrice;
-      const deliveryFee = (order.deliveryService || '').toLowerCase().includes('giao') && !(order.deliveryService || '').toLowerCase().includes('tại cửa hàng') ? 20000 : 0;
+      const selectedRow = getOrderServicePriceRow(order.service || 'Giặt sấy tiêu chuẩn');
+      const unit = String(selectedRow.unit || 'Kg');
+      const unitPrice = Number(selectedRow.price || 0);
+      const baseAmount = /kg|kilogram/i.test(unit) ? weight * unitPrice : unitPrice;
+      const deliveryFee = Number(order.shippingFee || 0);
       const discount = 0;
       const total = Number(order.total || 0) || baseAmount + deliveryFee - discount;
       return { baseAmount, deliveryFee, discount, total };
@@ -2689,9 +2699,35 @@
       let u = users[index];
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
 
-      let customerOrders = orders.filter(o => o.phone === u.phone || o.customerName === u.name);
+      const normalizePhone = (value) => String(value || '').replace(/\D/g, '');
+      const userPhone = normalizePhone(u.phone);
+      let customerOrders = orders.filter((o) => {
+        const orderPhone = normalizePhone(o.phone || o.memberPhone);
+        const samePhone = userPhone && orderPhone && userPhone === orderPhone;
+        const sameMemberPhone = userPhone && normalizePhone(o.memberPhone) === userPhone;
+        const sameCustomerName = !userPhone && String(o.customerName || o.name || '').trim().toLowerCase() === String(u.name || '').trim().toLowerCase();
+        return samePhone || sameMemberPhone || sameCustomerName;
+      });
+
       let totalOrdersCount = customerOrders.length;
       let totalMoneySpent = customerOrders.filter(o => o.status !== "Đã hủy").reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+      const serviceUsageMap = new Map();
+      customerOrders.forEach((o) => {
+        const serviceName = o.service || (o.type === 'express' ? 'Giặt sấy nhanh' : 'Giặt sấy tiêu chuẩn');
+        const current = serviceUsageMap.get(serviceName) || { count: 0, total: 0 };
+        current.count += 1;
+        current.total += Number(o.total || 0);
+        serviceUsageMap.set(serviceName, current);
+      });
+      const serviceUsageHtml = [...serviceUsageMap.entries()]
+        .sort((a, b) => b[1].count - a[1].count)
+        .map(([serviceName, stats]) => `
+          <li>
+            <strong>${serviceName}</strong>: ${stats.count} đơn · ${Number(stats.total || 0).toLocaleString()} VNĐ
+          </li>
+        `)
+        .join('') || '<li>Khách hàng chưa từng đặt dịch vụ nào.</li>';
 
       let reviewsHtml = (u.reviews && u.reviews.length > 0) ? u.reviews.map(r => `<li>⭐ ${r.rating}/5 - "${r.comment}" <small>(${r.date})</small></li>`).join('') : '<li>Chưa có đánh giá nào.</li>';
 
@@ -2733,6 +2769,7 @@
         <h4 style="color: var(--primary); margin-bottom: 6px;">📊 Thống Kê Sử Dụng Dịch Vụ:</h4>
         <p><strong>Tổng số đơn hàng đã đặt:</strong> <span style="color: var(--secondary); font-weight: bold;">${totalOrdersCount} đơn</span></p>
         <p><strong>Tổng số tiền đã chi tiêu:</strong> <span style="color: var(--success); font-weight: bold;">${totalMoneySpent.toLocaleString()} VNĐ</span></p>
+        <ul style="padding-left: 20px; font-size: 0.9rem; color: #475569; margin-top: 8px;">${serviceUsageHtml}</ul>
 
         <hr style="margin: 12px 0;">
         <p><strong>Lịch Sử Đánh Giá & Phản Hồi:</strong></p>

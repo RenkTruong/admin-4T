@@ -2214,24 +2214,24 @@
                 <hr class="divider" />
                 <h3>2. Chọn dịch vụ</h3>
                 <div class="choice-grid" style="margin-top: 14px">
-                  <label class="choice"
-                    ><input
-                      type="radio"
-                      name="service"
-                      value="standard"
-                      checked
-                      onchange="calculateTotal()"
-                    /><b>Tiêu chuẩn · 15.000đ/kg</b
-                    ><small>Tối thiểu 3 kg · dự kiến 24 giờ</small></label
-                  ><label class="choice"
-                    ><input
-                      type="radio"
-                      name="service"
-                      value="express"
-                      onchange="calculateTotal()"
-                    /><b>Nhanh · 30.000đ/kg</b
-                    ><small>Ưu tiên xử lý · dự kiến 4–8 giờ</small></label
-                  >
+                  <label class="field" style="width: 100%">
+                    <span>Tên dịch vụ *</span>
+                    <select id="serviceSelect" onchange="updateServiceMeta(); calculateTotal();"></select>
+                  </label>
+                </div>
+                <div class="choice-grid" style="margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+                  <label class="field">
+                    <span>Đơn vị tính</span>
+                    <input id="serviceUnitDisplay" type="text" readonly />
+                  </label>
+                  <label class="field">
+                    <span>Đơn giá</span>
+                    <input id="servicePriceDisplay" type="text" readonly />
+                  </label>
+                  <label class="field" style="grid-column: 1 / -1;">
+                    <span>Số lượng</span>
+                    <input id="serviceQuantity" type="number" min="1" value="3" oninput="syncServiceQuantity(); calculateTotal();" />
+                  </label>
                 </div>
                 <hr class="divider" />
                 <h3>3. Thanh toán</h3>
@@ -2719,6 +2719,91 @@
         shared["4t-support"] = safeChat;
         localStorage.setItem("adminChats", JSON.stringify(shared));
       }
+      function readPricingRows() {
+        const normalizeRows = (rows) => {
+          if (!Array.isArray(rows) || !rows.length) return [];
+          const rank = (name) => {
+            const text = String(name || "").toLowerCase();
+            if (text.includes("tiết kiệm") || text.includes("tiet kiem")) return 0;
+            if (text.includes("tiêu chuẩn") || text.includes("tieu chuan")) return 1;
+            if (text.includes("nhanh") || text.includes("express")) return 2;
+            return 3;
+          };
+          return [...rows].sort((a, b) => rank(a.name) - rank(b.name));
+        };
+
+        try {
+          const shared = JSON.parse(localStorage.getItem("4t-service-pricing") || "null");
+          const sharedRows = normalizeRows(shared?.table);
+          if (sharedRows.length) return sharedRows;
+        } catch (error) {
+          console.warn("Could not read 4t-service-pricing:", error);
+        }
+
+        try {
+          const legacy = JSON.parse(localStorage.getItem("servicePricingRows") || "null");
+          const legacyRows = normalizeRows(legacy);
+          if (legacyRows.length) return legacyRows;
+        } catch (error) {
+          console.warn("Could not read servicePricingRows:", error);
+        }
+
+        return normalizeRows([
+          { id: "1", name: "Giặt sấy tiêu chuẩn", unit: "Kg", price: 15000 },
+          { id: "2", name: "Giặt sấy tiết kiệm", unit: "Kg", price: 8000 },
+          { id: "3", name: "Giặt sấy nhanh", unit: "Kg", price: 30000 },
+        ]);
+      }
+      function renderServiceSelector() {
+        const select = document.getElementById("serviceSelect");
+        if (!select) return;
+
+        const rows = readPricingRows();
+        const preferredDefault = rows.find((row) => /tiết kiệm|tiet kiem/i.test(String(row.name || ""))) || rows[0];
+        const currentValue = select.value || String(preferredDefault?.id || "");
+        const hasCurrent = rows.some((row) => String(row.id) === String(currentValue) || String(row.name) === String(currentValue));
+        select.innerHTML = rows
+          .map(
+            (row) =>
+              `<option value="${String(row.id)}">${esc(row.name || "Dịch vụ mới")}</option>`,
+          )
+          .join("");
+
+        const fallbackValue = preferredDefault ? String(preferredDefault.id) : String(rows[0]?.id || "");
+        select.value = hasCurrent ? String(currentValue) : fallbackValue;
+        updateServiceMeta();
+      }
+      function updateServiceMeta() {
+        const selected = getSelectedPricingRow();
+        const unitNode = document.getElementById("serviceUnitDisplay");
+        const priceNode = document.getElementById("servicePriceDisplay");
+        const quantityNode = document.getElementById("serviceQuantity");
+        const orderKg = document.getElementById("orderKg");
+
+        if (unitNode) unitNode.value = String(selected?.unit || "Kg");
+        if (priceNode) priceNode.value = money(Number(selected?.price || 0));
+        if (quantityNode) {
+          const current = Number(quantityNode.value || 0);
+          quantityNode.value = current > 0 ? current : 3;
+        }
+        if (orderKg && quantityNode) orderKg.value = quantityNode.value;
+      }
+      function syncServiceQuantity() {
+        const quantityNode = document.getElementById("serviceQuantity");
+        const orderKg = document.getElementById("orderKg");
+        if (quantityNode && orderKg) orderKg.value = quantityNode.value;
+      }
+      function getSelectedPricingRow() {
+        const rows = readPricingRows();
+        const select = document.getElementById("serviceSelect");
+        const selectedValue = select ? select.value : "";
+        return (
+          rows.find((row) => String(row.id) === String(selectedValue)) ||
+          rows.find((row) => String(row.name) === String(selectedValue)) ||
+          rows[0] ||
+          null
+        );
+      }
       async function init() {
         await hydrateCloudData();
         migrateSharedData();
@@ -2759,18 +2844,22 @@
         } else {
           notice.classList.remove("hidden");
         }
+        renderServiceSelector();
       }
       function calculateTotal() {
         const kg = Math.max(
           3,
           Number(document.getElementById("orderKg")?.value || 3),
         );
-        const type =
-          document.querySelector('input[name="service"]:checked')?.value ||
-          "standard";
-        document.getElementById("orderTotal").textContent = money(
-          kg * (type === "express" ? 30000 : 15000),
-        );
+        const selected = getSelectedPricingRow();
+        const pricePerUnit = Number(selected?.price || 0);
+        const unit = String(selected?.unit || "Kg");
+        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails(),
+          total = serviceFee + delivery.shippingFee;
+        const totalNode = document.getElementById("orderTotal");
+        if (totalNode) totalNode.textContent = money(total);
       }
       function openAuth(tab) {
         document.getElementById("authModal").classList.add("active");
@@ -3006,9 +3095,10 @@
           name = document.getElementById("orderName").value.trim(),
           phone = document.getElementById("orderPhone").value.trim(),
           address = document.getElementById("orderAddress").value.trim(),
+          quantityNode = document.getElementById("serviceQuantity"),
           kg = Math.max(
-            3,
-            Number(document.getElementById("orderKg").value || 3),
+            1,
+            Number((quantityNode && quantityNode.value) || document.getElementById("orderKg")?.value || 3),
           ),
           selected = getSelectedPricingRow(),
           pricePerUnit = Number(selected?.price || 0),

@@ -1170,10 +1170,23 @@
     }
 
     function updateTotalUI() {
-        let w = parseFloat(document.getElementById('editWeight').value) || 0;
-        let addr = document.getElementById('editAddress').value;
-        let total = calculateShipping(w, addr);
-        document.getElementById('newTotalDisplay').innerText = total.toLocaleString() + " VNĐ";
+      const weight = Number(document.getElementById('editWeight')?.value || 0);
+      const service = document.getElementById('editService')?.value || 'Giặt sấy tiêu chuẩn';
+      const address = document.getElementById('editAddress')?.value || '';
+      const selectedRow = getOrderServicePriceRow(service);
+      const unit = String(selectedRow.unit || 'Kg');
+      const unitPrice = Number(selectedRow.price || 0);
+      const shippingFee = calculateShipping(weight, address, service);
+      const serviceFee = /kg|kilogram/i.test(unit) ? weight * unitPrice : unitPrice;
+      const total = serviceFee + shippingFee;
+
+      const unitNode = document.getElementById('editUnitDisplay');
+      const priceNode = document.getElementById('editPriceDisplay');
+      if (unitNode) unitNode.value = unit;
+      if (priceNode) priceNode.value = `${unitPrice.toLocaleString('vi-VN')} VNĐ`;
+
+      const totalNode = document.getElementById('newTotalDisplay');
+      if (totalNode) totalNode.innerText = `${total.toLocaleString()} VNĐ`;
     }
 
     function getPricingRowsFromStorage() {
@@ -1224,32 +1237,45 @@
     }
 
     function saveOrderChanges(index) {
-        let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
-        let newService = document.getElementById('editService').value;
-        let newWeight = parseFloat(document.getElementById('editWeight').value);
-        let newAddress = document.getElementById('editAddress').value;
-        let newTotal = calculateShipping(newWeight, newAddress);
+      let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
+      if (!orders[index]) return;
 
-        let oldStatus = orders[index].status;
-        orders[index].service = newService;
-        orders[index].weight = newWeight;
-        orders[index].address = newAddress;
-        orders[index].total = newTotal;
+      const serviceSelect = document.getElementById('editService');
+      const weightInput = document.getElementById('editWeight');
+      const addressInput = document.getElementById('editAddress');
+      const newService = serviceSelect ? serviceSelect.value : (orders[index].service || 'Giặt sấy tiêu chuẩn');
+      const newWeight = Number(weightInput?.value || orders[index].weight || 0);
+      const newAddress = addressInput ? addressInput.value : (orders[index].address || '');
+      const selectedRow = getOrderServicePriceRow(newService);
+      const unit = String(selectedRow.unit || 'Kg');
+      const unitPrice = Number(selectedRow.price || 0);
+      const serviceFee = /kg|kilogram/i.test(unit) ? newWeight * unitPrice : unitPrice;
+      const shippingFee = calculateShipping(newWeight, newAddress, newService);
+      const total = serviceFee + shippingFee;
 
-        if (!orders[index].history) orders[index].history = [];
-        let now = new Date();
-        let timeString = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      orders[index].service = newService;
+      orders[index].weight = newWeight;
+      orders[index].kg = newWeight;
+      orders[index].address = newAddress;
+      orders[index].serviceFee = serviceFee;
+      orders[index].shippingFee = shippingFee;
+      orders[index].total = total;
 
-        orders[index].history.push({
-            action: `Admin sửa đơn: ${newWeight}kg, ĐC: ${newAddress}, Giá mới: ${newTotal}`,
-            performer: localStorage.getItem('loggedAdmin'),
-            time: timeString
-        });
+      if (!orders[index].history) orders[index].history = [];
+      let now = new Date();
+      let timeString = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
-        localStorage.setItem('orders_v2', JSON.stringify(orders));
-        alert("Đã cập nhật đơn hàng thành công!");
-        closeModal('orderDetailModal');
-        renderOrdersTable();
+      orders[index].history.push({
+        action: `Admin sửa đơn: ${newWeight}kg · ${newService} · Tổng mới: ${total.toLocaleString()}đ`,
+        performer: localStorage.getItem('loggedAdmin'),
+        time: timeString,
+      });
+
+      localStorage.setItem('orders_v2', JSON.stringify(orders));
+      alert('Đã cập nhật đơn hàng thành công!');
+      closeModal('orderDetailModal');
+      renderOrdersTable();
+      renderOrderLogsTable();
     }
 
 
@@ -2009,20 +2035,38 @@
       }
 
       let body = document.getElementById('orderDetailBody');
+      const rows = getPricingRowsFromStorage();
+      const selectedService = o.service || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
+      const selectedRow = getOrderServicePriceRow(selectedService);
+      const serviceOptions = rows.map((row) => `
+        <option value="${String(row.name || 'Dịch vụ mới')}" ${String(row.name) === String(selectedService) ? 'selected' : ''}>
+          ${String(row.name || 'Dịch vụ mới')}
+        </option>
+      `).join('');
       body.innerHTML = `
         <div class="form-group">
-          <label>Loại dịch vụ/vải:</label>
-          <input type="text" id="editService" value="${o.service}">
+          <label>Tên dịch vụ:</label>
+          <select id="editService" onchange="updateTotalUI()">
+            ${serviceOptions}
+          </select>
         </div>
         <div class="form-group">
-          <label>Số Kg:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" oninput="updateTotalUI()">
+          <label>Đơn vị tính:</label>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Đơn giá:</label>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+        </div>
+        <div class="form-group">
+          <label>Số lượng:</label>
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
           <input type="text" id="editAddress" value="${addressInfo}" oninput="updateTotalUI()">
         </div>
-        <p><strong>Tổng Tiền Thực Tế:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+        <p><strong>Tổng tiền:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${Number(o.total || 0).toLocaleString()} VNĐ</span></p>
         <button class="btn btn-primary" onclick="saveOrderChanges(${index})" style="width:100%; margin-top:10px;">Lưu Thay Đổi Đơn Hàng</button>
         ${canPrintBill ? `<button class="btn btn-success" onclick="previewBillByOrder(${index})" style="width:100%; margin-top:10px;">🧾 Xem Trước / In Hóa Đơn</button>` : ''}
         
@@ -2569,20 +2613,38 @@
       }
 
       let body = document.getElementById('orderDetailBody');
+      const rows = getPricingRowsFromStorage();
+      const selectedService = o.service || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
+      const selectedRow = getOrderServicePriceRow(selectedService);
+      const serviceOptions = rows.map((row) => `
+        <option value="${String(row.name || 'Dịch vụ mới')}" ${String(row.name) === String(selectedService) ? 'selected' : ''}>
+          ${String(row.name || 'Dịch vụ mới')}
+        </option>
+      `).join('');
       body.innerHTML = `
         <div class="form-group">
-          <label>Loại dịch vụ/vải:</label>
-          <input type="text" id="editService" value="${o.service}">
+          <label>Tên dịch vụ:</label>
+          <select id="editService" onchange="updateTotalUI()">
+            ${serviceOptions}
+          </select>
         </div>
         <div class="form-group">
-          <label>Số Kg:</label>
-          <input type="number" id="editWeight" value="${o.weight || 1}" oninput="updateTotalUI()">
+          <label>Đơn vị tính:</label>
+          <input type="text" id="editUnitDisplay" value="${String(selectedRow.unit || 'Kg')}" readonly>
+        </div>
+        <div class="form-group">
+          <label>Đơn giá:</label>
+          <input type="text" id="editPriceDisplay" value="${Number(selectedRow.price || 0).toLocaleString('vi-VN')} VNĐ" readonly>
+        </div>
+        <div class="form-group">
+          <label>Số lượng:</label>
+          <input type="number" id="editWeight" value="${o.weight || 1}" min="1" step="1" oninput="updateTotalUI()">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao-nhận:</label>
           <input type="text" id="editAddress" value="${addressInfo}" oninput="updateTotalUI()">
         </div>
-        <p><strong>Tổng Tiền Thực Tế:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${o.total.toLocaleString()} VNĐ</span></p>
+        <p><strong>Tổng tiền:</strong> <span id="newTotalDisplay" style="color:var(--primary); font-weight:bold;">${Number(o.total || 0).toLocaleString()} VNĐ</span></p>
         <button class="btn btn-primary" onclick="saveOrderChanges(${index})" style="width:100%; margin-top:10px;">Lưu Thay Đổi Đơn Hàng</button>
         
         <hr style="margin: 15px 0;">

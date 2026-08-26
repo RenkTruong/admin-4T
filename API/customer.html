@@ -2215,8 +2215,22 @@
                 <h3>2. Chọn dịch vụ</h3>
                 <div class="choice-grid" style="margin-top: 14px">
                   <label class="field" style="width: 100%">
-                    <span>Dịch vụ *</span>
-                    <select id="serviceSelect" onchange="calculateTotal()"></select>
+                    <span>Tên dịch vụ *</span>
+                    <select id="serviceSelect" onchange="updateServiceMeta(); calculateTotal();"></select>
+                  </label>
+                </div>
+                <div class="choice-grid" style="margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+                  <label class="field">
+                    <span>Đơn vị tính</span>
+                    <input id="serviceUnitDisplay" type="text" readonly />
+                  </label>
+                  <label class="field">
+                    <span>Đơn giá</span>
+                    <input id="servicePriceDisplay" type="text" readonly />
+                  </label>
+                  <label class="field" style="grid-column: 1 / -1;">
+                    <span>Số lượng</span>
+                    <input id="serviceQuantity" type="number" min="1" value="3" oninput="syncServiceQuantity(); calculateTotal();" />
                   </label>
                 </div>
                 <hr class="divider" />
@@ -2824,12 +2838,35 @@
         select.innerHTML = rows
           .map(
             (row) =>
-              `<option value="${String(row.id)}">${esc(row.name || "Dịch vụ mới")} · ${esc(row.unit || "Kg")} · ${money(Number(row.price || 0))}</option>`,
+              `<option value="${String(row.id)}">${esc(row.name || "Dịch vụ mới")}</option>`,
           )
           .join("");
 
         const fallbackValue = preferredDefault ? String(preferredDefault.id) : String(rows[0]?.id || "");
         select.value = hasCurrent ? String(currentValue) : fallbackValue;
+        updateServiceMeta();
+      }
+
+      function updateServiceMeta() {
+        const selected = getSelectedPricingRow();
+        const unitNode = document.getElementById("serviceUnitDisplay");
+        const priceNode = document.getElementById("servicePriceDisplay");
+        const quantityNode = document.getElementById("serviceQuantity");
+        const orderKg = document.getElementById("orderKg");
+
+        if (unitNode) unitNode.value = String(selected?.unit || "Kg");
+        if (priceNode) priceNode.value = money(Number(selected?.price || 0));
+        if (quantityNode) {
+          const current = Number(quantityNode.value || 0);
+          quantityNode.value = current > 0 ? current : 3;
+        }
+        if (orderKg && quantityNode) orderKg.value = quantityNode.value;
+      }
+
+      function syncServiceQuantity() {
+        const quantityNode = document.getElementById("serviceQuantity");
+        const orderKg = document.getElementById("orderKg");
+        if (quantityNode && orderKg) orderKg.value = quantityNode.value;
       }
 
       function getSelectedPricingRow() {
@@ -2879,15 +2916,19 @@
         }
       }
       function calculateTotal() {
+        const quantityNode = document.getElementById("serviceQuantity");
+        const orderKgNode = document.getElementById("orderKg");
         const kg = Math.max(
-          3,
-          Number(document.getElementById("orderKg")?.value || 3),
+          1,
+          Number((quantityNode && quantityNode.value) || (orderKgNode && orderKgNode.value) || 3),
         );
         const selected = getSelectedPricingRow();
         const pricePerUnit = Number(selected?.price || 0);
         const unit = String(selected?.unit || "Kg");
         const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails();
+        const total = serviceFee + delivery.shippingFee;
         document.getElementById("orderTotal").textContent = money(total);
       }
       function openAuth(tab) {
@@ -3124,9 +3165,10 @@
           name = document.getElementById("orderName").value.trim(),
           phone = document.getElementById("orderPhone").value.trim(),
           address = document.getElementById("orderAddress").value.trim(),
+          quantityNode = document.getElementById("serviceQuantity"),
           kg = Math.max(
-            3,
-            Number(document.getElementById("orderKg").value || 3),
+            1,
+            Number((quantityNode && quantityNode.value) || document.getElementById("orderKg")?.value || 3),
           ),
           selected = getSelectedPricingRow(),
           pricePerUnit = Number(selected?.price || 0),

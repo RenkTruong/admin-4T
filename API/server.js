@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { getPool, getValue, setValue } = require('./db');
 
-const PORT = Number(process.env.PORT || 8787);
+const DEFAULT_PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_KEYS = new Set(['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog', 'adminChats', '4t_local_chat']);
 const STATIC_FILES = new Set(['customer.html', 'admin.html', '4T.jpg', 'favicon.svg']);
@@ -162,98 +162,118 @@ function serveStatic(response, pathname) {
   fs.createReadStream(file).pipe(response);
 }
 
-const server = http.createServer(async (request, response) => {
-  const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
-  if (request.method === 'OPTIONS') return sendJson(response, 204, {});
+function startServer(port) {
+  const server = http.createServer(async (request, response) => {
+    const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+    if (request.method === 'OPTIONS') return sendJson(response, 204, {});
 
-  try {
-    if (url.pathname === '/api/health' && request.method === 'GET') {
-      await getPool();
-      return sendJson(response, 200, { ok: true, database: process.env.DB_TYPE || 'postgres' });
-    }
-
-    if (url.pathname === '/api/sync' && request.method === 'GET') {
-      const requestedKeys = (url.searchParams.get('keys') || '').split(',').filter(key => PUBLIC_KEYS.has(key));
-      return sendJson(response, 200, await readKeys(requestedKeys.length ? requestedKeys : [...PUBLIC_KEYS]));
-    }
-
-    if (url.pathname === '/api/sync' && request.method === 'PUT') {
-      if (!isAuthorized(request)) return sendJson(response, 401, { error: 'Invalid sync token' });
-      const payload = await readBody(request);
-      for (const [key, value] of Object.entries(payload)) if (PUBLIC_KEYS.has(key)) await setValue(key, value);
-      return sendJson(response, 200, { ok: true });
-    }
-
-    if (url.pathname === '/api/admin/login' && request.method === 'POST') {
-      const payload = await readBody(request).catch(() => ({}));
-      const { username, password } = payload;
-      if (!username || !password) return sendJson(response, 400, { message: 'Thiếu username hoặc password' });
-      if (username !== DEFAULT_ADMIN.username || password !== 'admin123') {
-        return sendJson(response, 401, { message: 'Sai username hoặc password' });
+    try {
+      if (url.pathname === '/api/health' && request.method === 'GET') {
+        await getPool();
+        return sendJson(response, 200, { ok: true, database: process.env.DB_TYPE || 'postgres' });
       }
-      return sendJson(response, 200, {
-        id: DEFAULT_ADMIN.id,
-        username: DEFAULT_ADMIN.username,
-        full_name: DEFAULT_ADMIN.full_name,
-        title: DEFAULT_ADMIN.title,
-        permissions: DEFAULT_ADMIN.permissions,
-      });
+
+      if (url.pathname === '/api/sync' && request.method === 'GET') {
+        const requestedKeys = (url.searchParams.get('keys') || '').split(',').filter(key => PUBLIC_KEYS.has(key));
+        return sendJson(response, 200, await readKeys(requestedKeys.length ? requestedKeys : [...PUBLIC_KEYS]));
+      }
+
+      if (url.pathname === '/api/sync' && request.method === 'PUT') {
+        if (!isAuthorized(request)) return sendJson(response, 401, { error: 'Invalid sync token' });
+        const payload = await readBody(request);
+        for (const [key, value] of Object.entries(payload)) if (PUBLIC_KEYS.has(key)) await setValue(key, value);
+        return sendJson(response, 200, { ok: true });
+      }
+
+      if (url.pathname === '/api/admin/login' && request.method === 'POST') {
+        const payload = await readBody(request).catch(() => ({}));
+        const { username, password } = payload;
+        if (!username || !password) return sendJson(response, 400, { message: 'Thiếu username hoặc password' });
+        if (username !== DEFAULT_ADMIN.username || password !== 'admin123') {
+          return sendJson(response, 401, { message: 'Sai username hoặc password' });
+        }
+        return sendJson(response, 200, {
+          id: DEFAULT_ADMIN.id,
+          username: DEFAULT_ADMIN.username,
+          full_name: DEFAULT_ADMIN.full_name,
+          title: DEFAULT_ADMIN.title,
+          permissions: DEFAULT_ADMIN.permissions,
+        });
+      }
+
+      if (url.pathname === '/api/admins' && request.method === 'GET') {
+        return sendJson(response, 200, [DEFAULT_ADMIN]);
+      }
+
+      if (url.pathname === '/api/admins' && request.method === 'POST') {
+        const payload = await readBody(request).catch(() => ({}));
+        const username = String(payload.username || '').trim();
+        const password = String(payload.password || '').trim();
+        const full_name = String(payload.full_name || payload.fullname || '').trim();
+        if (!username || !password || !full_name) return sendJson(response, 400, { message: 'Thiếu thông tin admin' });
+        const created = { ...DEFAULT_ADMIN, id: Date.now(), username, full_name, fullname: full_name, title: payload.title || 'Nhân viên', permissions: Array.isArray(payload.permissions) ? payload.permissions : [] };
+        return sendJson(response, 201, created);
+      }
+
+      if (url.pathname.startsWith('/api/admins/') && request.method === 'PATCH') {
+        const payload = await readBody(request).catch(() => ({}));
+        const username = String(payload.username || '').trim();
+        const full_name = String(payload.full_name || payload.fullname || '').trim();
+        const updated = {
+          ...DEFAULT_ADMIN,
+          id: Number(url.pathname.split('/').pop()) || DEFAULT_ADMIN.id,
+          username: username || DEFAULT_ADMIN.username,
+          full_name: full_name || DEFAULT_ADMIN.full_name,
+          fullname: full_name || DEFAULT_ADMIN.full_name,
+          title: payload.title || DEFAULT_ADMIN.title,
+          permissions: Array.isArray(payload.permissions) ? payload.permissions : DEFAULT_ADMIN.permissions,
+        };
+        return sendJson(response, 200, updated);
+      }
+
+      if (url.pathname === '/api/invoice/preview' && (request.method === 'GET' || request.method === 'POST')) {
+        let payload = {};
+        if (request.method === 'POST') payload = await readBody(request).catch(() => ({}));
+        else payload = Object.fromEntries(url.searchParams.entries());
+
+        const order = payload.order || payload.data || {};
+        const explicitOrderId = payload.orderId || url.searchParams.get('orderId');
+        const finalOrder = explicitOrderId && !order.id ? { ...order, id: explicitOrderId } : order;
+        const html = buildInvoiceHtml(finalOrder);
+        return sendJson(response, 200, {
+          ok: true,
+          html,
+          orderId: finalOrder.id || '4T-UNKNOWN',
+          template: 'backend-default',
+        });
+      }
+
+      return serveStatic(response, url.pathname);
+    } catch (error) {
+      console.error(error);
+      return sendJson(response, 500, { error: 'Database unavailable' });
     }
+  });
 
-    if (url.pathname === '/api/admins' && request.method === 'GET') {
-      return sendJson(response, 200, [DEFAULT_ADMIN]);
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      const nextPort = port + 1;
+      if (nextPort <= DEFAULT_PORT + 10) {
+        console.warn(`Port ${port} is busy, retrying on ${nextPort}...`);
+        startServer(nextPort);
+        return;
+      }
+      console.error(`No free port available starting from ${DEFAULT_PORT}.`);
+      process.exit(1);
+      return;
     }
+    console.error('Server error:', error);
+    process.exit(1);
+  });
 
-    if (url.pathname === '/api/admins' && request.method === 'POST') {
-      const payload = await readBody(request).catch(() => ({}));
-      const username = String(payload.username || '').trim();
-      const password = String(payload.password || '').trim();
-      const full_name = String(payload.full_name || payload.fullname || '').trim();
-      if (!username || !password || !full_name) return sendJson(response, 400, { message: 'Thiếu thông tin admin' });
-      const created = { ...DEFAULT_ADMIN, id: Date.now(), username, full_name, fullname: full_name, title: payload.title || 'Nhân viên', permissions: Array.isArray(payload.permissions) ? payload.permissions : [] };
-      return sendJson(response, 201, created);
-    }
+  server.listen(port, HOST, () => {
+    console.log(`4T database sync server running at http://localhost:${port}`);
+  });
+}
 
-    if (url.pathname.startsWith('/api/admins/') && request.method === 'PATCH') {
-      const payload = await readBody(request).catch(() => ({}));
-      const username = String(payload.username || '').trim();
-      const full_name = String(payload.full_name || payload.fullname || '').trim();
-      const updated = {
-        ...DEFAULT_ADMIN,
-        id: Number(url.pathname.split('/').pop()) || DEFAULT_ADMIN.id,
-        username: username || DEFAULT_ADMIN.username,
-        full_name: full_name || DEFAULT_ADMIN.full_name,
-        fullname: full_name || DEFAULT_ADMIN.full_name,
-        title: payload.title || DEFAULT_ADMIN.title,
-        permissions: Array.isArray(payload.permissions) ? payload.permissions : DEFAULT_ADMIN.permissions,
-      };
-      return sendJson(response, 200, updated);
-    }
-
-    if (url.pathname === '/api/invoice/preview' && (request.method === 'GET' || request.method === 'POST')) {
-      let payload = {};
-      if (request.method === 'POST') payload = await readBody(request).catch(() => ({}));
-      else payload = Object.fromEntries(url.searchParams.entries());
-
-      const order = payload.order || payload.data || {};
-      const explicitOrderId = payload.orderId || url.searchParams.get('orderId');
-      const finalOrder = explicitOrderId && !order.id ? { ...order, id: explicitOrderId } : order;
-      const html = buildInvoiceHtml(finalOrder);
-      return sendJson(response, 200, {
-        ok: true,
-        html,
-        orderId: finalOrder.id || '4T-UNKNOWN',
-        template: 'backend-default',
-      });
-    }
-
-    return serveStatic(response, url.pathname);
-  } catch (error) {
-    console.error(error);
-    return sendJson(response, 500, { error: 'Database unavailable' });
-  }
-});
-
-server.listen(PORT, HOST, () => {
-  console.log(`4T database sync server running at http://localhost:${PORT}`);
-});
+startServer(DEFAULT_PORT);

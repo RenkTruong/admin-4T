@@ -1716,6 +1716,121 @@
     }
 
     let activeChatPhone = null;
+    const USER_SYNC_CHANNEL = '4t_user_sync';
+    const CURRENT_PROVINCES = ['Thành phố Hồ Chí Minh', 'Tỉnh Tây Ninh'];
+    let customerAddressData = [];
+
+    function normalizeAdministrativeName(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/^thành phố\s+/, '')
+        .replace(/^tỉnh\s+/, '')
+        .trim();
+    }
+
+    function parseAddressParts(address) {
+      const raw = String(address || '').trim();
+      const parts = raw ? raw.split(',').map((item) => item.trim()).filter(Boolean) : [];
+      const city = parts.find((part) => CURRENT_PROVINCES.some((name) => normalizeAdministrativeName(name) === normalizeAdministrativeName(part))) || CURRENT_PROVINCES[0];
+      const ward = parts.find((part) => /^phường\s|^xã\s|^thị trấn\s/i.test(part)) || '';
+      const street = parts.filter((part) => part !== ward && part !== city).join(', ');
+      return {
+        street,
+        ward: ward.replace(/^phường\s+/i, '').replace(/^xã\s+/i, '').replace(/^thị trấn\s+/i, '').trim(),
+        city,
+      };
+    }
+
+    function populateCustomerAddressFields(streetValue = '', wardValue = '', cityValue = '') {
+      const city = document.getElementById('editCustomerCity');
+      const ward = document.getElementById('editCustomerWard');
+      const street = document.getElementById('editCustomerStreet');
+      if (!city || !ward || !street) return;
+
+      city.innerHTML = `<option value="">Chọn tỉnh / thành phố</option>${CURRENT_PROVINCES.map((name) => `<option value="${name}">${name}</option>`).join('')}`;
+      city.value = cityValue || CURRENT_PROVINCES[0];
+      ward.disabled = !city.value;
+      ward.innerHTML = `<option value="">${city.value ? 'Chọn phường/xã' : 'Chọn tỉnh/thành trước'}</option>`;
+      const selectedName = normalizeAdministrativeName(city.value);
+      const province = customerAddressData.find((item) =>
+        normalizeAdministrativeName(item.name) === selectedName ||
+        normalizeAdministrativeName(item.name).includes(selectedName) ||
+        selectedName.includes(normalizeAdministrativeName(item.name)),
+      );
+      const options = (
+        province?.wards ||
+        province?.communes ||
+        province?.districts?.flatMap((item) => item.wards || item.communes || []) ||
+        []
+      )
+        .map((item) => (typeof item === 'string' ? item : item.name))
+        .filter(Boolean);
+
+      ward.disabled = !city.value || options.length === 0;
+      ward.innerHTML = `<option value="">${city.value ? 'Chọn phường/xã' : 'Chọn tỉnh/thành trước'}</option>${options.map((name) => `<option value="${name}">${name}</option>`).join('')}`;
+      if (wardValue && options.includes(wardValue)) ward.value = wardValue;
+      city.value = cityValue || city.value || CURRENT_PROVINCES[0];
+      street.value = streetValue || '';
+      const hidden = document.getElementById('editCustomerAddress');
+      if (hidden && city.value && ward.value) hidden.value = [street.value, ward.value, city.value].filter(Boolean).join(', ');
+    }
+
+    function syncCustomerAddressParts() {
+      const street = document.getElementById('editCustomerStreet')?.value.trim() || '';
+      const ward = document.getElementById('editCustomerWard')?.value.trim() || '';
+      const city = document.getElementById('editCustomerCity')?.value.trim() || '';
+      const hidden = document.getElementById('editCustomerAddress');
+      if (hidden) hidden.value = [street, ward, city].filter(Boolean).join(', ');
+    }
+
+    function updateCustomerWardOptions(selected = '') {
+      const city = document.getElementById('editCustomerCity');
+      const ward = document.getElementById('editCustomerWard');
+      if (!city || !ward) return;
+
+      const selectedName = normalizeAdministrativeName(city.value);
+      const province = customerAddressData.find((item) =>
+        normalizeAdministrativeName(item.name) === selectedName ||
+        normalizeAdministrativeName(item.name).includes(selectedName) ||
+        selectedName.includes(normalizeAdministrativeName(item.name)),
+      );
+      const options = (
+        province?.wards ||
+        province?.communes ||
+        province?.districts?.flatMap((item) => item.wards || item.communes || []) ||
+        []
+      )
+        .map((item) => (typeof item === 'string' ? item : item.name))
+        .filter(Boolean);
+
+      ward.disabled = !city.value || options.length === 0;
+      ward.innerHTML = `<option value="">${city.value ? 'Chọn phường/xã' : 'Chọn tỉnh/thành trước'}</option>${options.map((name) => `<option value="${name}">${name}</option>`).join('')}`;
+      if (selected && options.includes(selected)) ward.value = selected;
+      syncCustomerAddressParts();
+    }
+
+    function syncUsersAcrossSites(nextUsers) {
+      localStorage.setItem('users', JSON.stringify(nextUsers));
+      window.dispatchEvent(new CustomEvent('users_updated', { detail: nextUsers }));
+      try {
+        const channel = new BroadcastChannel(USER_SYNC_CHANNEL);
+        channel.postMessage({ key: 'users', value: nextUsers });
+      } catch (error) {
+        console.warn('User sync channel unavailable', error);
+      }
+    }
+
+    function loadCustomerAddressData() {
+      if (customerAddressData.length) return;
+      fetch('https://provinces.open-api.vn/api/v2/?depth=2')
+        .then((response) => (response.ok ? response.json() : []))
+        .then((data) => {
+          customerAddressData = Array.isArray(data) ? data : [];
+        })
+        .catch(() => {
+          customerAddressData = [];
+        });
+    }
 
     window.onload = async function() {
       await hydrateCloudData();
@@ -2839,10 +2954,6 @@
       const body = document.getElementById('deleteOrderConfirmBody');
       const deleteConfirmBtn = modal.querySelector('.btn-danger');
       const revenueStatus = normalizeRevenueStatus(order);
-      const currentAdminUsername = localStorage.getItem('loggedAdmin');
-      const admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-      const adminObj = admins.find(a => a.username === currentAdminUsername);
-      const isRoot = currentAdminUsername === 'admin4T';
       const hasDeletePermission = isRoot || (adminObj && adminObj.permissions && adminObj.permissions.includes('delete_order'));
       const canDelete = hasDeletePermission && (revenueStatus === 'Chờ thu' || isRoot);
       modal.dataset.orderIndex = String(index);
@@ -3284,11 +3395,15 @@
       }
 
       let body = document.getElementById('customerDetailBody');
+      const parsedAddress = parseAddressParts(u.address || '');
       body.innerHTML = `
         <h4 style="color: var(--primary); margin-bottom: 8px;">Cập Nhật Thông Tin Tài Khoản</h4>
         <div class="form-group"><label>Họ Tên Khách Hàng:</label><input id="editCustomerName" value="${u.name || ''}"></div>
         <div class="form-group"><label>Số Điện Thoại:</label><input id="editCustomerPhone" value="${u.phone || ''}" maxlength="10"></div>
-        <div class="form-group"><label>Địa Chỉ:</label><input id="editCustomerAddress" value="${u.address || ''}"></div>
+        <div class="form-group"><label>Số nhà + đường:</label><input id="editCustomerStreet" value="${parsedAddress.street || ''}" placeholder="Ví dụ: 123 Lê Lợi"></div>
+        <div class="form-group"><label>Phường / Xã:</label><select id="editCustomerWard" required disabled><option value="">Chọn tỉnh/thành trước</option></select></div>
+        <div class="form-group"><label>Tỉnh / Thành phố:</label><select id="editCustomerCity" required>${CURRENT_PROVINCES.map((name) => `<option value="${name}">${name}</option>`).join('')}</select></div>
+        <input type="hidden" id="editCustomerAddress" value="${(u.address || '').replace(/"/g, '&quot;')}" />
         <button class="btn btn-primary" onclick="updateCustomerInfo(${index})" style="width: 100%; padding: 8px;">Lưu Thông Tin Khách Hàng</button>
         <p><strong>Điểm Tích Lũy:</strong> <span style="color:var(--success); font-weight:bold;">${u.points || 0} điểm</span></p>
         <p><strong>Điểm Tích Lũy:</strong> <span style="color:var(--success); font-weight:bold;">${u.points || 0} điểm</span></p>
@@ -3305,6 +3420,17 @@
 
         ${passwordChangeSectionHtml}
       `;
+      loadCustomerAddressData();
+      const currentStreet = parsedAddress.street || '';
+      const currentWard = parsedAddress.ward || '';
+      const currentCity = parsedAddress.city || CURRENT_PROVINCES[0];
+      populateCustomerAddressFields(currentStreet, currentWard, currentCity);
+      document.getElementById('editCustomerCity')?.addEventListener('change', () => {
+        updateCustomerWardOptions();
+        syncCustomerAddressParts();
+      });
+      document.getElementById('editCustomerWard')?.addEventListener('change', syncCustomerAddressParts);
+      document.getElementById('editCustomerStreet')?.addEventListener('input', syncCustomerAddressParts);
       document.getElementById('customerDetailModal').style.display = 'flex';
     }
 
@@ -3315,9 +3441,12 @@
       let oldPhone = user.phone;
       let name = document.getElementById('editCustomerName').value.trim();
       let phone = document.getElementById('editCustomerPhone').value.trim();
-      let address = document.getElementById('editCustomerAddress').value.trim();
-      if (!name || !/^0\d{9}$/.test(phone) || address.length < 8) {
-        alert('Vui lòng nhập họ tên, số điện thoại đủ 10 số và địa chỉ rõ ràng.');
+      const street = document.getElementById('editCustomerStreet')?.value.trim() || '';
+      const ward = document.getElementById('editCustomerWard')?.value.trim() || '';
+      const city = document.getElementById('editCustomerCity')?.value.trim() || '';
+      let address = [street, ward, city].filter(Boolean).join(', ');
+      if (!name || !/^0\d{9}$/.test(phone) || !street || !ward || !city || address.length < 8) {
+        alert('Vui lòng nhập họ tên, số điện thoại đủ 10 số và đầy đủ Số nhà + đường, Phường/Xã, Tỉnh/Thành phố.');
         return;
       }
       if (users.some((item, index) => index !== userIndex && item.phone === phone)) {
@@ -3327,7 +3456,7 @@
       user.name = name;
       user.phone = phone;
       user.address = address;
-      localStorage.setItem('users', JSON.stringify(users));
+      syncUsersAcrossSites(users);
       let savedSession = JSON.parse(localStorage.getItem('4t_local_session') || 'null');
       if (savedSession && savedSession.phone === oldPhone) localStorage.setItem('4t_local_session', JSON.stringify(user));
       let orders = JSON.parse(localStorage.getItem('orders_v2') || '[]');
@@ -3340,6 +3469,7 @@
         }
       });
       localStorage.setItem('orders_v2', JSON.stringify(orders));
+      window.dispatchEvent(new CustomEvent('orders_v2_updated', { detail: orders }));
       alert('Đã cập nhật thông tin dùng chung cho cả hai website.');
       closeModal('customerDetailModal');
       renderUsersTable();
@@ -3349,6 +3479,21 @@
     window.addEventListener('storage', event => {
       if (['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog'].includes(event.key) && localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
     });
+    window.addEventListener('users_updated', () => {
+      if (localStorage.getItem('loggedAdmin')) applyPermissionsAndRender();
+    });
+    if ('BroadcastChannel' in window) {
+      try {
+        const channel = new BroadcastChannel(USER_SYNC_CHANNEL);
+        channel.onmessage = (event) => {
+          if (event.data && event.data.key === 'users' && localStorage.getItem('loggedAdmin')) {
+            applyPermissionsAndRender();
+          }
+        };
+      } catch (error) {
+        console.warn('User sync channel unavailable', error);
+      }
+    }
     window.addEventListener('orders_v2_updated', () => {
       if (localStorage.getItem('loggedAdmin')) {
         applyPermissionsAndRender();
@@ -3387,7 +3532,7 @@
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       if (users[userIndex]) {
         users[userIndex].password = newPass;
-        localStorage.setItem('users', JSON.stringify(users));
+        syncUsersAcrossSites(users);
         alert(`Đã cập nhật mật khẩu mới thành công cho khách hàng: ${users[userIndex].name}`);
         document.getElementById('newCustomerPasswordInput').value = '';
       }

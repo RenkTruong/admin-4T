@@ -2591,6 +2591,7 @@
         "4t_local_chat",
       ]);
       const ORDER_SYNC_CHANNEL = "4t_order_sync";
+      const USER_SYNC_CHANNEL = "4t_user_sync";
       const CLOUD_API =
         location.protocol === "file:"
           ? "http://localhost:8787"
@@ -3647,16 +3648,24 @@
       });
       if ("BroadcastChannel" in window) {
         try {
-          const channel = new BroadcastChannel(ORDER_SYNC_CHANNEL);
-          channel.onmessage = (event) => {
+          const orderChannel = new BroadcastChannel(ORDER_SYNC_CHANNEL);
+          orderChannel.onmessage = (event) => {
             if (event.data && event.data.key === "orders_v2") {
               renderAll();
               calculateTotal();
               renderChat();
             }
           };
+          const userChannel = new BroadcastChannel(USER_SYNC_CHANNEL);
+          userChannel.onmessage = (event) => {
+            if (event.data && event.data.key === "users") {
+              renderAll();
+              calculateTotal();
+              renderChat();
+            }
+          };
         } catch (error) {
-          console.warn("Customer order sync channel unavailable", error);
+          console.warn("Customer sync channel unavailable", error);
         }
       }
 

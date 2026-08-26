@@ -3527,6 +3527,16 @@
         calculateTotal();
         scheduleDistanceLookup();
       }
+      function clearAddressParts() {
+        const street = document.getElementById("addressStreet");
+        const ward = document.getElementById("addressWard");
+        const city = document.getElementById("addressCity");
+        const address = document.getElementById("orderAddress");
+        if (street) street.value = "";
+        if (ward) ward.value = "";
+        if (city) city.value = "";
+        if (address) address.value = "";
+      }
       function fillAddressParts(value) {
         const address = String(value || "").trim(),
           street = document.getElementById("addressStreet"),
@@ -3660,12 +3670,31 @@
           memberNote = document.getElementById("memberFillNote"),
           orderName = document.getElementById("orderName"),
           orderPhone = document.getElementById("orderPhone"),
-          orderAddress = document.getElementById("orderAddress");
+          orderAddress = document.getElementById("orderAddress"),
+          form = document.getElementById("orderForm");
+
+        if (form) form.reset();
+        const serviceSelect = document.getElementById("serviceSelect");
+        if (serviceSelect && serviceSelect.options.length) {
+          serviceSelect.selectedIndex = 0;
+        }
+        const paymentInputs = document.querySelectorAll('input[name="payment"]');
+        paymentInputs.forEach((input) => {
+          input.checked = input.value === "cash";
+        });
+        const kgInput = document.getElementById("orderKg");
+        if (kgInput) kgInput.value = 3;
+        const notesInput = document.getElementById("orderNotes");
+        if (notesInput) notesInput.value = "";
+        if (document.getElementById("pickupWindow")) {
+          const windowSelect = document.getElementById("pickupWindow");
+          if (windowSelect && windowSelect.options.length) windowSelect.selectedIndex = 0;
+        }
 
         if (s) {
           notice?.classList.add("hidden");
-          if (orderName) orderName.value = s.name;
-          if (orderPhone) orderPhone.value = s.phone;
+          if (orderName) orderName.value = s.name || "";
+          if (orderPhone) orderPhone.value = s.phone || "";
           if (document.getElementById("addressStreet") && document.getElementById("addressWard")) {
             fillAddressParts(s.address || "");
           } else if (orderAddress) {
@@ -3679,6 +3708,12 @@
         } else {
           notice?.classList.remove("hidden");
           memberNote?.classList.remove("show");
+          if (orderName) orderName.value = "";
+          if (orderPhone) orderPhone.value = "";
+          if (orderAddress) orderAddress.value = "";
+          if (document.getElementById("addressStreet") && document.getElementById("addressWard")) {
+            clearAddressParts();
+          }
         }
 
         if (typeof updateDeliveryUI === "function") updateDeliveryUI();
@@ -3790,7 +3825,7 @@
         const paymentText =
           order.payment === "cash"
             ? "Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ."
-            : "Thanh toán bằng app ngân hàng với QR tài khoản 4T. Mã đơn hàng được ghi cố định trong nội dung chuyển khoản để cửa hàng đối chiếu nhanh.";
+            : `Thanh toán bằng app ngân hàng. Nội dung chuyển khoản mặc định: Thanh toan don hang ${order.id}.`;
         const deliveryText =
           order.deliveryMode === "store"
             ? "Khách nhận & trả tại cửa hàng 4T."

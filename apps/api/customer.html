@@ -2576,6 +2576,8 @@
         "orders_v2",
         "websiteVisitsCount",
         "websiteVisitsLog",
+        "adminChats",
+        "4t_local_chat",
       ]);
       const CLOUD_API =
         location.protocol === "file:"
@@ -2680,14 +2682,29 @@
         )
           write(K.visits, read("4t_local_visits", 0));
       }
+      function bumpVisitCounter() {
+        if (sessionStorage.getItem("4t_customer_visit_logged")) {
+          return Number(read(K.visits, 0));
+        }
+        const next = Number(read(K.visits, 0)) + 1;
+        write(K.visits, next);
+        sessionStorage.setItem("4t_customer_visit_logged", "1");
+        const log = read("websiteVisitsLog", []);
+        log.push({ time: new Date().toLocaleString("vi-VN"), page: "customer" });
+        write("websiteVisitsLog", log);
+        return next;
+      }
+      function persistSupportChat(list) {
+        const safeChat = Array.isArray(list) ? list : [];
+        write(K.chat, safeChat);
+        const shared = JSON.parse(localStorage.getItem("adminChats") || "{}");
+        shared["4t-support"] = safeChat;
+        localStorage.setItem("adminChats", JSON.stringify(shared));
+      }
       async function init() {
         await hydrateCloudData();
         migrateSharedData();
-        const v = Number(read(K.visits, 0)) + 1;
-        write(K.visits, v);
-        const log = read("websiteVisitsLog", []);
-        log.push({ time: new Date().toLocaleString("vi-VN") });
-        write("websiteVisitsLog", log);
+        bumpVisitCounter();
         renderAll();
         calculateTotal();
         renderChat();
@@ -3017,20 +3034,30 @@
         }
       }
       function buildPaymentQrPayload(order) {
-        const amount = Math.round(Number(order.total || 0));
-        const note = `Thanh toan don ${order.id}`;
+        const amount = Math.max(0, Math.round(Number(order.total || 0)));
+        const note = `Thanh toan don hang ${order.id}`;
         return `4T|ACCOUNT=${STORE_BANK_ACCOUNT}|ORDER=${order.id}|AMOUNT=${amount}|NOTE=${note}`;
+      }
+      function buildPaymentQrImageUrl(order) {
+        const amount = Math.max(0, Math.round(Number(order.total || 0)));
+        const note = encodeURIComponent(`Thanh toan don hang ${order.id}`);
+        const accountName = encodeURIComponent(STORE_BANK_HOLDER);
+        return `https://img.vietqr.io/image/${STORE_BANK_CODE}-${STORE_BANK_ACCOUNT}-compact.png?amount=${amount}&addInfo=${note}&accountName=${accountName}`;
       }
       function renderPaymentQr(order) {
         if (!order || order.payment !== "bank") return "";
-        const amount = Math.round(Number(order.total || 0));
-        const note = encodeURIComponent(`Thanh toan don ${order.id}`);
-        const accountName = encodeURIComponent(STORE_BANK_HOLDER);
-        const qrUrl = `https://img.vietqr.io/image/${STORE_BANK_CODE}-${STORE_BANK_ACCOUNT}-compact.png?amount=${amount}&addInfo=${note}&accountName=${accountName}`;
+        const qrUrl = buildPaymentQrImageUrl(order);
+        const note = `Thanh toan don hang ${order.id}`;
         const qrMarkup = `
           <div class="qr-card">
             <div class="qr-box">
-              <img id="paymentQrImage" src="${qrUrl}" alt="VietQR thanh toán 4T" />
+              <img id="paymentQrImage" src="${qrUrl}" alt="Mã QR VietQR thanh toán 4T" />
+            </div>
+            <div class="qr-meta">
+              <strong>Ngân hàng: ${esc(STORE_BANK_CODE)}</strong><br>
+              <strong>Chủ tài khoản: ${esc(STORE_BANK_HOLDER)}</strong><br>
+              <strong>Số tài khoản: ${esc(STORE_BANK_ACCOUNT)}</strong><br>
+              <strong>Nội dung chuyển khoản: ${esc(note)}</strong>
             </div>
             <a id="downloadQr" class="btn btn-outline" href="${qrUrl}" target="_blank" rel="noopener" download="4T-${esc(order.id)}-vietqr.png">Tải QR về</a>
           </div>
@@ -3045,7 +3072,7 @@
         let pay =
           order.payment === "cash"
             ? "Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ."
-            : "Mã QR: QR kết hợp số tài khoản cửa hàng + mã đơn hàng, giúp khách tải về thanh toán và chủ cửa hàng tra cứu giao dịch dễ dàng.";
+            : `Thanh toán bằng app ngân hàng với QR tài khoản 4T. Nội dung chuyển khoản mặc định: Thanh toan don hang ${order.id}.`;
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
           `<div class="help"><b>${esc(pay)}</b></div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
@@ -3293,12 +3320,15 @@
         document.getElementById("chatBox").classList.toggle("open");
       }
       function renderChat() {
-        let list = read(K.chat, [
-          {
-            role: "store",
-            text: "Xin chào! 4T có thể hỗ trợ lịch lấy đồ, dịch vụ hoặc hình thức thanh toán.",
-          },
-        ]);
+        const stored = read(K.chat, []);
+        const list = Array.isArray(stored) && stored.length
+          ? stored
+          : [
+              {
+                role: "store",
+                text: "Xin chào! 4T có thể hỗ trợ lịch lấy đồ, dịch vụ hoặc hình thức thanh toán.",
+              },
+            ];
         document.getElementById("chatBody").innerHTML = list
           .map(
             (m) =>
@@ -3313,9 +3343,9 @@
         const input = document.getElementById("chatInput"),
           text = input.value.trim();
         if (!text) return;
-        let list = read(K.chat, []);
-        list.push({ role: "user", text });
-        write(K.chat, list);
+        const list = read(K.chat, []);
+        const nextList = [...(Array.isArray(list) ? list : []), { role: "user", text }];
+        persistSupportChat(nextList);
         input.value = "";
         renderChat();
         setTimeout(() => {
@@ -3325,7 +3355,8 @@
               text: "4T đã nhận tin nhắn. Chúng tôi sẽ phản hồi trong giờ phục vụ.",
             },
           ];
-          write(K.chat, [...read(K.chat, []), ...reply]);
+          const combined = [...read(K.chat, []), ...reply];
+          persistSupportChat(combined);
           renderChat();
         }, 500);
       }
@@ -3336,9 +3367,10 @@
         document.getElementById("mobileLinks").classList.remove("open");
       }
       window.addEventListener("storage", (event) => {
-        if ([K.users, K.orders, K.visits].includes(event.key)) {
+        if ([K.users, K.orders, K.visits, K.chat].includes(event.key)) {
           renderAll();
           calculateTotal();
+          renderChat();
         }
       });
 
@@ -3754,7 +3786,7 @@
         const paymentText =
           order.payment === "cash"
             ? "Tiền mặt: thanh toán khi 4T nhận hoặc giao đồ."
-            : "Mã QR: QR kết hợp số tài khoản cửa hàng + mã đơn hàng, giúp khách tải về thanh toán và chủ cửa hàng tra cứu giao dịch dễ dàng.";
+            : "Thanh toán bằng app ngân hàng với QR tài khoản 4T. Mã đơn hàng được ghi cố định trong nội dung chuyển khoản để cửa hàng đối chiếu nhanh.";
         const deliveryText =
           order.deliveryMode === "store"
             ? "Khách nhận & trả tại cửa hàng 4T."
@@ -3762,25 +3794,6 @@
         const qrHtml = order.payment === "bank" ? renderPaymentQr(order) : "";
         document.getElementById("resultBody").innerHTML =
           `<div class="help"><b>${esc(deliveryText)}</b><br>Dịch vụ ${money(order.serviceFee)} · ${esc(paymentText)}</div>${qrHtml}<button class="btn btn-coral" style="margin-top:18px" onclick="closeModal('resultModal')">Đã hiểu</button>`;
-        if (order.payment === "bank") {
-          const canvas = document.getElementById("paymentQrCanvas");
-          if (canvas && window.QRCode) {
-            window.QRCode.toCanvas(
-              canvas,
-              buildPaymentQrPayload(order),
-              {
-                width: 220,
-                margin: 1,
-                color: { dark: "#082e60", light: "#ffffff" },
-              },
-              (error) => {
-                if (error) console.error("QR generation failed", error);
-                const link = document.getElementById("downloadQr");
-                if (link) link.href = canvas.toDataURL("image/png");
-              },
-            );
-          }
-        }
         document.getElementById("resultModal").classList.add("active");
       }
       function orderCard(o) {

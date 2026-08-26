@@ -6,9 +6,9 @@ const { getPool, getValue, setValue } = require('./db');
 
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
-const PUBLIC_KEYS = new Set(['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog']);
+const PUBLIC_KEYS = new Set(['users', 'orders_v2', 'websiteVisitsCount', 'websiteVisitsLog', 'adminChats', '4t_local_chat']);
 const STATIC_FILES = new Set(['customer.html', 'admin.html', '4T.jpg', 'favicon.svg']);
-const FALLBACKS = { users: [], orders_v2: [], websiteVisitsCount: 0, websiteVisitsLog: [] };
+const FALLBACKS = { users: [], orders_v2: [], websiteVisitsCount: 0, websiteVisitsLog: [], adminChats: {}, '4t_local_chat': [] };
 
 function sendJson(response, status, body) {
   response.writeHead(status, {

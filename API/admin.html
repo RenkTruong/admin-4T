@@ -1371,7 +1371,7 @@
   </div>
 
   <script>
-    const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog']);
+    const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog','adminChats','4t_local_chat']);
     const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
     const API_BASE = window.APP_API_BASE || localStorage.getItem('APP_API_BASE') || (
       location.origin.includes('8787') || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
@@ -1417,18 +1417,64 @@
       return payload;
     }
     const nativeSetItem=Storage.prototype.setItem;
+    function mergeSharedValue(key, incomingValue, currentValue) {
+      if (key === 'users' || key === 'orders_v2') {
+        const incoming = Array.isArray(incomingValue) ? incomingValue : [];
+        const current = Array.isArray(currentValue) ? currentValue : [];
+        const merged = new Map();
+        [...incoming, ...current].forEach((item) => {
+          if (!item || typeof item !== 'object') return;
+          const id = item.id || item.phone || item.customer_id || item.order_code || item.orderCode || item.username || JSON.stringify(item);
+          merged.set(String(id), { ...(merged.get(String(id)) || {}), ...item });
+        });
+        return [...merged.values()];
+      }
+
+      if (key === 'websiteVisitsCount') {
+        return Math.max(Number(incomingValue ?? currentValue ?? 0), Number(currentValue ?? 0));
+      }
+
+      if (key === 'websiteVisitsLog' || key === '4t_local_chat') {
+        const incoming = Array.isArray(incomingValue) ? incomingValue : [];
+        const current = Array.isArray(currentValue) ? currentValue : [];
+        const joined = [...current, ...incoming];
+        const deduped = new Map();
+        joined.forEach((entry) => {
+          const id = entry && typeof entry === 'object' && (entry.id || entry.time || entry.text)
+            ? JSON.stringify({ id: entry.id, time: entry.time, text: entry.text })
+            : JSON.stringify(entry);
+          if (!deduped.has(id)) deduped.set(id, entry);
+        });
+        return [...deduped.values()];
+      }
+
+      if (key === 'adminChats' && currentValue && typeof currentValue === 'object' && !Array.isArray(currentValue)) {
+        return { ...(currentValue || {}), ...((incomingValue && typeof incomingValue === 'object') ? incomingValue : {}) };
+      }
+
+      if (incomingValue !== undefined) return incomingValue;
+      return currentValue;
+    }
     function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}
     Storage.prototype.setItem=function(key,value){
-      nativeSetItem.call(this,key,String(value));
+      const incoming = (() => { try { return JSON.parse(String(value)); } catch { return String(value); } })();
+      const current = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return localStorage.getItem(key); } })();
+      const merged = window.__hydratingCloud || !CLOUD_KEYS.has(key) ? incoming : mergeSharedValue(key, incoming, current);
+      nativeSetItem.call(this,key,String(JSON.stringify(merged)));
       if(window.__hydratingCloud || !CLOUD_KEYS.has(key)) return;
-      try {
-        const parsed = JSON.parse(String(value));
-        cloudPut(key, parsed);
-      } catch (error) {
-        cloudPut(key, String(value));
-      }
+      cloudPut(key, merged);
     };
-    async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined)nativeSetItem.call(localStorage,key,JSON.stringify(value))})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
+    async function hydrateCloudData(){try{window.__hydratingCloud=true;const response=await fetch(`${CLOUD_API}/api/sync?keys=${[...CLOUD_KEYS].join(',')}`);if(response.ok){const data=await response.json();Object.entries(data).forEach(([key,value])=>{if(value!==undefined){const current=(()=>{try{return JSON.parse(localStorage.getItem(key) || 'null');}catch{return localStorage.getItem(key);}})();const merged=mergeSharedValue(key,value,current);nativeSetItem.call(localStorage,key,JSON.stringify(merged))}})}}catch(error){console.warn('Cloud sync unavailable',error)}finally{window.__hydratingCloud=false}}
+    function bumpVisitCounter() {
+      if (sessionStorage.getItem('4t_admin_visit_logged')) return Number(localStorage.getItem('websiteVisitsCount') || '0');
+      const next = Number(localStorage.getItem('websiteVisitsCount') || '0') + 1;
+      localStorage.setItem('websiteVisitsCount', String(next));
+      sessionStorage.setItem('4t_admin_visit_logged', '1');
+      const log = JSON.parse(localStorage.getItem('websiteVisitsLog') || '[]');
+      log.push({ time: new Date().toLocaleString('vi-VN'), page: 'admin' });
+      localStorage.setItem('websiteVisitsLog', JSON.stringify(log));
+      return next;
+    }
     function installStoreAddress(){const card=document.querySelector('#loginScreen .login-card');if(card&&!card.querySelector('.store-address')){const address=document.createElement('p');address.className='store-address';address.textContent='123 Liên Khu 4-5, Phường Bình Tân, Hồ Chí Minh';address.style='text-align:center;color:#64748b;font-size:.85rem;margin:-1rem 0 1.2rem';card.querySelector('h2').after(address)}}
     
     const STORE_BANK_ACCOUNT = "19036623385014";
@@ -1611,6 +1657,7 @@
       await hydrateCloudData();
       installStoreAddress();
       initDefaultData();
+      bumpVisitCounter();
       await loadAdminsFromApi();
       checkAuthStatus();
     };
@@ -3728,6 +3775,10 @@
     // --- LIVE CHAT ---
     function renderChatList() {
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      const sharedCustomerChat = JSON.parse(localStorage.getItem('4t_local_chat') || '[]');
+      if (!Object.keys(chats).length && Array.isArray(sharedCustomerChat) && sharedCustomerChat.length) {
+        chats['4t-support'] = sharedCustomerChat;
+      }
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       let listContainer = document.getElementById('chatUsersList');
       if (!listContainer) return;
@@ -3783,6 +3834,10 @@
       if (!box || !activeChatPhone) return;
 
       let chats = JSON.parse(localStorage.getItem('adminChats') || '{}');
+      const sharedCustomerChat = JSON.parse(localStorage.getItem('4t_local_chat') || '[]');
+      if (!Object.keys(chats).length && Array.isArray(sharedCustomerChat) && sharedCustomerChat.length) {
+        chats['4t-support'] = sharedCustomerChat;
+      }
       let msgList = chats[activeChatPhone] || [];
 
       box.innerHTML = '';
@@ -3811,6 +3866,9 @@
 
       chats[activeChatPhone].push({ sender: "admin", text: text, handledBy: currentAdmin });
       localStorage.setItem('adminChats', JSON.stringify(chats));
+      if (activeChatPhone === '4t-support') {
+        localStorage.setItem('4t_local_chat', JSON.stringify(chats[activeChatPhone]));
+      }
 
       input.value = '';
       renderChatMessages();

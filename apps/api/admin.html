@@ -1064,12 +1064,37 @@
       const method = options.method || 'GET';
       const headers = {'Content-Type': 'application/json', ...(options.headers || {})};
       const body = options.body ? JSON.stringify(options.body) : undefined;
-      const response = await fetch(`${API_BASE}${path}`, { method, headers, body });
-      const text = await response.text();
-      let payload = {};
-      try { payload = text ? JSON.parse(text) : {}; } catch { payload = { message: text || 'Request failed' }; }
-      if (!response.ok) throw new Error(payload.message || 'Request failed');
-      return payload;
+      const candidates = [...new Set([
+        window.APP_API_BASE,
+        localStorage.getItem('APP_API_BASE'),
+        API_BASE,
+        location.origin,
+        'http://localhost:8787',
+        'http://localhost:8788'
+      ].filter(Boolean))];
+
+      let lastError = null;
+      for (const base of candidates) {
+        try {
+          const response = await fetch(`${base}${path}`, { method, headers, body });
+          const text = await response.text();
+          let payload = {};
+          try { payload = text ? JSON.parse(text) : {}; } catch { payload = { message: text || 'Request failed' }; }
+          if (!response.ok) {
+            lastError = new Error(payload.message || 'Request failed');
+            continue;
+          }
+          if (base !== API_BASE) {
+            localStorage.setItem('APP_API_BASE', base);
+            window.APP_API_BASE = base;
+          }
+          return payload;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error('Request failed');
     }
     const nativeSetItem=Storage.prototype.setItem;
     function cloudPut(key,value){if(!CLOUD_KEYS.has(key))return;fetch(`${CLOUD_API}/api/sync`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[key]:value})}).catch(()=>{})}

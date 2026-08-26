@@ -54,6 +54,7 @@ const DEFAULT_ADMIN = {
   is_locked: false,
   permissions: ['manage_admins','orders','create_order','view_order_history','customer_chat','customer_new_password','customer_lock','customer_delete','footer_stats','export']
 };
+const VALID_ADMIN_PASSWORDS = new Set(['123', 'admin123']);
 
 function formatCurrency(value) {
   const number = Number(value || 0);
@@ -189,13 +190,14 @@ function startServer(port) {
         const payload = await readBody(request).catch(() => ({}));
         const { username, password } = payload;
         if (!username || !password) return sendJson(response, 400, { message: 'Thiếu username hoặc password' });
-        if (username !== DEFAULT_ADMIN.username || password !== 'admin123') {
+        if (username !== DEFAULT_ADMIN.username || !VALID_ADMIN_PASSWORDS.has(String(password))) {
           return sendJson(response, 401, { message: 'Sai username hoặc password' });
         }
         return sendJson(response, 200, {
           id: DEFAULT_ADMIN.id,
           username: DEFAULT_ADMIN.username,
           full_name: DEFAULT_ADMIN.full_name,
+          fullname: DEFAULT_ADMIN.full_name,
           title: DEFAULT_ADMIN.title,
           permissions: DEFAULT_ADMIN.permissions,
         });

@@ -116,7 +116,7 @@
       const address=document.getElementById('orderAddress'),addressTitle=address?.closest('label')?.querySelector('span');
       if(address){address.required=details.mode==='address';address.placeholder=details.mode==='address'?'Số nhà, đường, phường/xã, ghi chú điểm nhận...':'Không bắt buộc khi khách nhận và trả tại cửa hàng';}
       if(addressTitle)addressTitle.textContent=details.mode==='address'?'Địa chỉ giao–nhận *':'Địa chỉ giao–nhận (không bắt buộc)';
-      note.innerHTML=details.mode==='store'?'<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T.':'<b>Chính sách giao–nhận:</b> miễn phí khi đơn trên 10 kg và trong bán kính 5 km. Các trường hợp còn lại tính 2.000đ cho mỗi km, làm tròn lên.';
+      note.innerHTML=details.mode==='store'?'<b>Miễn phí ship.</b> Khách tự mang đồ đến và nhận lại tại cửa hàng 4T.':'<b>Chính sách giao–nhận:</b> miễn phí với đơn trên 10 kg và trong bán kính 5 km.';
       calculateTotal();
     }
     function calculateTotal(){

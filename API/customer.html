@@ -2390,14 +2390,28 @@
                   placeholder="09xx xxx xxx"
               /></label>
             </div>
+            <div class="form-row">
+              <label class="field"
+                ><span>Số nhà + đường *</span
+                ><input
+                  id="registerStreet"
+                  required
+                  placeholder="Ví dụ: 123 Lê Lợi" /></label>
+            </div>
+            <div class="form-row">
+              <label class="field"
+                ><span>Phường / Xã *</span
+                ><select id="registerWard" required disabled>
+                  <option value="">Chọn tỉnh/thành trước</option>
+                </select></label
+              ><label class="field"
+                ><span>Tỉnh / Thành phố *</span
+                ><select id="registerCity" required>
+                  <option value="">Chọn tỉnh / thành phố</option>
+                </select></label>
+            </div>
+            <input type="hidden" id="registerAddress" />
             <label class="field"
-              ><span>Địa chỉ *</span
-              ><textarea
-                id="registerAddress"
-                required
-                placeholder="Địa chỉ nhận đồ thường dùng"
-              ></textarea></label
-            ><label class="field"
               ><span>Mật khẩu *</span
               ><input
                 id="registerPassword"
@@ -2764,24 +2778,39 @@
         renderChat();
       }
       function readPricingRows() {
+        const normalizeRows = (rows) => {
+          if (!Array.isArray(rows) || !rows.length) return [];
+          const rank = (name) => {
+            const text = String(name || "").toLowerCase();
+            if (text.includes("tiết kiệm") || text.includes("tiet kiem")) return 0;
+            if (text.includes("tiêu chuẩn") || text.includes("tieu chuan")) return 1;
+            if (text.includes("nhanh") || text.includes("express")) return 2;
+            return 3;
+          };
+          return [...rows].sort((a, b) => rank(a.name) - rank(b.name));
+        };
+
         try {
           const shared = JSON.parse(localStorage.getItem("4t-service-pricing") || "null");
-          if (shared && Array.isArray(shared.table) && shared.table.length) return shared.table;
+          const sharedRows = normalizeRows(shared?.table);
+          if (sharedRows.length) return sharedRows;
         } catch (error) {
           console.warn("Could not read 4t-service-pricing:", error);
         }
 
         try {
           const legacy = JSON.parse(localStorage.getItem("servicePricingRows") || "null");
-          if (Array.isArray(legacy) && legacy.length) return legacy;
+          const legacyRows = normalizeRows(legacy);
+          if (legacyRows.length) return legacyRows;
         } catch (error) {
           console.warn("Could not read servicePricingRows:", error);
         }
 
-        return [
+        return normalizeRows([
           { id: "1", name: "Giặt sấy tiêu chuẩn", unit: "Kg", price: 15000 },
-          { id: "2", name: "Giặt sấy nhanh", unit: "Kg", price: 30000 },
-        ];
+          { id: "2", name: "Giặt sấy tiết kiệm", unit: "Kg", price: 8000 },
+          { id: "3", name: "Giặt sấy nhanh", unit: "Kg", price: 30000 },
+        ]);
       }
 
       function renderServiceSelector() {
@@ -2789,7 +2818,9 @@
         if (!select) return;
 
         const rows = readPricingRows();
-        const current = select.value || rows[0]?.id || "";
+        const preferredDefault = rows.find((row) => /tiết kiệm|tiet kiem/i.test(String(row.name || ""))) || rows[0];
+        const currentValue = select.value || String(preferredDefault?.id || "");
+        const hasCurrent = rows.some((row) => String(row.id) === String(currentValue) || String(row.name) === String(currentValue));
         select.innerHTML = rows
           .map(
             (row) =>
@@ -2797,15 +2828,20 @@
           )
           .join("");
 
-        const hasCurrent = rows.some((row) => String(row.id) === String(current));
-        select.value = hasCurrent ? String(current) : String(rows[0]?.id || "");
+        const fallbackValue = preferredDefault ? String(preferredDefault.id) : String(rows[0]?.id || "");
+        select.value = hasCurrent ? String(currentValue) : fallbackValue;
       }
 
       function getSelectedPricingRow() {
         const rows = readPricingRows();
         const select = document.getElementById("serviceSelect");
-        const selectedId = select ? select.value : "";
-        return rows.find((row) => String(row.id) === String(selectedId)) || rows[0] || null;
+        const selectedValue = select ? select.value : "";
+        return (
+          rows.find((row) => String(row.id) === String(selectedValue)) ||
+          rows.find((row) => String(row.name) === String(selectedValue)) ||
+          rows[0] ||
+          null
+        );
       }
 
       function renderAll() {
@@ -2861,6 +2897,66 @@
       function closeModal(id) {
         document.getElementById(id).classList.remove("active");
       }
+      function populateRegisterAddressOptions() {
+        const city = document.getElementById("registerCity");
+        if (!city || city.dataset.ready === "true") return;
+        city.innerHTML = `
+          <option value="">Chọn tỉnh / thành phố</option>
+          ${CURRENT_PROVINCES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join("")}
+        `;
+        city.dataset.ready = "true";
+        city.addEventListener("change", () => {
+          const selected = document.getElementById("registerWard");
+          if (selected) updateRegisterWardOptions();
+          syncRegisterAddressParts();
+        });
+      }
+
+      function updateRegisterWardOptions(selected = "") {
+        const city = document.getElementById("registerCity");
+        const ward = document.getElementById("registerWard");
+        if (!city || !ward) return;
+
+        const selectedName = normalizeAdministrativeName(city.value);
+        const province = administrativeData.find(
+          (item) =>
+            normalizeAdministrativeName(item.name) === selectedName ||
+            normalizeAdministrativeName(item.name).includes(selectedName) ||
+            selectedName.includes(normalizeAdministrativeName(item.name)),
+        );
+        const wards = (
+          province?.wards ||
+          province?.communes ||
+          province?.districts?.flatMap(
+            (item) => item.wards || item.communes || [],
+          ) ||
+          []
+        )
+          .map((item) => (typeof item === "string" ? item : item.name))
+          .filter(Boolean);
+
+        ward.disabled = !city.value || wards.length === 0;
+        ward.innerHTML =
+          `<option value="">${city.value ? "Chọn phường/xã" : "Chọn tỉnh/thành trước"}</option>` +
+          wards
+            .map((name) => `<option value="${esc(name)}">${esc(name)}</option>`)
+            .join("");
+
+        if (selected && wards.includes(selected)) {
+          ward.value = selected;
+        }
+
+        syncRegisterAddressParts();
+      }
+
+      function syncRegisterAddressParts() {
+        const street = document.getElementById("registerStreet")?.value.trim() || "";
+        const ward = document.getElementById("registerWard")?.value.trim() || "";
+        const city = document.getElementById("registerCity")?.value.trim() || "";
+        const hidden = document.getElementById("registerAddress");
+        if (hidden) hidden.value = [street, ward, city].filter(Boolean).join(", ");
+      }
+
       function showAuthTab(tab) {
         const login = tab === "login";
         document.getElementById("loginTab").classList.toggle("active", login);
@@ -2871,6 +2967,15 @@
         document
           .getElementById("registerForm")
           .classList.toggle("hidden", login);
+
+        if (!login) {
+          populateRegisterAddressOptions();
+          if (document.getElementById("registerWard")) {
+            document.getElementById("registerWard").addEventListener("change", syncRegisterAddressParts);
+          }
+          document.getElementById("registerStreet")?.addEventListener("input", syncRegisterAddressParts);
+          syncRegisterAddressParts();
+        }
       }
       function validPhone(phone) {
         return /^0\d{9}$/.test(phone);
@@ -2884,6 +2989,8 @@
           password = document.getElementById("registerPassword").value;
         if (!validPhone(phone))
           return toast("Số điện thoại cần đủ 10 số và bắt đầu bằng 0.");
+        if (!document.getElementById("registerStreet").value.trim() || !document.getElementById("registerWard").value || !document.getElementById("registerCity").value)
+          return toast("Vui lòng nhập đầy đủ Số nhà + đường, Phường/Xã và Tỉnh/Thành phố.");
         if (address.length < 8)
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
         if (password.length < 6)
@@ -3034,7 +3141,9 @@
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
 
         const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails();
+        const total = serviceFee + delivery.shippingFee;
         const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
 
         try {
@@ -3044,10 +3153,10 @@
               customer_id: s?.id || null,
               customer_name: name,
               phone,
-              service_name: type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn",
+              service_name: selected?.name || "Giặt sấy tiết kiệm",
               weight: kg,
               address,
-              delivery_service: "Giao tận nơi",
+              delivery_service: delivery.mode === "store" ? "Nhận tại cửa hàng" : "Giao tận nơi",
               payment_method: payment === "bank" ? "Mã QR" : "Tiền mặt",
               total_amount: total,
             },
@@ -3765,7 +3874,9 @@
         if (form) form.reset();
         const serviceSelect = document.getElementById("serviceSelect");
         if (serviceSelect && serviceSelect.options.length) {
-          serviceSelect.selectedIndex = 0;
+          const options = Array.from(serviceSelect.options);
+          const preferredDefault = options.find((option) => /tiết kiệm|tiet kiem/i.test(option.textContent || "")) || options[0];
+          serviceSelect.value = preferredDefault ? preferredDefault.value : serviceSelect.options[0].value;
         }
         const paymentInputs = document.querySelectorAll('input[name="payment"]');
         paymentInputs.forEach((input) => {

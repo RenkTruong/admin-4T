@@ -2407,14 +2407,28 @@
                   placeholder="09xx xxx xxx"
               /></label>
             </div>
+            <div class="form-row">
+              <label class="field"
+                ><span>Số nhà + đường *</span
+                ><input
+                  id="registerStreet"
+                  required
+                  placeholder="Ví dụ: 123 Lê Lợi" /></label>
+            </div>
+            <div class="form-row">
+              <label class="field"
+                ><span>Phường / Xã *</span
+                ><select id="registerWard" required disabled>
+                  <option value="">Chọn tỉnh/thành trước</option>
+                </select></label
+              ><label class="field"
+                ><span>Tỉnh / Thành phố *</span
+                ><select id="registerCity" required>
+                  <option value="">Chọn tỉnh / thành phố</option>
+                </select></label>
+            </div>
+            <input type="hidden" id="registerAddress" />
             <label class="field"
-              ><span>Địa chỉ *</span
-              ><textarea
-                id="registerAddress"
-                required
-                placeholder="Địa chỉ nhận đồ thường dùng"
-              ></textarea></label
-            ><label class="field"
               ><span>Mật khẩu *</span
               ><input
                 id="registerPassword"
@@ -2765,6 +2779,66 @@
       function closeModal(id) {
         document.getElementById(id).classList.remove("active");
       }
+      function populateRegisterAddressOptions() {
+        const city = document.getElementById("registerCity");
+        if (!city || city.dataset.ready === "true") return;
+        city.innerHTML = `
+          <option value="">Chọn tỉnh / thành phố</option>
+          ${CURRENT_PROVINCES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join("")}
+        `;
+        city.dataset.ready = "true";
+        city.addEventListener("change", () => {
+          const selected = document.getElementById("registerWard");
+          if (selected) updateRegisterWardOptions();
+          syncRegisterAddressParts();
+        });
+      }
+
+      function updateRegisterWardOptions(selected = "") {
+        const city = document.getElementById("registerCity");
+        const ward = document.getElementById("registerWard");
+        if (!city || !ward) return;
+
+        const selectedName = normalizeAdministrativeName(city.value);
+        const province = administrativeData.find(
+          (item) =>
+            normalizeAdministrativeName(item.name) === selectedName ||
+            normalizeAdministrativeName(item.name).includes(selectedName) ||
+            selectedName.includes(normalizeAdministrativeName(item.name)),
+        );
+        const wards = (
+          province?.wards ||
+          province?.communes ||
+          province?.districts?.flatMap(
+            (item) => item.wards || item.communes || [],
+          ) ||
+          []
+        )
+          .map((item) => (typeof item === "string" ? item : item.name))
+          .filter(Boolean);
+
+        ward.disabled = !city.value || wards.length === 0;
+        ward.innerHTML =
+          `<option value="">${city.value ? "Chọn phường/xã" : "Chọn tỉnh/thành trước"}</option>` +
+          wards
+            .map((name) => `<option value="${esc(name)}">${esc(name)}</option>`)
+            .join("");
+
+        if (selected && wards.includes(selected)) {
+          ward.value = selected;
+        }
+
+        syncRegisterAddressParts();
+      }
+
+      function syncRegisterAddressParts() {
+        const street = document.getElementById("registerStreet")?.value.trim() || "";
+        const ward = document.getElementById("registerWard")?.value.trim() || "";
+        const city = document.getElementById("registerCity")?.value.trim() || "";
+        const hidden = document.getElementById("registerAddress");
+        if (hidden) hidden.value = [street, ward, city].filter(Boolean).join(", ");
+      }
+
       function showAuthTab(tab) {
         const login = tab === "login";
         document.getElementById("loginTab").classList.toggle("active", login);
@@ -2775,6 +2849,15 @@
         document
           .getElementById("registerForm")
           .classList.toggle("hidden", login);
+
+        if (!login) {
+          populateRegisterAddressOptions();
+          if (document.getElementById("registerWard")) {
+            document.getElementById("registerWard").addEventListener("change", syncRegisterAddressParts);
+          }
+          document.getElementById("registerStreet")?.addEventListener("input", syncRegisterAddressParts);
+          syncRegisterAddressParts();
+        }
       }
       function validPhone(phone) {
         return /^0\d{9}$/.test(phone);
@@ -2788,6 +2871,8 @@
           password = document.getElementById("registerPassword").value;
         if (!validPhone(phone))
           return toast("Số điện thoại cần đủ 10 số và bắt đầu bằng 0.");
+        if (!document.getElementById("registerStreet").value.trim() || !document.getElementById("registerWard").value || !document.getElementById("registerCity").value)
+          return toast("Vui lòng nhập đầy đủ Số nhà + đường, Phường/Xã và Tỉnh/Thành phố.");
         if (address.length < 8)
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
         if (password.length < 6)
@@ -2938,7 +3023,9 @@
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
 
         const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const total = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const delivery = getDeliveryDetails();
+        const total = serviceFee + delivery.shippingFee;
         const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
 
         try {
@@ -2948,10 +3035,10 @@
               customer_id: s?.id || null,
               customer_name: name,
               phone,
-              service_name: type === "express" ? "Giặt sấy nhanh" : "Giặt sấy tiêu chuẩn",
+              service_name: selected?.name || "Giặt sấy tiết kiệm",
               weight: kg,
               address,
-              delivery_service: "Giao tận nơi",
+              delivery_service: delivery.mode === "store" ? "Nhận tại cửa hàng" : "Giao tận nơi",
               payment_method: payment === "bank" ? "Mã QR" : "Tiền mặt",
               total_amount: total,
             },
@@ -3669,7 +3756,9 @@
         if (form) form.reset();
         const serviceSelect = document.getElementById("serviceSelect");
         if (serviceSelect && serviceSelect.options.length) {
-          serviceSelect.selectedIndex = 0;
+          const options = Array.from(serviceSelect.options);
+          const preferredDefault = options.find((option) => /tiết kiệm|tiet kiem/i.test(option.textContent || "")) || options[0];
+          serviceSelect.value = preferredDefault ? preferredDefault.value : serviceSelect.options[0].value;
         }
         const paymentInputs = document.querySelectorAll('input[name="payment"]');
         paymentInputs.forEach((input) => {

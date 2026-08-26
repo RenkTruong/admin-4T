@@ -1108,10 +1108,11 @@
     function calculateShipping(weight, address, serviceName = 'Giặt sấy tiêu chuẩn') {
       const selectedRow = getOrderServicePriceRow(serviceName);
       const unit = String(selectedRow.unit || 'Kg');
-      const unitPrice = Number(selectedRow.price || 0);
-      const serviceFee = /kg|kilogram/i.test(unit) ? Number(weight || 0) * unitPrice : unitPrice;
-      const extraFee = String(address || '').toLowerCase().includes('xa') ? 20000 : 0;
-      return serviceFee + extraFee;
+      const normalizedAddress = String(address || '').toLowerCase();
+      const hasAddressDetails = /phường|xã|đường|quận|huyện|tỉnh|thành phố|số nhà/i.test(normalizedAddress);
+      const isStoreArea = /hồ chí minh|tp\. hcm|thành phố hồ chí minh|bình tân|liên khu 4-5/i.test(normalizedAddress);
+      if (!hasAddressDetails || isStoreArea) return 0;
+      return /kg|kilogram/i.test(unit) ? Number(weight || 0) * 2000 : 20000;
     }
 
     function normalizePaymentMethod(value) {

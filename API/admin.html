@@ -1276,7 +1276,7 @@
   <div class="modal" id="customerDetailModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>👤 Thông Tin, Thống Kê & Đổi Mật Khẩu Khách Hàng</h3>
+        <h3>👤 Thông Tin Khách Hàng</h3>
         <span class="close-modal" onclick="closeModal('customerDetailModal')">&times;</span>
       </div>
       <div id="customerDetailBody"></div>
@@ -1287,7 +1287,7 @@
   <div class="modal" id="adminModal">
     <div class="modal-content" style="width: 500px;">
       <div class="modal-header">
-        <h3 id="adminModalTitle">Thêm Tài Khoản Admin Mới</h3>
+        <h3 id="adminModalTitle">Thêm Tài Khoản Admin</h3>
         <span class="close-modal" onclick="closeModal('adminModal')">&times;</span>
       </div>
       <form id="adminForm" onsubmit="saveAdminAccount(event)">
@@ -1297,7 +1297,7 @@
           <input type="text" id="inputUsername" required placeholder="vd: staff01">
         </div>
         <div class="form-group" id="passwordGroupField">
-          <label>Mật Khẩu Ban Đầu:</label>
+          <label>Mật Khẩu:</label>
           <input type="password" id="inputPassword" placeholder="vd: 123456">
         </div>
         <div class="form-group">
@@ -1309,7 +1309,7 @@
           <input type="text" id="inputTitle" required placeholder="vd: Trưởng ca / Nhân viên CSKH">
         </div>
         <div class="form-group">
-          <label>Phân Quyền Chức Năng Chi Tiết:</label>
+          <label>Phân Quyền Chức Năng:</label>
           <div class="permissions-grid">
             <label><input type="checkbox" class="perm-checkbox" value="orders"> Quản lý đơn hàng</label>
             <label><input type="checkbox" class="perm-checkbox" value="create_order"> Tạo đơn hàng thủ công</label>
@@ -1489,10 +1489,11 @@
     function calculateShipping(weight, address, serviceName = 'Giặt sấy tiêu chuẩn') {
       const selectedRow = getOrderServicePriceRow(serviceName);
       const unit = String(selectedRow.unit || 'Kg');
-      const unitPrice = Number(selectedRow.price || 0);
-      const serviceFee = /kg|kilogram/i.test(unit) ? Number(weight || 0) * unitPrice : unitPrice;
-      const extraFee = String(address || '').toLowerCase().includes('xa') ? 20000 : 0;
-      return serviceFee + extraFee;
+      const normalizedAddress = String(address || '').toLowerCase();
+      const hasAddressDetails = /phường|xã|đường|quận|huyện|tỉnh|thành phố|số nhà/i.test(normalizedAddress);
+      const isStoreArea = /hồ chí minh|tp\. hcm|thành phố hồ chí minh|bình tân|liên khu 4-5/i.test(normalizedAddress);
+      if (!hasAddressDetails || isStoreArea) return 0;
+      return /kg|kilogram/i.test(unit) ? Number(weight || 0) * 2000 : 20000;
     }
 
     function normalizePaymentMethod(value) {
@@ -1552,7 +1553,8 @@
     function updateTotalUI() {
       const weight = Number(document.getElementById('editWeight')?.value || 0);
       const service = document.getElementById('editService')?.value || 'Giặt sấy tiêu chuẩn';
-      const shippingFee = Number(document.getElementById('editShippingFee')?.value || 0);
+      const address = document.getElementById('editAddress')?.value || '';
+      const shippingFee = calculateShipping(weight, address, service);
       const { total } = getCalculatedOrderTotals(service, weight, shippingFee);
       const totalNode = document.getElementById('newTotalDisplay');
       if (totalNode) totalNode.innerText = `${total.toLocaleString()} VNĐ`;
@@ -1584,13 +1586,14 @@
       if (!select) return;
 
       const rows = getPricingRowsFromStorage();
-      const currentValue = select.value || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
+      const preferredDefault = rows.find((row) => /tiết kiệm|tiet kiem/i.test(String(row.name || ''))) || rows[0];
+      const currentValue = select.value || preferredDefault?.name || 'Giặt sấy tiêu chuẩn';
       select.innerHTML = rows.map(row => `
         <option value="${String(row.name || 'Dịch vụ mới')}">${String(row.name || 'Dịch vụ mới')} · ${String(row.unit || 'Kg')} · ${Number(row.price || 0).toLocaleString('vi-VN')}đ</option>
       `).join('');
 
       const hasCurrent = rows.some(row => String(row.name) === String(currentValue));
-      select.value = hasCurrent ? String(currentValue) : String(rows[0]?.name || 'Giặt sấy tiêu chuẩn');
+      select.value = hasCurrent ? String(currentValue) : String(preferredDefault?.name || rows[0]?.name || 'Giặt sấy tiêu chuẩn');
       updateManualOrderPreview();
     }
 
@@ -1631,7 +1634,7 @@
       const newService = serviceSelect ? serviceSelect.value : (orders[index].service || 'Giặt sấy tiêu chuẩn');
       const newWeight = Number(weightInput?.value || orders[index].weight || 0);
       const newAddress = addressInput ? addressInput.value : (orders[index].address || '');
-      const shippingFee = Number(orders[index].shippingFee || 0);
+      const shippingFee = calculateShipping(newWeight, newAddress, newService);
       const { serviceFee, total } = getCalculatedOrderTotals(newService, newWeight, shippingFee);
 
       orders[index].service = newService;

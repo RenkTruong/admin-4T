@@ -1581,7 +1581,9 @@
     // --- PHÂN QUYỀN & GIAO DIỆN ---
     function applyPermissionsAndRender() {
       let currentUsername = localStorage.getItem('loggedAdmin');
-      let admins = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+      let admins = getLocalAdminAccounts();
+      ensureSeedAdminAccount();
+      admins = getLocalAdminAccounts();
       let admin = admins.find(a => a.username === currentUsername);
 
       if (!admin) {
@@ -3134,16 +3136,42 @@
     // --- QUẢN LÝ ADMIN & CHỨC DANH ---
     async function loadAdminsFromApi() {
       try {
-        const admins = await apiRequest('/api/admins');
-        localStorage.setItem('adminAccounts', JSON.stringify(admins.map(a => ({
-          username: a.username,
-          fullname: a.fullname || a.full_name || a.name || a.username,
-          title: a.title || 'Nhân viên',
-          permissions: Array.isArray(a.permissions) ? a.permissions : JSON.parse(a.permissions || '[]'),
-          isLocked: Boolean(a.is_locked),
-          id: a.id,
-          password: localStorage.getItem('adminAccounts') ? JSON.parse(localStorage.getItem('adminAccounts') || '[]').find(x => x.username === a.username)?.password || '123456' : '123456'
-        }))));
+        const remoteAdmins = await apiRequest('/api/admins');
+        const localAdmins = getLocalAdminAccounts();
+        const mergedAdmins = [...localAdmins];
+
+        remoteAdmins.forEach((a) => {
+          const username = a.username;
+          const index = mergedAdmins.findIndex((item) => item.username === username);
+          const normalized = {
+            username,
+            fullname: a.fullname || a.full_name || a.name || a.username,
+            title: a.title || 'Nhân viên',
+            permissions: Array.isArray(a.permissions) ? a.permissions : (() => {
+              try { return JSON.parse(a.permissions || '[]'); } catch { return []; }
+            })(),
+            isLocked: Boolean(a.is_locked),
+            id: a.id,
+            password: localAdmins.find((item) => item.username === username)?.password || '123456'
+          };
+
+          if (index >= 0) {
+            mergedAdmins[index] = { ...mergedAdmins[index], ...normalized };
+          } else {
+            mergedAdmins.push(normalized);
+          }
+        });
+
+        ensureSeedAdminAccount();
+        const finalAdmins = getLocalAdminAccounts();
+        const rootIndex = finalAdmins.findIndex((item) => item.username === DEFAULT_ADMIN_ACCOUNT.username);
+        if (rootIndex >= 0) {
+          finalAdmins[rootIndex] = { ...DEFAULT_ADMIN_ACCOUNT, ...finalAdmins[rootIndex], username: DEFAULT_ADMIN_ACCOUNT.username };
+        } else {
+          finalAdmins.unshift({ ...DEFAULT_ADMIN_ACCOUNT });
+        }
+
+        localStorage.setItem('adminAccounts', JSON.stringify(finalAdmins));
         renderAdminTable();
       } catch (error) {
         console.warn('Admin API unavailable, using local data:', error.message);

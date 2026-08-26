@@ -1058,8 +1058,15 @@
 
   <script>
     const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog','adminChats','4t_local_chat']);
-    const CLOUD_API=location.protocol==='file:'?'http://localhost:8787':location.origin;
-    const API_BASE = window.APP_API_BASE || localStorage.getItem('APP_API_BASE') || 'http://localhost:4000';
+    const ACTIVE_API_PORTS = ['http://localhost:4001', 'http://localhost:4000', 'http://localhost:8787', 'http://localhost:8788'];
+    const CLOUD_API = location.protocol === 'file:' ? 'http://localhost:4001' : (location.origin || 'http://localhost:4001');
+    const FALLBACK_API_BASES = [
+      window.APP_API_BASE,
+      localStorage.getItem('APP_API_BASE'),
+      location.origin,
+      ...ACTIVE_API_PORTS,
+    ].filter((value) => value && value !== 'null' && value !== 'null://');
+    const API_BASE = FALLBACK_API_BASES[0] || 'http://localhost:4001';
     async function apiRequest(path, options={}) {
       const method = options.method || 'GET';
       const headers = {'Content-Type': 'application/json', ...(options.headers || {})};
@@ -1069,9 +1076,8 @@
         localStorage.getItem('APP_API_BASE'),
         API_BASE,
         location.origin,
-        'http://localhost:8787',
-        'http://localhost:8788'
-      ].filter(Boolean))];
+        ...ACTIVE_API_PORTS,
+      ].filter((value) => value && value !== 'null' && value !== 'null://'))];
 
       let lastError = null;
       for (const base of candidates) {

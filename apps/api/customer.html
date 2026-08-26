@@ -2535,10 +2535,12 @@
         visits: "websiteVisitsCount",
         chat: "4t_local_chat",
       };
+      const ACTIVE_API_PORTS = ["http://localhost:4001", "http://localhost:4000", "http://localhost:8787", "http://localhost:8788"];
       const API_BASE =
         window.APP_API_BASE ||
         localStorage.getItem("APP_API_BASE") ||
-        "http://localhost:4000";
+        location.origin ||
+        "http://localhost:4001";
 
       async function apiRequest(path, options = {}) {
         const method = options.method || "GET";
@@ -2547,22 +2549,44 @@
           ...(options.headers || {}),
         };
         const body = options.body ? JSON.stringify(options.body) : undefined;
-        const response = await fetch(`${API_BASE}${path}`, {
-          method,
-          headers,
-          body,
-        });
-        const text = await response.text();
-        let payload = {};
-        try {
-          payload = text ? JSON.parse(text) : {};
-        } catch {
-          payload = { message: text || "Request failed" };
+        const candidates = [...new Set([
+          window.APP_API_BASE,
+          localStorage.getItem("APP_API_BASE"),
+          API_BASE,
+          location.origin,
+          ...ACTIVE_API_PORTS,
+        ].filter((value) => value && value !== "null" && value !== "null://"))];
+
+        let lastError = null;
+        for (const base of candidates) {
+          try {
+            const response = await fetch(`${base}${path}`, {
+              method,
+              headers,
+              body,
+            });
+            const text = await response.text();
+            let payload = {};
+            try {
+              payload = text ? JSON.parse(text) : {};
+            } catch {
+              payload = { message: text || "Request failed" };
+            }
+            if (!response.ok) {
+              lastError = new Error(payload.message || "Request failed");
+              continue;
+            }
+            if (base !== API_BASE) {
+              localStorage.setItem("APP_API_BASE", base);
+              window.APP_API_BASE = base;
+            }
+            return payload;
+          } catch (error) {
+            lastError = error;
+          }
         }
-        if (!response.ok) {
-          throw new Error(payload.message || "Request failed");
-        }
-        return payload;
+
+        throw lastError || new Error("Request failed");
       }
       const STORE_BANK_ACCOUNT = "19036623385014";
       const STORE_BANK_CODE = "TCB";

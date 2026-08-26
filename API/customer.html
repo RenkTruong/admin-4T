@@ -3927,15 +3927,15 @@
         if (details.mode === "address") scheduleDistanceLookup();
       }
       function calculateTotal() {
-        const kg = Math.max(
-          3,
-          Number(document.getElementById("orderKg")?.value || 3),
+        const quantityNode = document.getElementById("serviceQuantity");
+        const quantity = Math.max(
+          1,
+          Number((quantityNode && quantityNode.value) || 1),
         );
         const selected = getSelectedPricingRow();
         const pricePerUnit = Number(selected?.price || 0);
         const unit = String(selected?.unit || "Kg");
-        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = quantity * pricePerUnit;
         const delivery = getDeliveryDetails(),
           total = serviceFee + delivery.shippingFee;
         const totalNode = document.getElementById("orderTotal"),
@@ -3943,6 +3943,10 @@
         if (totalNode) totalNode.textContent = money(total);
         if (breakdown)
           breakdown.innerHTML = `Dịch vụ: <b>${money(serviceFee)}</b><br>Giao–nhận: <b>${delivery.shippingFee === 0 ? "Miễn phí" : money(delivery.shippingFee)}</b>${delivery.mode === "address" ? ` · ${delivery.distance} km` : " "}`;
+        if (unit) {
+          const unitNode = document.getElementById("serviceUnitDisplay");
+          if (unitNode) unitNode.value = unit;
+        }
       }
       function renderOrderForm() {
         const s = session(),

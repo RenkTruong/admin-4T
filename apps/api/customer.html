@@ -2207,7 +2207,7 @@
                 <div class="choice-grid" style="margin-top: 14px">
                   <label class="field" style="width: 100%">
                     <span>Tên dịch vụ *</span>
-                    <select id="serviceSelect" onchange="updateServiceMeta(); calculateTotal();"></select>
+                    <select id="serviceSelect" required onchange="updateServiceMeta(); calculateTotal();"></select>
                   </label>
                 </div>
                 <div class="choice-grid" style="margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
@@ -2220,8 +2220,8 @@
                     <input id="servicePriceDisplay" type="text" readonly />
                   </label>
                   <label class="field" style="grid-column: 1 / -1;">
-                    <span>Số lượng</span>
-                    <input id="serviceQuantity" type="number" min="1" value="3" oninput="syncServiceQuantity(); calculateTotal();" />
+                    <span>Số lượng *</span>
+                    <input id="serviceQuantity" type="number" min="1" step="1" value="3" required oninput="syncServiceQuantity(); calculateTotal();" />
                   </label>
                 </div>
                 <hr class="divider" />
@@ -2607,6 +2607,11 @@
         "websiteVisitsLog",
         "adminChats",
         "4t_local_chat",
+        "adminAccounts",
+        "loggedAdmin",
+        "servicePricingRows",
+        "4t-service-pricing",
+        "APP_API_BASE",
       ]);
       const ORDER_SYNC_CHANNEL = "4t_order_sync";
       const USER_SYNC_CHANNEL = "4t_user_sync";
@@ -2776,18 +2781,17 @@
         if (!select) return;
 
         const rows = readPricingRows();
-        const preferredDefault = rows.find((row) => /tiết kiệm|tiet kiem/i.test(String(row.name || ""))) || rows[0];
-        const currentValue = select.value || String(preferredDefault?.id || "");
+        const currentValue = select.value || "";
         const hasCurrent = rows.some((row) => String(row.id) === String(currentValue) || String(row.name) === String(currentValue));
-        select.innerHTML = rows
+        select.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' + rows
           .map(
             (row) =>
               `<option value="${String(row.id)}">${esc(row.name || "Dịch vụ mới")}</option>`,
           )
           .join("");
 
-        const fallbackValue = preferredDefault ? String(preferredDefault.id) : String(rows[0]?.id || "");
-        select.value = hasCurrent ? String(currentValue) : fallbackValue;
+        select.value = hasCurrent ? String(currentValue) : "";
+        select.setCustomValidity(select.value ? "" : "Vui lòng chọn một dịch vụ");
         updateServiceMeta();
       }
       function updateServiceMeta() {
@@ -2795,29 +2799,47 @@
         const unitNode = document.getElementById("serviceUnitDisplay");
         const priceNode = document.getElementById("servicePriceDisplay");
         const quantityNode = document.getElementById("serviceQuantity");
+        const select = document.getElementById("serviceSelect");
 
-        if (unitNode) unitNode.value = String(selected?.unit || "Kg");
-        if (priceNode) priceNode.value = money(Number(selected?.price || 0));
+        if (!selected) {
+          if (select) select.setCustomValidity("Vui lòng chọn một dịch vụ");
+          if (unitNode) unitNode.value = "";
+          if (priceNode) priceNode.value = "";
+          if (quantityNode) quantityNode.setCustomValidity("Vui lòng nhập số lượng lớn hơn 0");
+          return;
+        }
+
+        if (select) select.setCustomValidity("");
+        if (unitNode) unitNode.value = String(selected.unit || "Kg");
+        if (priceNode) priceNode.value = money(Number(selected.price || 0));
         if (quantityNode) {
           const current = Number(quantityNode.value || 0);
-          quantityNode.value = current > 0 ? current : 1;
+          if (!quantityNode.value || Number.isNaN(current) || current <= 0) {
+            quantityNode.setCustomValidity("Vui lòng nhập số lượng lớn hơn 0");
+          } else {
+            quantityNode.setCustomValidity("");
+          }
         }
       }
       function syncServiceQuantity() {
         const quantityNode = document.getElementById("serviceQuantity");
-        if (quantityNode) {
-          const current = Number(quantityNode.value || 0);
-          quantityNode.value = current > 0 ? current : 1;
+        if (!quantityNode) return;
+
+        const current = Number(quantityNode.value || 0);
+        if (!quantityNode.value || Number.isNaN(current) || current <= 0) {
+          quantityNode.setCustomValidity("Vui lòng nhập số lượng lớn hơn 0");
+        } else {
+          quantityNode.setCustomValidity("");
         }
       }
       function getSelectedPricingRow() {
         const rows = readPricingRows();
         const select = document.getElementById("serviceSelect");
         const selectedValue = select ? select.value : "";
+        if (!selectedValue) return null;
         return (
           rows.find((row) => String(row.id) === String(selectedValue)) ||
           rows.find((row) => String(row.name) === String(selectedValue)) ||
-          rows[0] ||
           null
         );
       }
@@ -2865,16 +2887,24 @@
       }
       function calculateTotal() {
         const quantityNode = document.getElementById("serviceQuantity");
-        const quantity = Math.max(1, Number((quantityNode && quantityNode.value) || 1));
         const selected = getSelectedPricingRow();
+        const totalNode = document.getElementById("orderTotal");
+        const unitNode = document.getElementById("serviceUnitDisplay");
+
+        if (!selected) {
+          if (unitNode) unitNode.value = "";
+          if (totalNode) totalNode.textContent = money(0);
+          return;
+        }
+
+        const quantity = Number((quantityNode && quantityNode.value) || 0);
+        const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
         const pricePerUnit = Number(selected?.price || 0);
         const unit = String(selected?.unit || "Kg");
-        const serviceFee = quantity * pricePerUnit;
+        const serviceFee = safeQuantity * pricePerUnit;
         const delivery = getDeliveryDetails(),
           total = serviceFee + delivery.shippingFee;
-        const totalNode = document.getElementById("orderTotal");
         if (totalNode) totalNode.textContent = money(total);
-        const unitNode = document.getElementById("serviceUnitDisplay");
         if (unitNode) unitNode.value = unit;
       }
       function openAuth(tab) {
@@ -3112,10 +3142,7 @@
           phone = document.getElementById("orderPhone").value.trim(),
           address = document.getElementById("orderAddress").value.trim(),
           quantityNode = document.getElementById("serviceQuantity"),
-          kg = Math.max(
-            1,
-            Number((quantityNode && quantityNode.value) || document.getElementById("orderKg")?.value || 3),
-          ),
+          serviceSelect = document.getElementById("serviceSelect"),
           selected = getSelectedPricingRow(),
           pricePerUnit = Number(selected?.price || 0),
           unit = String(selected?.unit || "Kg"),
@@ -3123,13 +3150,30 @@
             'input[name="payment"]:checked',
           ).value,
           notes = document.getElementById("orderNotes").value.trim();
+
+        if (!selected) {
+          serviceSelect?.focus();
+          serviceSelect?.setCustomValidity("Vui lòng chọn một dịch vụ");
+          serviceSelect?.reportValidity();
+          return;
+        }
+        serviceSelect?.setCustomValidity("");
+
+        if (!quantityNode || !quantityNode.value || Number.isNaN(Number(quantityNode.value)) || Number(quantityNode.value) <= 0) {
+          quantityNode?.focus();
+          quantityNode?.setCustomValidity("Số lượng phải lớn hơn 0");
+          quantityNode?.reportValidity();
+          return;
+        }
+        quantityNode.setCustomValidity("");
+
+        const kg = Number(quantityNode.value);
         if (!validPhone(phone))
           return toast("Số điện thoại cần đủ 10 số và bắt đầu bằng 0.");
         if (address.length < 8)
           return toast("Vui lòng nhập địa chỉ nhận đồ rõ hơn.");
 
-        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = kg * pricePerUnit;
         const delivery = getDeliveryDetails();
         const total = serviceFee + delivery.shippingFee;
         const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
@@ -3861,23 +3905,29 @@
       }
       function calculateTotal() {
         const quantityNode = document.getElementById("serviceQuantity");
-        const quantity = Math.max(
-          1,
-          Number((quantityNode && quantityNode.value) || 1),
-        );
         const selected = getSelectedPricingRow();
+        const totalNode = document.getElementById("orderTotal");
+        const breakdown = document.getElementById("priceBreakdown");
+        const unitNode = document.getElementById("serviceUnitDisplay");
+
+        if (!selected) {
+          if (unitNode) unitNode.value = "";
+          if (totalNode) totalNode.textContent = money(0);
+          if (breakdown) breakdown.innerHTML = "Dịch vụ: <b>0</b><br>Giao–nhận: <b>Miễn phí</b>";
+          return;
+        }
+
+        const quantity = Number((quantityNode && quantityNode.value) || 0);
+        const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
         const pricePerUnit = Number(selected?.price || 0);
         const unit = String(selected?.unit || "Kg");
-        const serviceFee = quantity * pricePerUnit;
+        const serviceFee = safeQuantity * pricePerUnit;
         const delivery = getDeliveryDetails(),
           total = serviceFee + delivery.shippingFee;
-        const totalNode = document.getElementById("orderTotal"),
-          breakdown = document.getElementById("priceBreakdown");
         if (totalNode) totalNode.textContent = money(total);
         if (breakdown)
           breakdown.innerHTML = `Dịch vụ: <b>${money(serviceFee)}</b><br>Giao–nhận: <b>${delivery.shippingFee === 0 ? "Miễn phí" : money(delivery.shippingFee)}</b>${delivery.mode === "address" ? ` · ${delivery.distance} km` : " "}`;
         if (unit) {
-          const unitNode = document.getElementById("serviceUnitDisplay");
           if (unitNode) unitNode.value = unit;
         }
       }
@@ -3893,9 +3943,8 @@
         if (form) form.reset();
         const serviceSelect = document.getElementById("serviceSelect");
         if (serviceSelect && serviceSelect.options.length) {
-          const options = Array.from(serviceSelect.options);
-          const preferredDefault = options.find((option) => /tiết kiệm|tiet kiem/i.test(option.textContent || "")) || options[0];
-          serviceSelect.value = preferredDefault ? preferredDefault.value : serviceSelect.options[0].value;
+          serviceSelect.value = "";
+          serviceSelect.setCustomValidity("Vui lòng chọn một dịch vụ");
         }
         const paymentInputs = document.querySelectorAll('input[name="payment"]');
         paymentInputs.forEach((input) => {
@@ -3943,10 +3992,9 @@
           name = document.getElementById("orderName").value.trim(),
           phone = document.getElementById("orderPhone").value.trim(),
           address = document.getElementById("orderAddress").value.trim(),
-          kg = Math.max(
-            3,
-            Number(document.getElementById("orderKg").value || 3),
-          ),
+          serviceSelect = document.getElementById("serviceSelect"),
+          quantityNode = document.getElementById("serviceQuantity"),
+          kg = Number(quantityNode?.value || 0),
           selected = getSelectedPricingRow(),
           pricePerUnit = Number(selected?.price || 0),
           unit = String(selected?.unit || "Kg"),
@@ -3955,6 +4003,23 @@
           ).value,
           notes = document.getElementById("orderNotes").value.trim(),
           delivery = getDeliveryDetails();
+
+        if (!selected) {
+          serviceSelect?.focus();
+          serviceSelect?.setCustomValidity("Vui lòng chọn một dịch vụ");
+          serviceSelect?.reportValidity();
+          return;
+        }
+        serviceSelect?.setCustomValidity("");
+
+        if (!quantityNode || !quantityNode.value || Number.isNaN(Number(quantityNode.value)) || Number(quantityNode.value) <= 0) {
+          quantityNode?.focus();
+          quantityNode?.setCustomValidity("Số lượng phải lớn hơn 0");
+          quantityNode?.reportValidity();
+          return;
+        }
+        quantityNode.setCustomValidity("");
+
         if (!validPhone(phone))
           return toast("Số điện thoại cần đủ 10 số và bắt đầu bằng 0.");
         if (
@@ -3971,8 +4036,7 @@
           return toast("Vui lòng nhập địa chỉ giao–nhận rõ hơn.");
         if (delivery.mode === "address" && delivery.distance <= 0)
           return toast("Vui lòng nhập khoảng cách ước tính từ cửa hàng 4T.");
-        const isByWeight = /kg/i.test(unit) || /kilogram/i.test(unit);
-        const serviceFee = isByWeight ? kg * pricePerUnit : pricePerUnit;
+        const serviceFee = kg * pricePerUnit;
         const total = serviceFee + delivery.shippingFee;
         const type = selected && /nhanh|express/i.test(selected.name) ? "express" : "standard";
         const serviceName =

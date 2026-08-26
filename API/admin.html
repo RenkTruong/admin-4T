@@ -1170,10 +1170,22 @@
         </div>
         <div class="form-group">
           <label>Dịch vụ:</label>
-          <select id="manualService" class="select-status" style="width: 100%;" onchange="updateManualOrderPreview()"></select>
+          <select id="manualService" class="select-status" style="width: 100%;" required onchange="updateManualOrderPreview()">
+            <option value="">-- Chọn dịch vụ --</option>
+          </select>
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <label>
+            <span>Đơn vị tính</span>
+            <input type="text" id="manualServiceUnitDisplay" readonly value="" style="background:#f8fafc;">
+          </label>
+          <label>
+            <span>Đơn giá</span>
+            <input type="text" id="manualServicePriceDisplay" readonly value="" style="background:#f8fafc;">
+          </label>
         </div>
         <div class="form-group">
-          <label>Khối lượng (kg):</label>
+          <label>Số lượng:</label>
           <input type="number" id="manualWeight" required min="1" step="0.5" value="5" inputmode="decimal" placeholder="Nhập số lượng (kg)" oninvalid="this.setCustomValidity('Vui lòng nhập số lượng lớn hơn 0')" oninput="this.setCustomValidity(''); updateManualOrderPreview();">
         </div>
         <div class="form-group">
@@ -1371,7 +1383,7 @@
   </div>
 
   <script>
-    const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog','adminChats','4t_local_chat']);
+    const CLOUD_KEYS=new Set(['users','orders_v2','websiteVisitsCount','websiteVisitsLog','adminChats','4t_local_chat','adminAccounts','loggedAdmin','servicePricingRows','4t-service-pricing','APP_API_BASE']);
     const ACTIVE_API_PORTS = ['http://localhost:4001', 'http://localhost:4000', 'http://localhost:8787', 'http://localhost:8788'];
     const CLOUD_API = location.protocol === 'file:' ? 'http://localhost:4001' : (location.origin || 'http://localhost:4001');
     const FALLBACK_API_BASES = [
@@ -1445,13 +1457,13 @@
     }
     const nativeSetItem=Storage.prototype.setItem;
     function mergeSharedValue(key, incomingValue, currentValue) {
-      if (key === 'users' || key === 'orders_v2') {
+      if (key === 'users' || key === 'orders_v2' || key === 'adminAccounts' || key === 'servicePricingRows' || key === '4t-service-pricing') {
         const incoming = Array.isArray(incomingValue) ? incomingValue : [];
         const current = Array.isArray(currentValue) ? currentValue : [];
         const merged = new Map();
         [...incoming, ...current].forEach((item) => {
           if (!item || typeof item !== 'object') return;
-          const id = item.id || item.phone || item.customer_id || item.order_code || item.orderCode || item.username || JSON.stringify(item);
+          const id = item.id || item.phone || item.customer_id || item.order_code || item.orderCode || item.username || item.name || JSON.stringify(item);
           merged.set(String(id), { ...(merged.get(String(id)) || {}), ...item });
         });
         return [...merged.values()];
@@ -1459,6 +1471,11 @@
 
       if (key === 'websiteVisitsCount') {
         return Math.max(Number(incomingValue ?? currentValue ?? 0), Number(currentValue ?? 0));
+      }
+
+      if (key === 'loggedAdmin' || key === 'APP_API_BASE') {
+        if (incomingValue !== undefined) return incomingValue;
+        return currentValue;
       }
 
       if (key === 'websiteVisitsLog' || key === '4t_local_chat') {
@@ -1636,26 +1653,32 @@
       if (!select) return;
 
       const rows = getPricingRowsFromStorage();
-      const preferredDefault = rows.find((row) => /tiết kiệm|tiet kiem/i.test(String(row.name || ''))) || rows[0];
-      const currentValue = select.value || preferredDefault?.name || 'Giặt sấy tiêu chuẩn';
-      select.innerHTML = rows.map(row => `
+      const currentValue = select.value || '';
+      const hasCurrent = rows.some((row) => String(row.name) === String(currentValue));
+      select.innerHTML = '<option value="">-- Chọn dịch vụ --</option>' + rows.map(row => `
         <option value="${String(row.name || 'Dịch vụ mới')}">${String(row.name || 'Dịch vụ mới')} · ${String(row.unit || 'Kg')} · ${Number(row.price || 0).toLocaleString('vi-VN')}đ</option>
       `).join('');
 
-      const hasCurrent = rows.some(row => String(row.name) === String(currentValue));
-      select.value = hasCurrent ? String(currentValue) : String(preferredDefault?.name || rows[0]?.name || 'Giặt sấy tiêu chuẩn');
+      select.value = hasCurrent ? String(currentValue) : '';
       updateManualOrderPreview();
     }
 
     function getSelectedManualServicePrice(weight = 0) {
       const rows = getPricingRowsFromStorage();
       const select = document.getElementById('manualService');
-      const selectedName = select?.value || rows[0]?.name || 'Giặt sấy tiêu chuẩn';
-      const selectedRow = rows.find(row => String(row.name) === String(selectedName)) || rows[0] || { name: selectedName, unit: 'Kg', price: 15000 };
+      const selectedName = select?.value || '';
+      if (!selectedName) {
+        return { selectedRow: null, total: 0, unitPrice: 0, unit: '' };
+      }
+      const selectedRow = rows.find(row => String(row.name) === String(selectedName)) || null;
+      if (!selectedRow) {
+        return { selectedRow: null, total: 0, unitPrice: 0, unit: '' };
+      }
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const total = /kg|kilogram/i.test(unit) ? Number(weight || 0) * unitPrice : unitPrice;
-      return { selectedRow, total, unitPrice };
+      const safeWeight = Number(weight || 0);
+      const total = safeWeight * unitPrice;
+      return { selectedRow, total, unitPrice, unit };
     }
 
     function getCalculatedOrderTotals(serviceName, weight, shippingFee = 0) {
@@ -1664,7 +1687,7 @@
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
       const safeWeight = Number(weight || 0);
-      const serviceFee = /kg|kilogram/i.test(unit) ? safeWeight * unitPrice : unitPrice;
+      const serviceFee = safeWeight * unitPrice;
       const shipping = Number(shippingFee || 0);
       return {
         selectedRow,
@@ -2065,12 +2088,25 @@
 
     // --- QUẢN LÝ ĐƠN HÀNG ---
     function updateManualOrderPreview() {
-      let weight = Number(document.getElementById('manualWeight')?.value || 0);
+      const weightInput = document.getElementById('manualWeight');
+      const serviceSelect = document.getElementById('manualService');
+      const unitNode = document.getElementById('manualServiceUnitDisplay');
+      const priceNode = document.getElementById('manualServicePriceDisplay');
+      const totalNode = document.getElementById('manualOrderTotalPreview');
+      let weight = Number(weightInput?.value || 0);
       let address = document.getElementById('manualAddress')?.value || '';
       const selectedPrice = getSelectedManualServicePrice(weight);
+      if (!serviceSelect?.value || !selectedPrice.selectedRow) {
+        if (unitNode) unitNode.value = '';
+        if (priceNode) priceNode.value = '';
+        if (totalNode) totalNode.value = '0 VNĐ';
+        return;
+      }
+      if (unitNode) unitNode.value = String(selectedPrice.unit || 'Kg');
+      if (priceNode) priceNode.value = Number(selectedPrice.unitPrice || 0).toLocaleString('vi-VN') + ' VNĐ';
       const shippingFee = /xa|huyen|quoc lo|ngoai thanh/i.test(String(address || '')) ? 20000 : 0;
       const total = selectedPrice.total + shippingFee;
-      document.getElementById('manualOrderTotalPreview').value = total.toLocaleString() + ' VNĐ';
+      if (totalNode) totalNode.value = total.toLocaleString() + ' VNĐ';
     }
 
     function openCreateOrderModal() {
@@ -2084,6 +2120,7 @@
       }
       document.getElementById('manualOrderForm').reset();
       document.getElementById('manualWeight').value = '5';
+      document.getElementById('manualService').value = '';
       document.getElementById('manualPaymentMethod').value = 'Tiền mặt';
       document.getElementById('manualDeliveryService').value = 'Nhận tại cửa hàng';
       populateManualServiceOptions();
@@ -2111,6 +2148,15 @@
       let address = document.getElementById('manualAddress').value.trim();
       let paymentMethod = document.getElementById('manualPaymentMethod').value;
       let deliveryService = document.getElementById('manualDeliveryService').value;
+
+      if (!service) {
+        alert('Vui lòng chọn một tên dịch vụ trước khi lưu đơn hàng.');
+        document.getElementById('manualService')?.focus();
+        document.getElementById('manualService')?.setCustomValidity('Vui lòng chọn một dịch vụ');
+        document.getElementById('manualService')?.reportValidity();
+        return;
+      }
+      document.getElementById('manualService')?.setCustomValidity('');
 
       if (!name || !phone || !address || weightValue === '' || Number.isNaN(weight) || weight <= 0) {
         alert('Vui lòng nhập số lượng lớn hơn 0 trước khi lưu đơn hàng.');
@@ -2177,7 +2223,7 @@
       const selectedRow = getOrderServicePriceRow(order.service || 'Giặt sấy tiêu chuẩn');
       const unit = String(selectedRow.unit || 'Kg');
       const unitPrice = Number(selectedRow.price || 0);
-      const baseAmount = /kg|kilogram/i.test(unit) ? weight * unitPrice : unitPrice;
+      const baseAmount = weight * unitPrice;
       const deliveryFee = Number(order.shippingFee || 0);
       const discount = 0;
       const total = Number(order.total || 0) || baseAmount + deliveryFee - discount;

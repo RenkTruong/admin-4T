@@ -3940,7 +3940,7 @@
           Number(document.getElementById("deliveryDistance")?.value || 0),
         );
         const roundedKm = Math.ceil(distance);
-        const free = mode === "address" && kg > 10 && distance <= 5;
+        const free = mode === "address" && kg > 10 && distance <= 2;
         const shippingFee = mode === "store" || free ? 0 : roundedKm * 2000;
         return {
           mode,
@@ -3972,7 +3972,7 @@
         note.innerHTML =
           details.mode === "store"
             ? "<b>Miễn phí ship</b>"
-            : "<b>Chính sách giao–nhận:</b> miễn phí với đơn trên 10 kg và trong bán kính 5 km.";
+            : "<b>Chính sách giao–nhận:</b> miễn phí với đơn trên 10 kg và trong bán kính 2 km.";
         calculateTotal();
         if (details.mode === "address") scheduleDistanceLookup();
       }
